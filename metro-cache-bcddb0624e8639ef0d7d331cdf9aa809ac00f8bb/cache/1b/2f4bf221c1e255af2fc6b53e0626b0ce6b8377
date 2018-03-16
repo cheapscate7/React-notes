@@ -1,0 +1,185 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var _react2 = require(_dependencyMap[0], "react");
+
+    var _react3 = _interopRequireDefault(_react2);
+
+    var _index = require(_dependencyMap[1], "./../node_modules/react-transform-hmr/lib/index.js");
+
+    var _index2 = _interopRequireDefault(_index);
+
+    var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/components/NotesList.js";
+
+    var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+    var _reactNative = require(_dependencyMap[2], "react-native");
+
+    var _masonryList = require(_dependencyMap[3], "@appandflow/masonry-list");
+
+    var _masonryList2 = _interopRequireDefault(_masonryList);
+
+    var _Note = require(_dependencyMap[4], "./Note.js");
+
+    var _Note2 = _interopRequireDefault(_Note);
+
+    function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+    function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+    function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+    var _components = {
+        NoteList: {
+            displayName: "NoteList"
+        }
+    };
+
+    var _node_modulesReactTransformHmrLibIndexJs2 = (0, _index2.default)({
+        filename: "/Users/cheapscate7/Documents/React-notes/components/NotesList.js",
+        components: _components,
+        locals: [module],
+        imports: [_react3.default]
+    });
+
+    function _wrapComponent(id) {
+        return function (Component) {
+            return _node_modulesReactTransformHmrLibIndexJs2(Component, id);
+        };
+    }
+
+    var data = [{
+        title: "hello",
+        content: "whats up bitch"
+    }, {
+        title: "This is another one",
+        content: "hahahaha"
+    }, {
+        title: "How many?",
+        content: "hahahahahahahahahahahaha"
+    }, {
+        title: "go on, keep going",
+        content: "punk"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "ha ha ha haha haha hahahahahahahahahahahah ahahahahahahahah ahaha hahah ahahahahahah ahahahahahahahahah ahaha hahahahahahahahahahahahahahahahahahahahaha  hahahahahahahahah ahahahaha hahaha haha hahahahahahahahah ahahaha"
+    }, {
+        title: "",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }, {
+        title: "Wow, you got one too?!",
+        content: "hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"
+    }];
+
+    var NoteList = _wrapComponent("NoteList")(function (_React$Component) {
+        _inherits(NoteList, _React$Component);
+
+        function NoteList(props) {
+            _classCallCheck(this, NoteList);
+
+            return _possibleConstructorReturn(this, (NoteList.__proto__ || Object.getPrototypeOf(NoteList)).call(this, props));
+        }
+
+        _createClass(NoteList, [{
+            key: "render",
+            value: function render() {
+                return _react3.default.createElement(
+                    _reactNative.View,
+                    {
+                        style: noteListStyles.noteListContainer,
+                        __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 33
+                        }
+                    },
+                    _react3.default.createElement(_masonryList2.default, {
+                        removeClippedSubviews: true,
+                        getHeightForItem: function getHeightForItem(_ref) {
+                            var any = _ref.item,
+                                number = _ref.index;
+                            return 300;
+                        },
+                        data: data,
+                        renderItem: function renderItem(_ref2) {
+                            var item = _ref2.item;
+                            return _react3.default.createElement(
+                                _reactNative.View,
+                                {
+                                    style: {
+                                        paddingTop: 5
+                                    },
+                                    __source: {
+                                        fileName: _jsxFileName,
+                                        lineNumber: 38
+                                    }
+                                },
+                                _react3.default.createElement(_Note2.default, {
+                                    noteTitle: item.title,
+                                    noteContent: item.content,
+                                    __source: {
+                                        fileName: _jsxFileName,
+                                        lineNumber: 39
+                                    }
+                                })
+                            );
+                        },
+                        keyExtractor: function keyExtractor(item, index) {
+                            return index;
+                        },
+                        numColumns: 2,
+                        initialNumToRender: 12,
+                        __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 34
+                        }
+                    })
+                );
+            }
+        }]);
+
+        return NoteList;
+    }(_react3.default.Component));
+
+    var noteListStyles = _reactNative.StyleSheet.create({
+        noteListContainer: {
+            marginTop: 5,
+            flex: 1
+        }
+    });
+
+    exports.default = NoteList;
+});

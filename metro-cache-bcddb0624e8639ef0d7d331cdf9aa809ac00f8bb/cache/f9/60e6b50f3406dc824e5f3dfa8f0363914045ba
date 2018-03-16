@@ -1,0 +1,106 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Paper.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _shadow = require(_dependencyMap[3], "../styles/shadow");
+
+  var _shadow2 = _interopRequireDefault(_shadow);
+
+  var _withTheme = require(_dependencyMap[4], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  var _colors = require(_dependencyMap[5], "../styles/colors");
+
+  var Colors = _interopRequireWildcard(_colors);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    Paper: {
+      displayName: "Paper"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Paper.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var Paper = _wrapComponent("Paper")(function (_React$Component) {
+    _inherits(Paper, _React$Component);
+
+    function Paper() {
+      _classCallCheck(this, Paper);
+
+      return _possibleConstructorReturn(this, (Paper.__proto__ || Object.getPrototypeOf(Paper)).apply(this, arguments));
+    }
+
+    _createClass(Paper, [{
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            style = _props.style,
+            theme = _props.theme,
+            restOfProps = _objectWithoutProperties(_props, ["style", "theme"]);
+
+        var flattenedStyles = _reactNative.StyleSheet.flatten(style) || {};
+        var elevation = flattenedStyles.elevation;
+        return React.createElement(_reactNative.View, _extends({}, restOfProps, {
+          style: [styles.paper, {
+            backgroundColor: theme.colors.paper
+          }, elevation && (0, _shadow2.default)(elevation), style],
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 62
+          }
+        }));
+      }
+    }]);
+
+    return Paper;
+  }(React.Component));
+
+  exports.default = (0, _withTheme2.default)(Paper);
+
+  var styles = _reactNative.StyleSheet.create({
+    paper: {
+      backgroundColor: Colors.white
+    }
+  });
+});

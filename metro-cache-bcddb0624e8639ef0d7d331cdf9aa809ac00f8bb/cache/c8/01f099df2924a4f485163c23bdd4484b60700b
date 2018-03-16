@@ -1,0 +1,78 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Icon.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _MaterialIcons = require(_dependencyMap[2], "@expo/vector-icons/MaterialIcons");
+
+  var _MaterialIcons2 = _interopRequireDefault(_MaterialIcons);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  var Icon = function Icon(_ref) {
+    var name = _ref.name,
+        props = _objectWithoutProperties(_ref, ["name"]);
+
+    if (typeof name === 'string') {
+      return React.createElement(_MaterialIcons2.default, _extends({}, props, {
+        name: name,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 18
+        }
+      }));
+    } else if (typeof name === 'object' && name !== null && Object.prototype.hasOwnProperty.call(name, 'uri') && typeof name.uri === 'string' || typeof name === 'number') {
+      return React.createElement(_reactNative.Image, _extends({}, props, {
+        source: name,
+        style: [{
+          width: props.size,
+          height: props.size,
+          tintColor: props.color
+        }, props.style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 27
+        }
+      }));
+    }
+
+    return React.createElement(
+      _reactNative.View,
+      _extends({}, props, {
+        style: [{
+          width: props.size,
+          height: props.size
+        }, styles.container, props.style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 42
+        }
+      }),
+      name
+    );
+  };
+
+  exports.default = Icon;
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden'
+    }
+  });
+});

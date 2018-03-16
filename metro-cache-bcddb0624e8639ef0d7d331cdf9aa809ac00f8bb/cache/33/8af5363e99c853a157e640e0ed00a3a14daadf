@@ -1,0 +1,59 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/ProgressBar.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _color = require(_dependencyMap[2], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _withTheme = require(_dependencyMap[3], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var ProgressBarComponent = _reactNative.Platform.select({
+    ios: _reactNative.ProgressViewIOS,
+    android: _reactNative.ProgressBarAndroid
+  });
+
+  var ProgressBar = function ProgressBar(_ref) {
+    var progress = _ref.progress,
+        color = _ref.color,
+        style = _ref.style,
+        theme = _ref.theme;
+    var tintColor = color || theme.colors.primary;
+    var trackTintColor = (0, _color2.default)(tintColor).alpha(0.38).rgb().string();
+    return React.createElement(ProgressBarComponent, {
+      styleAttr: "Horizontal",
+      indeterminate: false,
+      progress: progress,
+      progressTintColor: tintColor,
+      color: tintColor,
+      style: [styles.progressBarHeight, style],
+      trackTintColor: trackTintColor,
+      __source: {
+        fileName: _jsxFileName,
+        lineNumber: 60
+      }
+    });
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    progressBarHeight: {
+      paddingVertical: 10
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(ProgressBar);
+});

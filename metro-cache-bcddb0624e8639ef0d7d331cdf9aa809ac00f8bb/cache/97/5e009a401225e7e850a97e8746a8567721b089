@@ -1,0 +1,352 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _class,
+      _temp,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/TextInput.js";
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _Text = require(_dependencyMap[3], "./Typography/Text");
+
+  var _Text2 = _interopRequireDefault(_Text);
+
+  var _withTheme = require(_dependencyMap[4], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    TextInput: {
+      displayName: "TextInput"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/TextInput.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var AnimatedText = _reactNative.Animated.createAnimatedComponent(_Text2.default);
+
+  var TextInput = _wrapComponent("TextInput")((_temp = _class = function (_React$Component) {
+    _inherits(TextInput, _React$Component);
+
+    function TextInput(props) {
+      _classCallCheck(this, TextInput);
+
+      var _this = _possibleConstructorReturn(this, (TextInput.__proto__ || Object.getPrototypeOf(TextInput)).call(this, props));
+
+      _this._setPlaceholder = function () {
+        clearTimeout(_this._timer);
+        _this._timer = setTimeout(function () {
+          return _this.setState({
+            placeholder: _this.props.placeholder
+          });
+        }, 50);
+      };
+
+      _this._removePlaceholder = function () {
+        return _this.setState({
+          placeholder: ''
+        });
+      };
+
+      _this._setRef = function (c) {
+        _this._root = c;
+      };
+
+      _this._animateFocus = function () {
+        _reactNative.Animated.timing(_this.state.focused, {
+          toValue: 1,
+          duration: 150
+        }).start(_this._setPlaceholder);
+      };
+
+      _this._animateBlur = function () {
+        _this._removePlaceholder();
+
+        _reactNative.Animated.timing(_this.state.focused, {
+          toValue: 0,
+          duration: 180
+        }).start();
+      };
+
+      _this._handleFocus = function () {
+        _this._animateFocus();
+
+        if (_this.props.onFocus) {
+          var _this$props;
+
+          (_this$props = _this.props).onFocus.apply(_this$props, arguments);
+        }
+      };
+
+      _this._handleBlur = function () {
+        _this._animateBlur();
+
+        if (_this.props.onBlur) {
+          var _this$props2;
+
+          (_this$props2 = _this.props).onBlur.apply(_this$props2, arguments);
+        }
+      };
+
+      _this.state = {
+        focused: new _reactNative.Animated.Value(0),
+        placeholder: ''
+      };
+      return _this;
+    }
+
+    _createClass(TextInput, [{
+      key: "componentDidUpdate",
+      value: function componentDidUpdate(prevProps) {
+        if ((prevProps.value !== this.props.value || prevProps.placeholder !== this.props.placeholder) && this.props.value === '') {
+          this._setPlaceholder();
+        }
+      }
+    }, {
+      key: "componentWillUnmount",
+      value: function componentWillUnmount() {
+        clearTimeout(this._timer);
+      }
+    }, {
+      key: "setNativeProps",
+      value: function setNativeProps() {
+        var _root;
+
+        return (_root = this._root).setNativeProps.apply(_root, arguments);
+      }
+    }, {
+      key: "isFocused",
+      value: function isFocused() {
+        var _root2;
+
+        return (_root2 = this._root).isFocused.apply(_root2, arguments);
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
+        var _root3;
+
+        return (_root3 = this._root).clear.apply(_root3, arguments);
+      }
+    }, {
+      key: "focus",
+      value: function focus() {
+        var _root4;
+
+        return (_root4 = this._root).focus.apply(_root4, arguments);
+      }
+    }, {
+      key: "blur",
+      value: function blur() {
+        var _root5;
+
+        return (_root5 = this._root).blur.apply(_root5, arguments);
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            value = _props.value,
+            disabled = _props.disabled,
+            label = _props.label,
+            underlineColor = _props.underlineColor,
+            style = _props.style,
+            theme = _props.theme,
+            rest = _objectWithoutProperties(_props, ["value", "disabled", "label", "underlineColor", "style", "theme"]);
+
+        var colors = theme.colors,
+            fonts = theme.fonts;
+        var fontFamily = fonts.regular;
+        var primaryColor = colors.primary;
+        var inactiveColor = colors.disabled;
+        var inputTextColor = void 0,
+            labelColor = void 0,
+            bottomLineColor = void 0;
+
+        if (!disabled) {
+          inputTextColor = colors.text;
+          labelColor = primaryColor;
+          bottomLineColor = underlineColor || primaryColor;
+        } else {
+          inputTextColor = labelColor = bottomLineColor = inactiveColor;
+        }
+
+        var labelColorAnimation = this.state.focused.interpolate({
+          inputRange: [0, 1],
+          outputRange: [inactiveColor, labelColor]
+        });
+        var translateY = value ? -22 : this.state.focused.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -22]
+        });
+        var fontSize = value ? 12 : this.state.focused.interpolate({
+          inputRange: [0, 1],
+          outputRange: [16, 12]
+        });
+        var labelStyle = {
+          color: labelColorAnimation,
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          transform: [{
+            translateY: translateY
+          }]
+        };
+        var bottomLineStyle = {
+          backgroundColor: bottomLineColor,
+          transform: [{
+            scaleX: this.state.focused
+          }],
+          opacity: this.state.focused.interpolate({
+            inputRange: [0, 0.1, 1],
+            outputRange: [0, 1, 1]
+          })
+        };
+        return React.createElement(
+          _reactNative.View,
+          {
+            style: style,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 275
+            }
+          },
+          React.createElement(
+            AnimatedText,
+            {
+              pointerEvents: "none",
+              style: [styles.placeholder, labelStyle],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 276
+              }
+            },
+            label
+          ),
+          React.createElement(_reactNative.TextInput, _extends({}, rest, {
+            value: value,
+            placeholder: this.state.placeholder,
+            placeholderTextColor: colors.placeholder,
+            editable: !disabled,
+            ref: this._setRef,
+            selectionColor: labelColor,
+            onFocus: this._handleFocus,
+            onBlur: this._handleBlur,
+            underlineColorAndroid: "transparent",
+            style: [styles.input, rest.multiline && styles.multiline, {
+              color: inputTextColor,
+              fontFamily: fontFamily
+            }],
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 282
+            }
+          })),
+          React.createElement(
+            _reactNative.View,
+            {
+              pointerEvents: "none",
+              style: styles.bottomLineContainer,
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 302
+              }
+            },
+            React.createElement(_reactNative.View, {
+              style: [styles.bottomLine, {
+                backgroundColor: inactiveColor
+              }],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 303
+              }
+            }),
+            React.createElement(_reactNative.Animated.View, {
+              style: [styles.bottomLine, styles.focusLine, bottomLineStyle],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 306
+              }
+            })
+          )
+        );
+      }
+    }]);
+
+    return TextInput;
+  }(React.Component), _class.defaultProps = {
+    disabled: false,
+    multiline: false
+  }, _temp));
+
+  var styles = _reactNative.StyleSheet.create({
+    placeholder: {
+      position: 'absolute',
+      left: 0,
+      top: 38,
+      fontSize: 16
+    },
+    input: {
+      minHeight: 64,
+      paddingTop: 20,
+      paddingBottom: 0,
+      marginTop: 8,
+      marginBottom: -4
+    },
+    multiline: {
+      paddingTop: 30
+    },
+    bottomLineContainer: {
+      marginBottom: 4,
+      height: _reactNative.StyleSheet.hairlineWidth * 4
+    },
+    bottomLine: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      height: _reactNative.StyleSheet.hairlineWidth
+    },
+    focusLine: {
+      height: _reactNative.StyleSheet.hairlineWidth * 4
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(TextInput);
+});

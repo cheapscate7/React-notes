@@ -1,15 +1,29 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
+
 class Note extends React.Component {
     constructor(props){
         super(props);
+        this.state = {fontsize : 16};
+
     }
+
+    componentDidMount(){
+        //as the number of words in the content of a note decreases, make the font bigger
+        if(this.props.noteContent.split(" ").length < 10){  //less than 10 words
+            this.setState({fontsize : 18});
+        }
+        else if(this.props.noteContent.split(" ").length < 5 ){   //less than 5 and there is no title
+            this.setState({fontsize : 20});
+        }
+    }
+
     render() {
         return (
             <View style={noteStyles.note}>
                 <Text style={noteStyles.noteTitle}>{this.props.noteTitle}</Text>
-                <Text style={noteStyles.noteContent}>{this.props.noteContent}</Text>
+                <Text style={{fontSize:this.state.fontsize}}>{this.props.noteContent}</Text>
             </View>
         );
     }
@@ -27,9 +41,10 @@ const noteStyles = StyleSheet.create({
   },
   noteTitle: {
     fontWeight: "bold",
+    fontSize: 17,
   },
   noteContent: {
-    fontSize: 16,
+    //fontSize: {this.state.fontsize},
   },
 });
 

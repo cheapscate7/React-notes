@@ -1,0 +1,95 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/DrawerSection.js";
+
+  var _color = require(_dependencyMap[0], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _react = require(_dependencyMap[1], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _Divider = require(_dependencyMap[3], "./Divider");
+
+  var _Divider2 = _interopRequireDefault(_Divider);
+
+  var _withTheme = require(_dependencyMap[4], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  var DrawerSection = function DrawerSection(_ref) {
+    var children = _ref.children,
+        title = _ref.title,
+        theme = _ref.theme,
+        props = _objectWithoutProperties(_ref, ["children", "title", "theme"]);
+
+    var colors = theme.colors,
+        fonts = theme.fonts;
+    var titleColor = (0, _color2.default)(colors.text).alpha(0.54).rgb().string();
+    var fontFamily = fonts.medium;
+    return React.createElement(
+      _reactNative.View,
+      _extends({}, props, {
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 67
+        }
+      }),
+      title && React.createElement(
+        _reactNative.View,
+        {
+          style: {
+            height: 40,
+            justifyContent: 'center'
+          },
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 69
+          }
+        },
+        React.createElement(
+          _reactNative.Text,
+          {
+            numberOfLines: 1,
+            style: {
+              color: titleColor,
+              fontFamily: fontFamily,
+              marginLeft: 16
+            },
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 70
+            }
+          },
+          title
+        )
+      ),
+      children,
+      React.createElement(_Divider2.default, {
+        style: {
+          marginVertical: 4
+        },
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 79
+        }
+      })
+    );
+  };
+
+  exports.default = (0, _withTheme2.default)(DrawerSection);
+});

@@ -1,0 +1,120 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/FAB.js";
+
+  var _color = require(_dependencyMap[0], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _react = require(_dependencyMap[1], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _Paper = require(_dependencyMap[3], "./Paper");
+
+  var _Paper2 = _interopRequireDefault(_Paper);
+
+  var _Icon = require(_dependencyMap[4], "./Icon");
+
+  var _Icon2 = _interopRequireDefault(_Icon);
+
+  var _TouchableRipple = require(_dependencyMap[5], "./TouchableRipple");
+
+  var _TouchableRipple2 = _interopRequireDefault(_TouchableRipple);
+
+  var _colors = require(_dependencyMap[6], "../styles/colors");
+
+  var _withTheme = require(_dependencyMap[7], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  var FAB = function FAB(props) {
+    var small = props.small,
+        dark = props.dark,
+        icon = props.icon,
+        iconColor = props.color,
+        onPress = props.onPress,
+        theme = props.theme,
+        style = props.style;
+    var backgroundColor = theme.colors.accent;
+    var isDark = typeof dark === 'boolean' ? dark : !(0, _color2.default)(backgroundColor).light();
+    var textColor = iconColor || (isDark ? _colors.white : 'rgba(0, 0, 0, .54)');
+    var rippleColor = (0, _color2.default)(textColor).alpha(0.32).rgb().string();
+    return React.createElement(
+      _Paper2.default,
+      _extends({}, props, {
+        style: [{
+          backgroundColor: backgroundColor,
+          elevation: 12
+        }, styles.content, small ? styles.small : styles.standard, style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 78
+        }
+      }),
+      React.createElement(
+        _TouchableRipple2.default,
+        {
+          borderless: true,
+          onPress: onPress,
+          rippleColor: rippleColor,
+          style: [styles.content, small ? styles.small : styles.standard],
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 87
+          }
+        },
+        React.createElement(
+          _reactNative.View,
+          {
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 93
+            }
+          },
+          React.createElement(_Icon2.default, {
+            name: icon,
+            size: 24,
+            style: {
+              color: textColor
+            },
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 94
+            }
+          })
+        )
+      )
+    );
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    content: {
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    standard: {
+      height: 56,
+      width: 56,
+      borderRadius: 28
+    },
+    small: {
+      height: 40,
+      width: 40,
+      borderRadius: 20
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(FAB);
+});

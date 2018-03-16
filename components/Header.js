@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { Toolbar, ToolbarBackAction, ToolbarContent, ToolbarAction } from 'react-native-paper';
+
 class Header extends React.Component {
   constructor(props) {
     super(props)
@@ -8,31 +10,31 @@ class Header extends React.Component {
 
   render() {
     return (
-      <View style={headerStyles.container}>
-        <Text style={headerStyles.title}>Doodle <Text style={headerStyles.subtitle}>Keep</Text></Text>
-       
-      </View>
+      <Toolbar style={headerStyles.container}>
+          <ToolbarBackAction
+            onPress={this._goBack}
+          />
+          <ToolbarContent style={headerStyles.title} subtitleStyle={headerStyles.subtitle}
+            title="Doodle" subtitle=" Keep"
+          />
+          <ToolbarAction icon="search" onPress={this._onSearch} />
+          <ToolbarAction icon="more-vert" onPress={this._onMore} />
+        </Toolbar>
     );
   }
 }
 
 const headerStyles = StyleSheet.create({
   container: {
-    //width: 350,
-    height: 50,
-    padding: 20,
-    elevation: 3,
-    flexDirection: 'row',
     backgroundColor: '#fb0',
-    alignItems: 'center',
-    justifyContent: 'space-between',
   },
   title: {
-    fontFamily: "Roboto",
-    fontWeight: "bold",
+    //fontFamily: "Roboto",
+    alignItems: "baseline",
+    flexDirection: "row",
   },
   subtitle: {
-    fontWeight: "normal",
+    fontSize: 17,
   },
   input: {
     flex: 1,

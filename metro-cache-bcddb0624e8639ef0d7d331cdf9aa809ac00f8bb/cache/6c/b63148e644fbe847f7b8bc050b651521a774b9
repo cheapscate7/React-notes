@@ -1,0 +1,221 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _class,
+      _temp,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Modal.js";
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _ThemedPortal = require(_dependencyMap[3], "./Portal/ThemedPortal");
+
+  var _ThemedPortal2 = _interopRequireDefault(_ThemedPortal);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    Modal: {
+      displayName: "Modal"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Modal.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var Modal = _wrapComponent("Modal")((_temp = _class = function (_React$Component) {
+    _inherits(Modal, _React$Component);
+
+    function Modal(props) {
+      _classCallCheck(this, Modal);
+
+      var _this = _possibleConstructorReturn(this, (Modal.__proto__ || Object.getPrototypeOf(Modal)).call(this, props));
+
+      _this._handleBack = function () {
+        if (_this.props.dismissable) {
+          _this._hideModal();
+        }
+
+        return true;
+      };
+
+      _this._showModal = function () {
+        _reactNative.BackHandler.addEventListener('hardwareBackPress', _this._handleBack);
+
+        _reactNative.Animated.timing(_this.state.opacity, {
+          toValue: 1,
+          duration: 280,
+          easing: _reactNative.Easing.ease
+        }).start();
+      };
+
+      _this._hideModal = function () {
+        _reactNative.BackHandler.removeEventListener('hardwareBackPress', _this._handleBack);
+
+        _reactNative.Animated.timing(_this.state.opacity, {
+          toValue: 0,
+          duration: 280,
+          easing: _reactNative.Easing.ease
+        }).start(function () {
+          if (_this.props.visible && _this.props.onDismiss) {
+            _this.props.onDismiss();
+          }
+
+          if (_this.props.visible) {
+            _this._showModal();
+          } else {
+            _this.setState({
+              rendered: false
+            });
+          }
+        });
+      };
+
+      _this.state = {
+        opacity: new _reactNative.Animated.Value(props.visible ? 1 : 0),
+        rendered: props.visible
+      };
+      return _this;
+    }
+
+    _createClass(Modal, [{
+      key: "componentWillReceiveProps",
+      value: function componentWillReceiveProps(_ref) {
+        var visible = _ref.visible;
+
+        if (this.props.visible !== visible) {
+          if (visible) {
+            this.setState({
+              rendered: true
+            });
+          }
+        }
+      }
+    }, {
+      key: "componentDidUpdate",
+      value: function componentDidUpdate(_ref2) {
+        var visible = _ref2.visible;
+
+        if (visible !== this.props.visible) {
+          if (this.props.visible) {
+            this._showModal();
+          } else {
+            this._hideModal();
+          }
+        }
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        if (!this.state.rendered) return null;
+        var _props = this.props,
+            children = _props.children,
+            dismissable = _props.dismissable;
+        return React.createElement(
+          _ThemedPortal2.default,
+          {
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 144
+            }
+          },
+          React.createElement(
+            _reactNative.Animated.View,
+            {
+              style: [{
+                opacity: this.state.opacity
+              }, styles.wrapper],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 145
+              }
+            },
+            React.createElement(_reactNative.View, {
+              style: [_reactNative.StyleSheet.absoluteFill, {
+                backgroundColor: 'rgba(0, 0, 0, .5)'
+              }],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 148
+              }
+            }),
+            dismissable && React.createElement(
+              _reactNative.TouchableWithoutFeedback,
+              {
+                onPress: this._hideModal,
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 155
+                }
+              },
+              React.createElement(_reactNative.View, {
+                style: _reactNative.StyleSheet.absoluteFill,
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 156
+                }
+              })
+            ),
+            React.createElement(
+              _reactNative.Animated.View,
+              {
+                style: [{
+                  opacity: this.state.opacity
+                }],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 159
+                }
+              },
+              children
+            )
+          )
+        );
+      }
+    }]);
+
+    return Modal;
+  }(React.Component), _class.defaultProps = {
+    dismissable: true,
+    visible: false
+  }, _temp));
+
+  exports.default = Modal;
+
+  var styles = _reactNative.StyleSheet.create({
+    wrapper: _extends({}, _reactNative.StyleSheet.absoluteFillObject, {
+      justifyContent: 'center'
+    })
+  });
+});

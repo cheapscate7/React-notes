@@ -1,0 +1,139 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _class,
+      _temp,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/TouchableRipple.js";
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _color = require(_dependencyMap[3], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _withTheme = require(_dependencyMap[4], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    TouchableRipple: {
+      displayName: "TouchableRipple"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/TouchableRipple.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var ANDROID_VERSION_LOLLIPOP = 21;
+
+  var TouchableRipple = _wrapComponent("TouchableRipple")((_temp = _class = function (_React$Component) {
+    _inherits(TouchableRipple, _React$Component);
+
+    function TouchableRipple() {
+      _classCallCheck(this, TouchableRipple);
+
+      return _possibleConstructorReturn(this, (TouchableRipple.__proto__ || Object.getPrototypeOf(TouchableRipple)).apply(this, arguments));
+    }
+
+    _createClass(TouchableRipple, [{
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            style = _props.style,
+            background = _props.background,
+            borderless = _props.borderless,
+            disabledProp = _props.disabled,
+            rippleColor = _props.rippleColor,
+            underlayColor = _props.underlayColor,
+            children = _props.children,
+            theme = _props.theme,
+            rest = _objectWithoutProperties(_props, ["style", "background", "borderless", "disabled", "rippleColor", "underlayColor", "children", "theme"]);
+
+        var isDarkTheme = theme.dark;
+        var disabled = disabledProp || !this.props.onPress;
+        var calculatedRippleColor = rippleColor || (isDarkTheme ? 'rgba(255, 255, 255, .20)' : 'rgba(0, 0, 0, .32)');
+
+        if (_reactNative.Platform.OS === 'android' && _reactNative.Platform.Version >= ANDROID_VERSION_LOLLIPOP) {
+          return React.createElement(
+            _reactNative.TouchableNativeFeedback,
+            _extends({}, rest, {
+              disabled: disabled,
+              background: background != null ? background : _reactNative.TouchableNativeFeedback.Ripple(calculatedRippleColor, borderless),
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 104
+              }
+            }),
+            React.createElement(
+              _reactNative.View,
+              {
+                style: style,
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 116
+                }
+              },
+              React.Children.only(children)
+            )
+          );
+        }
+
+        return React.createElement(
+          _reactNative.TouchableHighlight,
+          _extends({}, rest, {
+            disabled: disabled,
+            style: style,
+            underlayColor: underlayColor != null ? underlayColor : (0, _color2.default)(calculatedRippleColor).fade(0.5).rgb().string(),
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 123
+            }
+          }),
+          React.Children.only(children)
+        );
+      }
+    }]);
+
+    return TouchableRipple;
+  }(React.Component), _class.defaultProps = {
+    borderless: false
+  }, _temp));
+
+  exports.default = (0, _withTheme2.default)(TouchableRipple);
+});

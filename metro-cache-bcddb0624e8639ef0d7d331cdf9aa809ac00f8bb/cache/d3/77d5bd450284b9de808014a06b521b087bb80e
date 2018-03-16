@@ -1,0 +1,53 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Dialog/DialogTitle.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _Title = require(_dependencyMap[2], "../Typography/Title");
+
+  var _Title2 = _interopRequireDefault(_Title);
+
+  var _withTheme = require(_dependencyMap[3], "../../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var DialogTitle = function DialogTitle(_ref) {
+    var children = _ref.children,
+        text = _ref.theme.colors.text,
+        style = _ref.style;
+    return React.createElement(
+      _Title2.default,
+      {
+        style: [styles.text, {
+          color: text
+        }, style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 56
+        }
+      },
+      children
+    );
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    text: {
+      marginTop: 22,
+      marginBottom: 18,
+      marginHorizontal: 24
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(DialogTitle);
+});

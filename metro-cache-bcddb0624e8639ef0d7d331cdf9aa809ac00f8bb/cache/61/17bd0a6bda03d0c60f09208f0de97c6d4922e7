@@ -1,0 +1,179 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _class,
+      _temp,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Dialog/Dialog.js";
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _Modal = require(_dependencyMap[3], "../Modal");
+
+  var _Modal2 = _interopRequireDefault(_Modal);
+
+  var _colors = require(_dependencyMap[4], "../../styles/colors");
+
+  var _Paper = require(_dependencyMap[5], "../Paper");
+
+  var _Paper2 = _interopRequireDefault(_Paper);
+
+  var _DialogActions = require(_dependencyMap[6], "./DialogActions");
+
+  var _DialogActions2 = _interopRequireDefault(_DialogActions);
+
+  var _DialogTitle = require(_dependencyMap[7], "./DialogTitle");
+
+  var _DialogTitle2 = _interopRequireDefault(_DialogTitle);
+
+  var _DialogContent = require(_dependencyMap[8], "./DialogContent");
+
+  var _DialogContent2 = _interopRequireDefault(_DialogContent);
+
+  var _withTheme = require(_dependencyMap[9], "../../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    Dialog: {
+      displayName: "Dialog"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Dialog/Dialog.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var AnimatedPaper = _reactNative.Animated.createAnimatedComponent(_Paper2.default);
+
+  var Dialog = _wrapComponent("Dialog")((_temp = _class = function (_React$Component) {
+    _inherits(Dialog, _React$Component);
+
+    function Dialog() {
+      _classCallCheck(this, Dialog);
+
+      return _possibleConstructorReturn(this, (Dialog.__proto__ || Object.getPrototypeOf(Dialog)).apply(this, arguments));
+    }
+
+    _createClass(Dialog, [{
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            children = _props.children,
+            dismissable = _props.dismissable,
+            onDismiss = _props.onDismiss,
+            visible = _props.visible,
+            style = _props.style,
+            theme = _props.theme;
+        var backgroundColor = theme.colors.paper;
+        var childrenArray = React.Children.toArray(children);
+        var title = childrenArray.find(function (child) {
+          return child.type === _DialogTitle2.default;
+        });
+        var actionBtnsChildren = childrenArray.filter(function (child) {
+          return child && child.type === _DialogActions2.default;
+        });
+        var restOfChildren = childrenArray.filter(function (child) {
+          return child && child.type !== _DialogActions2.default && child.type !== _DialogTitle2.default;
+        });
+        var restOfChildrenWithoutTitle = restOfChildren;
+
+        if (!title) {
+          var found = false;
+          restOfChildrenWithoutTitle = restOfChildren.map(function (child) {
+            if (child.type === _DialogContent2.default && !found) {
+              found = true;
+              return React.cloneElement(child, {
+                style: {
+                  paddingTop: 24
+                }
+              });
+            }
+
+            return child;
+          });
+        }
+
+        return React.createElement(
+          _Modal2.default,
+          {
+            dismissable: dismissable,
+            onDismiss: onDismiss,
+            visible: visible,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 130
+            }
+          },
+          React.createElement(
+            AnimatedPaper,
+            {
+              style: [styles.container, {
+                backgroundColor: backgroundColor
+              }, style],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 131
+              }
+            },
+            title,
+            restOfChildrenWithoutTitle,
+            actionBtnsChildren
+          )
+        );
+      }
+    }]);
+
+    return Dialog;
+  }(React.Component), _class.defaultProps = {
+    dismissable: true,
+    visible: false
+  }, _temp));
+
+  Dialog.defaultProps = {
+    dismissable: true,
+    titleColor: _colors.black,
+    visible: false
+  };
+  exports.default = (0, _withTheme2.default)(Dialog);
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      marginVertical: _reactNative.Platform.OS === 'android' ? 44 : 0,
+      marginHorizontal: 26,
+      borderRadius: 2,
+      backgroundColor: _colors.white,
+      elevation: 24
+    }
+  });
+});

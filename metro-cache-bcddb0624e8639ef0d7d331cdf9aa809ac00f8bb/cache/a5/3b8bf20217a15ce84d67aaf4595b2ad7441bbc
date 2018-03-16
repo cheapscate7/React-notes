@@ -1,0 +1,200 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/core/withTheme.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  exports.default = withTheme;
+
+  var _hoistNonReactStatics = require(_dependencyMap[2], "hoist-non-react-statics");
+
+  var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
+
+  var _deepmerge = require(_dependencyMap[3], "deepmerge");
+
+  var _deepmerge2 = _interopRequireDefault(_deepmerge);
+
+  var _ThemeProvider = require(_dependencyMap[4], "./ThemeProvider");
+
+  var _ThemeProvider2 = _interopRequireDefault(_ThemeProvider);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    ThemedComponent: {
+      displayName: "ThemedComponent",
+      isInFunction: true
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/core/withTheme.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var REACT_METHODS = ['autobind', 'childContextTypes', 'componentDidMount', 'componentDidUpdate', 'componentWillMount', 'componentWillReceiveProps', 'componentWillUnmount', 'componentWillUpdate', 'contextTypes', 'displayName', 'getChildContext', 'getDefaultProps', 'getDOMNode', 'getInitialState', 'mixins', 'propTypes', 'render', 'replaceProps', 'setProps', 'shouldComponentUpdate', 'statics', 'updateComponent'];
+
+  var isClassComponent = function isClassComponent(Component) {
+    return !!Component.prototype.render;
+  };
+
+  function withTheme(Comp) {
+    var _class, _temp2;
+
+    var ThemedComponent = _wrapComponent("ThemedComponent")((_temp2 = _class = function (_React$Component) {
+      _inherits(ThemedComponent, _React$Component);
+
+      function ThemedComponent() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        _classCallCheck(this, ThemedComponent);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ThemedComponent.__proto__ || Object.getPrototypeOf(ThemedComponent)).call.apply(_ref, [this].concat(args))), _this), _this._merge = function (a, b) {
+          var previous = _this._previous;
+
+          if (previous && previous.a === a && previous.b === b) {
+            return previous.result;
+          }
+
+          var result = a && b ? (0, _deepmerge2.default)(a, b) : a || b;
+          _this._previous = {
+            a: a,
+            b: b,
+            result: result
+          };
+          return result;
+        }, _temp), _possibleConstructorReturn(_this, _ret);
+      }
+
+      _createClass(ThemedComponent, [{
+        key: "render",
+        value: function render() {
+          var _this2 = this;
+
+          return React.createElement(
+            _ThemeProvider.ThemeContext.Consumer,
+            {
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 64
+              }
+            },
+            function (theme) {
+              var merged = _this2._merge(theme, _this2.props.theme);
+
+              var element = void 0;
+
+              if (isClassComponent(Comp)) {
+                element = React.createElement(Comp, _extends({}, _this2.props, {
+                  ref: function ref(c) {
+                    _this2._root = c;
+                  },
+                  theme: merged,
+                  __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 74
+                  }
+                }));
+              } else {
+                element = React.createElement(Comp, _extends({}, _this2.props, {
+                  theme: merged,
+                  __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 83
+                  }
+                }));
+              }
+
+              if (merged !== _this2.props.theme) {
+                return React.createElement(
+                  _ThemeProvider2.default,
+                  {
+                    theme: merged,
+                    __source: {
+                      fileName: _jsxFileName,
+                      lineNumber: 88
+                    }
+                  },
+                  element
+                );
+              }
+
+              return element;
+            }
+          );
+        }
+      }]);
+
+      return ThemedComponent;
+    }(React.Component), _class.displayName = "withTheme(" + (Comp.displayName || Comp.name) + ")", _temp2));
+
+    if (isClassComponent(Comp)) {
+      ThemedComponent.prototype.getWrappedInstance = function getWrappedInstance() {
+        return this._root.getWrappedInstance ? this._root.getWrappedInstance() : this._root;
+      };
+
+      Object.getOwnPropertyNames(Comp.prototype).filter(function (prop) {
+        return !(REACT_METHODS.includes(prop) || prop in React.Component.prototype || prop in ThemedComponent.prototype || prop.startsWith('_'));
+      }).forEach(function (prop) {
+        if (typeof Comp.prototype[prop] === 'function') {
+          ThemedComponent.prototype[prop] = function () {
+            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+              args[_key2] = arguments[_key2];
+            }
+
+            Comp.prototype[prop].apply(this.getWrappedInstance(), args);
+          };
+
+          ThemedComponent.prototype[prop].name = prop;
+        } else {
+          Object.defineProperty(ThemedComponent.prototype, prop, {
+            get: function get() {
+              return this.getWrappedInstance()[prop];
+            },
+            set: function set(value) {
+              this.getWrappedInstance()[prop] = value;
+            }
+          });
+        }
+      });
+    }
+
+    (0, _hoistNonReactStatics2.default)(ThemedComponent, Comp);
+    return ThemedComponent;
+  }
+});

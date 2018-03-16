@@ -1,0 +1,192 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.PortalContext = undefined;
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Portal/PortalHost.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _PortalManager = require(_dependencyMap[3], "./PortalManager");
+
+  var _PortalManager2 = _interopRequireDefault(_PortalManager);
+
+  var _createReactContext = require(_dependencyMap[4], "create-react-context");
+
+  var _createReactContext2 = _interopRequireDefault(_createReactContext);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    PortalHost: {
+      displayName: "PortalHost"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Portal/PortalHost.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var PortalContext = exports.PortalContext = (0, _createReactContext2.default)(null);
+
+  var PortalHost = _wrapComponent("PortalHost")(function (_React$Component) {
+    _inherits(PortalHost, _React$Component);
+
+    function PortalHost() {
+      var _ref;
+
+      var _temp, _this, _ret;
+
+      _classCallCheck(this, PortalHost);
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PortalHost.__proto__ || Object.getPrototypeOf(PortalHost)).call.apply(_ref, [this].concat(args))), _this), _this._mount = function (props) {
+        var key = _this._nextId++;
+
+        if (_this._manager) {
+          _this._manager.mount(key, props);
+        } else {
+          _this._queue.push({
+            type: 'mount',
+            key: key,
+            props: props
+          });
+        }
+
+        return key;
+      }, _this._update = function (key, props) {
+        if (_this._manager) {
+          _this._manager.update(key, props);
+        } else {
+          var op = {
+            type: 'update',
+            key: key,
+            props: props
+          };
+
+          var index = _this._queue.findIndex(function (o) {
+            return o.type === 'mount' || o.type === 'update' && o.key === key;
+          });
+
+          if (index > -1) {
+            _this._queue = _this._queue[index] = op;
+          } else {
+            _this._queue.push(op);
+          }
+        }
+      }, _this._unmount = function (key) {
+        if (_this._manager) {
+          _this._manager.unmount(key);
+        } else {
+          _this._queue.push({
+            type: 'unmount',
+            key: key
+          });
+        }
+      }, _this._handleRef = function (manager) {
+        _this._manager = manager;
+
+        while (_this._queue.length && manager) {
+          var action = _this._queue.pop();
+
+          switch (action.type) {
+            case 'mount':
+              manager.mount(action.key, action.props);
+              break;
+
+            case 'update':
+              manager.update(action.key, action.props);
+              break;
+
+            case 'unmount':
+              manager.unmount(action.key);
+              break;
+          }
+        }
+      }, _this._nextId = 0, _this._queue = [], _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(PortalHost, [{
+      key: "render",
+      value: function render() {
+        return React.createElement(
+          _reactNative.View,
+          _extends({
+            pointerEvents: "box-none"
+          }, this.props, {
+            style: [styles.container, this.props.style],
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 98
+            }
+          }),
+          React.createElement(
+            PortalContext.Provider,
+            {
+              value: {
+                mount: this._mount,
+                update: this._update,
+                unmount: this._unmount
+              },
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 103
+              }
+            },
+            this.props.children
+          ),
+          React.createElement(_PortalManager2.default, {
+            ref: this._handleRef,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 112
+            }
+          })
+        );
+      }
+    }]);
+
+    return PortalHost;
+  }(React.Component));
+
+  exports.default = PortalHost;
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      flex: 1
+    }
+  });
+});

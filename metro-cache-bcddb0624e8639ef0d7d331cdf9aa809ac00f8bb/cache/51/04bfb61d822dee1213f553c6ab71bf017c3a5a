@@ -1,0 +1,43 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Portal/Portal.js";
+  exports.default = Portal;
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _PortalConsumer = require(_dependencyMap[1], "./PortalConsumer");
+
+  var _PortalConsumer2 = _interopRequireDefault(_PortalConsumer);
+
+  var _PortalHost = require(_dependencyMap[2], "./PortalHost");
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function Portal(props) {
+    return React.createElement(
+      _PortalHost.PortalContext.Consumer,
+      {
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 24
+        }
+      },
+      function (manager) {
+        return React.createElement(_PortalConsumer2.default, {
+          manager: manager,
+          props: props,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 25
+          }
+        });
+      }
+    );
+  }
+});

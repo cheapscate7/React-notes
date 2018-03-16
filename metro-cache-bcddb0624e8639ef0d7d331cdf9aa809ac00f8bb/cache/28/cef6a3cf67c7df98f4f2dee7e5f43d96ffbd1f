@@ -1,0 +1,80 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Toolbar/ToolbarBackAction.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _color = require(_dependencyMap[2], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _ToolbarAction = require(_dependencyMap[3], "./ToolbarAction");
+
+  var _ToolbarAction2 = _interopRequireDefault(_ToolbarAction);
+
+  var _Icon = require(_dependencyMap[4], "../Icon");
+
+  var _Icon2 = _interopRequireDefault(_Icon);
+
+  var _colors = require(_dependencyMap[5], "../../styles/colors");
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var ToolbarBackAction = function ToolbarBackAction(props) {
+    var dark = props.dark,
+        onPress = props.onPress,
+        style = props.style;
+    var icon = void 0;
+
+    if (_reactNative.Platform.OS === 'ios') {
+      var iconColor = dark ? _colors.white : (0, _color2.default)(_colors.black).alpha(0.54).rgb().string();
+      icon = React.createElement(_Icon2.default, {
+        name: "keyboard-arrow-left",
+        style: styles.icon,
+        color: iconColor,
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 40
+        }
+      });
+    } else {
+      icon = 'arrow-back';
+    }
+
+    return React.createElement(_ToolbarAction2.default, {
+      icon: icon,
+      dark: dark,
+      onPress: onPress,
+      style: [styles.action, style],
+      __source: {
+        fileName: _jsxFileName,
+        lineNumber: 47
+      }
+    });
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    action: _reactNative.Platform.select({
+      ios: {
+        marginHorizontal: 0
+      }
+    }),
+    icon: _reactNative.Platform.select({
+      ios: {
+        fontSize: 36,
+        height: 36,
+        width: 36
+      }
+    })
+  });
+
+  exports.default = ToolbarBackAction;
+});

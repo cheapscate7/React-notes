@@ -1,0 +1,722 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _class,
+      _temp,
+      _initialiseProps,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/BottomNavigation.js";
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _color = require(_dependencyMap[3], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _Icon = require(_dependencyMap[4], "./Icon");
+
+  var _Icon2 = _interopRequireDefault(_Icon);
+
+  var _Paper = require(_dependencyMap[5], "./Paper");
+
+  var _Paper2 = _interopRequireDefault(_Paper);
+
+  var _Text = require(_dependencyMap[6], "./Typography/Text");
+
+  var _Text2 = _interopRequireDefault(_Text);
+
+  var _colors = require(_dependencyMap[7], "../styles/colors");
+
+  var _withTheme = require(_dependencyMap[8], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    BottomNavigation: {
+      displayName: "BottomNavigation"
+    },
+    SceneComponent: {
+      displayName: "SceneComponent",
+      isInFunction: true
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/BottomNavigation.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var AnimatedText = _reactNative.Animated.createAnimatedComponent(_Text2.default);
+
+  var AnimatedPaper = _reactNative.Animated.createAnimatedComponent(_Paper2.default);
+
+  var MIN_RIPPLE_SCALE = 0.001;
+  var MIN_SHIFT_AMOUNT = 10;
+  var MIN_TAB_WIDTH = 96;
+  var MAX_TAB_WIDTH = 168;
+  var BAR_HEIGHT = 56;
+  var SMALL_RIPPLE_SIZE = 96;
+  var ACTIVE_LABEL_SIZE = 14;
+  var INACTIVE_LABEL_SIZE = 12;
+
+  var BottomNavigation = _wrapComponent("BottomNavigation")((_temp = _class = function (_React$Component) {
+    _inherits(BottomNavigation, _React$Component);
+
+    _createClass(BottomNavigation, null, [{
+      key: "SceneMap",
+      value: function SceneMap(scenes) {
+        var SceneComponent = _wrapComponent("SceneComponent")(function (_React$PureComponent) {
+          _inherits(SceneComponent, _React$PureComponent);
+
+          function SceneComponent() {
+            _classCallCheck(this, SceneComponent);
+
+            return _possibleConstructorReturn(this, (SceneComponent.__proto__ || Object.getPrototypeOf(SceneComponent)).apply(this, arguments));
+          }
+
+          _createClass(SceneComponent, [{
+            key: "render",
+            value: function render() {
+              return React.createElement(scenes[this.props.route.key], this.props);
+            }
+          }]);
+
+          return SceneComponent;
+        }(React.PureComponent));
+
+        return function (_ref) {
+          var route = _ref.route,
+              jumpTo = _ref.jumpTo;
+          return React.createElement(SceneComponent, {
+            key: route.key,
+            route: route,
+            jumpTo: jumpTo,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 263
+            }
+          });
+        };
+      }
+    }]);
+
+    function BottomNavigation(props) {
+      _classCallCheck(this, BottomNavigation);
+
+      var _this = _possibleConstructorReturn(this, (BottomNavigation.__proto__ || Object.getPrototypeOf(BottomNavigation)).call(this, props));
+
+      _initialiseProps.call(_this);
+
+      var _this$props$navigatio = _this.props.navigationState,
+          routes = _this$props$navigatio.routes,
+          index = _this$props$navigatio.index;
+      _this.state = {
+        tabs: routes.map(function (_, i) {
+          return new _reactNative.Animated.Value(i === index ? 1 : 0);
+        }),
+        shifts: routes.map(function (_, i) {
+          return new _reactNative.Animated.Value(_this._calculateShift(index, i, routes.length));
+        }),
+        index: new _reactNative.Animated.Value(index),
+        ripple: new _reactNative.Animated.Value(MIN_RIPPLE_SCALE),
+        touch: new _reactNative.Animated.Value(MIN_RIPPLE_SCALE),
+        layout: {
+          height: 0,
+          width: 0,
+          measured: false
+        },
+        previous: 0,
+        loaded: [index]
+      };
+      return _this;
+    }
+
+    _createClass(BottomNavigation, [{
+      key: "componentWillReceiveProps",
+      value: function componentWillReceiveProps(nextProps) {
+        if (nextProps.navigationState.index !== this.props.navigationState.index) {
+          var _previous = this.props.navigationState.index;
+          var next = nextProps.navigationState.index;
+          this.setState(function (state) {
+            return {
+              previous: _previous,
+              loaded: state.loaded.includes(next) ? state.loaded : [].concat(_toConsumableArray(state.loaded), [next])
+            };
+          });
+        }
+      }
+    }, {
+      key: "componentDidUpdate",
+      value: function componentDidUpdate(prevProps) {
+        var _this3 = this;
+
+        if (prevProps.navigationState.index === this.props.navigationState.index) {
+          return;
+        }
+
+        var _props$navigationStat = this.props.navigationState,
+            routes = _props$navigationStat.routes,
+            index = _props$navigationStat.index;
+        this.state.ripple.setValue(MIN_RIPPLE_SCALE);
+
+        _reactNative.Animated.parallel([_reactNative.Animated.timing(this.state.ripple, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true
+        }), _reactNative.Animated.sequence([_reactNative.Animated.delay(100), _reactNative.Animated.parallel([].concat(_toConsumableArray(routes.map(function (_, i) {
+          return _reactNative.Animated.timing(_this3.state.tabs[i], {
+            toValue: i === index ? 1 : 0,
+            duration: 200,
+            useNativeDriver: true
+          });
+        })), _toConsumableArray(routes.map(function (_, i) {
+          return _reactNative.Animated.timing(_this3.state.shifts[i], {
+            toValue: _this3._calculateShift(index, i, routes.length),
+            duration: 200,
+            easing: _reactNative.Easing.out(_reactNative.Easing.sin),
+            useNativeDriver: true
+          });
+        }))))])]).start(function () {
+          _this3.state.tabs.map(function (tab, i) {
+            return tab.setValue(i === index ? 1 : 0);
+          });
+
+          _this3.state.index.setValue(index);
+
+          _this3.state.ripple.setValue(MIN_RIPPLE_SCALE);
+        });
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        var _this4 = this;
+
+        var _props = this.props,
+            navigationState = _props.navigationState,
+            renderScene = _props.renderScene,
+            renderIcon = _props.renderIcon,
+            renderLabel = _props.renderLabel,
+            _props$getLabelText = _props.getLabelText,
+            getLabelText = _props$getLabelText === undefined ? function (_ref2) {
+          var route = _ref2.route;
+          return route.title;
+        } : _props$getLabelText,
+            _props$getColor = _props.getColor,
+            getColor = _props$getColor === undefined ? function (_ref3) {
+          var route = _ref3.route;
+          return route.color;
+        } : _props$getColor,
+            barStyle = _props.barStyle,
+            style = _props.style,
+            theme = _props.theme;
+        var _state = this.state,
+            layout = _state.layout,
+            loaded = _state.loaded;
+        var routes = navigationState.routes;
+        var colors = theme.colors;
+        var shifting = typeof this.props.shifting === 'boolean' ? this.props.shifting : routes.length > 3;
+
+        var _ref4 = _reactNative.StyleSheet.flatten(barStyle) || {},
+            _ref4$backgroundColor = _ref4.backgroundColor,
+            approxBackgroundColor = _ref4$backgroundColor === undefined ? shifting ? colors.primary : theme.dark ? _colors.black : _colors.white : _ref4$backgroundColor;
+
+        var backgroundColor = shifting ? this.state.index.interpolate({
+          inputRange: routes.map(function (_, i) {
+            return i;
+          }),
+          outputRange: routes.map(function (route) {
+            return getColor({
+              route: route
+            }) || approxBackgroundColor;
+          })
+        }) : approxBackgroundColor;
+        var isDark = !(0, _color2.default)(approxBackgroundColor).light();
+        var textColor = isDark ? _colors.white : _colors.black;
+        var activeColor = shifting ? textColor : colors.primary;
+        var inactiveColor = shifting ? textColor : (0, _color2.default)(textColor).alpha(0.5).rgb().string();
+        var touchColor = (0, _color2.default)(textColor).alpha(0.12).rgb().string();
+        var maxTabWidth = routes.length > 3 ? MIN_TAB_WIDTH : MAX_TAB_WIDTH;
+        var tabWidth = Math.min((layout.width - MIN_SHIFT_AMOUNT * 4) / routes.length, maxTabWidth);
+        return React.createElement(
+          _reactNative.View,
+          {
+            style: [styles.container, style],
+            onLayout: this._handleLayout,
+            pointerEvents: layout.measured ? 'auto' : 'none',
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 475
+            }
+          },
+          React.createElement(
+            _reactNative.View,
+            {
+              style: [styles.content, {
+                backgroundColor: colors.background
+              }],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 480
+              }
+            },
+            routes.map(function (route, index) {
+              if (!loaded.includes(index)) {
+                return null;
+              }
+
+              var focused = _this4.state.tabs[index];
+              var opacity = focused;
+              var translateY = shifting ? focused.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [8, 8, 0]
+              }) : 0;
+              return React.createElement(
+                _reactNative.Animated.View,
+                {
+                  key: route.key,
+                  pointerEvents: navigationState.index === index ? 'auto' : 'none',
+                  style: [_reactNative.StyleSheet.absoluteFill, {
+                    opacity: opacity,
+                    transform: [{
+                      translateY: translateY
+                    }]
+                  }],
+                  __source: {
+                    fileName: _jsxFileName,
+                    lineNumber: 497
+                  }
+                },
+                renderScene({
+                  route: route,
+                  jumpTo: _this4._jumpTo
+                })
+              );
+            })
+          ),
+          React.createElement(
+            AnimatedPaper,
+            {
+              style: [styles.bar, barStyle, {
+                backgroundColor: backgroundColor
+              }],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 515
+              }
+            },
+            React.createElement(
+              _reactNative.SafeAreaView,
+              {
+                style: [styles.items, {
+                  maxWidth: maxTabWidth * routes.length
+                }],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 516
+                }
+              },
+              shifting ? React.createElement(_reactNative.Animated.View, {
+                pointerEvents: "none",
+                style: [styles.ripple, {
+                  top: BAR_HEIGHT / 2 - layout.width / 8,
+                  left: navigationState.index * tabWidth + tabWidth / 2 - layout.width / 8,
+                  height: layout.width / 4,
+                  width: layout.width / 4,
+                  borderRadius: layout.width / 2,
+                  backgroundColor: getColor({
+                    route: routes[navigationState.index]
+                  }),
+                  transform: [{
+                    translateX: this.state.shifts[navigationState.index]
+                  }, {
+                    scale: this.state.ripple.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, 8]
+                    })
+                  }],
+                  opacity: this.state.ripple.interpolate({
+                    inputRange: [0, MIN_RIPPLE_SCALE, 0.3, 1],
+                    outputRange: [0, 0, 1, 1]
+                  })
+                }],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 520
+                }
+              }) : null,
+              React.createElement(_reactNative.Animated.View, {
+                pointerEvents: "none",
+                style: [styles.ripple, {
+                  top: BAR_HEIGHT / 2 - SMALL_RIPPLE_SIZE / 2,
+                  left: navigationState.index * tabWidth + tabWidth / 2 - SMALL_RIPPLE_SIZE / 2,
+                  height: SMALL_RIPPLE_SIZE,
+                  width: SMALL_RIPPLE_SIZE,
+                  borderRadius: SMALL_RIPPLE_SIZE / 2,
+                  backgroundColor: touchColor,
+                  transform: [{
+                    translateX: shifting ? this.state.shifts[navigationState.index] : 0
+                  }, {
+                    scale: this.state.touch
+                  }],
+                  opacity: this.state.touch.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [0, 1, 0]
+                  })
+                }],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 556
+                }
+              }),
+              routes.map(function (route, index) {
+                var shift = _this4.state.shifts[index];
+                var focused = _this4.state.tabs[index];
+                var scale = focused.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [shifting ? 0.5 : INACTIVE_LABEL_SIZE / ACTIVE_LABEL_SIZE, 1]
+                });
+                var translateY = focused.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [shifting ? 10 : 2, 0]
+                });
+                var translateX = shifting ? shift : 0;
+                var inactiveOpacity = focused.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, 0]
+                });
+                var activeIconOpacity = shifting ? focused.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.6, 1]
+                }) : focused;
+                var activeLabelOpacity = focused;
+                var inactiveIconOpacity = inactiveOpacity;
+                var inactiveLabelOpacity = inactiveOpacity;
+                return React.createElement(
+                  _reactNative.TouchableWithoutFeedback,
+                  {
+                    key: route.key,
+                    onPress: function onPress() {
+                      return _this4._handleTabPress(index);
+                    },
+                    __source: {
+                      fileName: _jsxFileName,
+                      lineNumber: 628
+                    }
+                  },
+                  React.createElement(
+                    _reactNative.Animated.View,
+                    {
+                      style: [styles.item, {
+                        transform: [{
+                          translateX: translateX
+                        }]
+                      }],
+                      __source: {
+                        fileName: _jsxFileName,
+                        lineNumber: 632
+                      }
+                    },
+                    React.createElement(
+                      _reactNative.Animated.View,
+                      {
+                        style: [styles.iconContainer, {
+                          transform: [{
+                            translateY: translateY
+                          }]
+                        }],
+                        __source: {
+                          fileName: _jsxFileName,
+                          lineNumber: 635
+                        }
+                      },
+                      React.createElement(
+                        _reactNative.Animated.View,
+                        {
+                          style: [styles.iconWrapper, {
+                            opacity: activeIconOpacity
+                          }],
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 641
+                          }
+                        },
+                        renderIcon ? renderIcon({
+                          route: route,
+                          focused: true,
+                          tintColor: activeColor
+                        }) : React.createElement(_Icon2.default, {
+                          style: styles.icon,
+                          name: route.icon,
+                          color: activeColor,
+                          size: 24,
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 654
+                          }
+                        })
+                      ),
+                      shifting ? null : React.createElement(
+                        _reactNative.Animated.View,
+                        {
+                          style: [styles.iconWrapper, {
+                            opacity: inactiveIconOpacity
+                          }],
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 663
+                          }
+                        },
+                        renderIcon ? renderIcon({
+                          route: route,
+                          focused: false,
+                          tintColor: inactiveColor
+                        }) : React.createElement(_Icon2.default, {
+                          style: styles.icon,
+                          name: route.icon,
+                          color: inactiveColor,
+                          size: 24,
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 676
+                          }
+                        })
+                      )
+                    ),
+                    React.createElement(
+                      _reactNative.Animated.View,
+                      {
+                        style: [styles.labelContainer, {
+                          transform: [{
+                            scale: scale
+                          }, {
+                            translateY: translateY
+                          }]
+                        }],
+                        __source: {
+                          fileName: _jsxFileName,
+                          lineNumber: 686
+                        }
+                      },
+                      React.createElement(
+                        _reactNative.Animated.View,
+                        {
+                          style: [styles.labelWrapper, {
+                            opacity: activeLabelOpacity
+                          }],
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 694
+                          }
+                        },
+                        renderLabel ? renderLabel({
+                          route: route,
+                          focused: true,
+                          tintColor: activeColor
+                        }) : React.createElement(
+                          AnimatedText,
+                          {
+                            style: [styles.label, {
+                              color: activeColor
+                            }],
+                            __source: {
+                              fileName: _jsxFileName,
+                              lineNumber: 707
+                            }
+                          },
+                          getLabelText({
+                            route: route
+                          })
+                        )
+                      ),
+                      shifting ? null : React.createElement(
+                        _reactNative.Animated.View,
+                        {
+                          style: [styles.labelWrapper, {
+                            opacity: inactiveLabelOpacity
+                          }],
+                          __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 720
+                          }
+                        },
+                        renderLabel ? renderLabel({
+                          route: route,
+                          focused: false,
+                          tintColor: inactiveColor
+                        }) : React.createElement(
+                          AnimatedText,
+                          {
+                            style: [styles.label, {
+                              color: inactiveColor
+                            }],
+                            __source: {
+                              fileName: _jsxFileName,
+                              lineNumber: 733
+                            }
+                          },
+                          getLabelText({
+                            route: route
+                          })
+                        )
+                      )
+                    )
+                  )
+                );
+              })
+            )
+          )
+        );
+      }
+    }]);
+
+    return BottomNavigation;
+  }(React.Component), _initialiseProps = function _initialiseProps() {
+    var _this5 = this;
+
+    this._calculateShift = function (activeIndex, currentIndex, numberOfItems) {
+      if (activeIndex < currentIndex) {
+        return 2 * MIN_SHIFT_AMOUNT;
+      }
+
+      if (activeIndex > currentIndex) {
+        return -2 * MIN_SHIFT_AMOUNT;
+      }
+
+      if (activeIndex === currentIndex) {
+        if (currentIndex === 0) {
+          return MIN_SHIFT_AMOUNT;
+        }
+
+        if (currentIndex === numberOfItems - 1) {
+          return -MIN_SHIFT_AMOUNT;
+        }
+      }
+
+      return 0;
+    };
+
+    this._handleLayout = function (e) {
+      return _this5.setState({
+        layout: {
+          height: e.nativeEvent.layout.height,
+          width: e.nativeEvent.layout.width,
+          measured: true
+        }
+      });
+    };
+
+    this._handleTabPress = function (index) {
+      var navigationState = _this5.props.navigationState;
+
+      _this5.state.touch.setValue(MIN_RIPPLE_SCALE);
+
+      _reactNative.Animated.timing(_this5.state.touch, {
+        toValue: 1,
+        duration: 300,
+        easing: _reactNative.Easing.in(_reactNative.Easing.sin),
+        useNativeDriver: true
+      }).start();
+
+      if (index !== navigationState.index) {
+        _this5.props.onIndexChange(index);
+      }
+
+      if (_this5.props.onTabPress) {
+        _this5.props.onTabPress({
+          route: navigationState.routes[index]
+        });
+      }
+    };
+
+    this._jumpTo = function (key) {
+      var index = _this5.props.navigationState.routes.findIndex(function (route) {
+        return route.key === key;
+      });
+
+      _this5.props.onIndexChange(index);
+    };
+  }, _temp));
+
+  exports.default = (0, _withTheme2.default)(BottomNavigation);
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    content: {
+      flex: 1
+    },
+    bar: {
+      elevation: 8,
+      overflow: 'hidden',
+      alignItems: 'center',
+      paddingHorizontal: MIN_SHIFT_AMOUNT * 2
+    },
+    items: {
+      flexDirection: 'row'
+    },
+    item: {
+      flex: 1,
+      paddingVertical: 6
+    },
+    ripple: {
+      position: 'absolute'
+    },
+    iconContainer: {
+      height: 24,
+      width: 24,
+      marginHorizontal: 12,
+      alignSelf: 'center'
+    },
+    iconWrapper: _extends({}, _reactNative.StyleSheet.absoluteFillObject, {
+      alignItems: 'center'
+    }),
+    icon: {
+      backgroundColor: 'transparent'
+    },
+    labelContainer: {
+      height: 18,
+      marginTop: 2,
+      paddingBottom: 4
+    },
+    labelWrapper: _extends({}, _reactNative.StyleSheet.absoluteFillObject),
+    label: {
+      fontSize: _reactNative.Platform.OS === 'ios' ? 13 : 14,
+      textAlign: 'center',
+      backgroundColor: 'transparent'
+    }
+  });
+});

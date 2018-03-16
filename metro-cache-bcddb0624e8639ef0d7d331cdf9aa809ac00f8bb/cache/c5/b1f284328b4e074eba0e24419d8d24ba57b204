@@ -1,0 +1,87 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Card/CardCover.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _withTheme = require(_dependencyMap[2], "../../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  var _colors = require(_dependencyMap[3], "../../styles/colors");
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var CardCover = function CardCover(props) {
+    var index = props.index,
+        total = props.total,
+        style = props.style,
+        theme = props.theme;
+    var roundness = theme.roundness;
+    var coverStyle = void 0;
+
+    if (index === 0) {
+      if (total === 1) {
+        coverStyle = {
+          borderRadius: roundness
+        };
+      } else {
+        coverStyle = {
+          borderTopLeftRadius: roundness,
+          borderTopRightRadius: roundness
+        };
+      }
+    } else if (typeof total === 'number' && index === total - 1) {
+      coverStyle = {
+        borderBottomLeftRadius: roundness
+      };
+    }
+
+    return React.createElement(
+      _reactNative.View,
+      {
+        style: [styles.container, coverStyle, style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 66
+        }
+      },
+      React.createElement(_reactNative.Image, _extends({}, props, {
+        style: [styles.image, coverStyle],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 67
+        }
+      }))
+    );
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      height: 195,
+      backgroundColor: _colors.grey200,
+      overflow: 'hidden'
+    },
+    image: {
+      flex: 1,
+      height: null,
+      width: null,
+      padding: 16,
+      justifyContent: 'flex-end',
+      resizeMode: 'cover'
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(CardCover);
+});

@@ -1,0 +1,380 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/@appandflow/masonry-list/src/MasonryList.js",
+      _class,
+      _temp2;
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    FakeScrollView: {
+      displayName: "FakeScrollView"
+    },
+    MasonryList: {
+      displayName: "MasonryList"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/@appandflow/masonry-list/src/MasonryList.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var _stateFromProps = function _stateFromProps(_ref) {
+    var numColumns = _ref.numColumns,
+        data = _ref.data,
+        getHeightForItem = _ref.getHeightForItem;
+    var columns = Array.from({
+      length: numColumns
+    }).map(function (col, i) {
+      return {
+        index: i,
+        totalHeight: 0,
+        data: [],
+        heights: []
+      };
+    });
+    data.forEach(function (item, index) {
+      var height = getHeightForItem({
+        item: item,
+        index: index
+      });
+      var column = columns.reduce(function (prev, cur) {
+        return cur.totalHeight < prev.totalHeight ? cur : prev;
+      }, columns[0]);
+      column.data.push(item);
+      column.heights.push(height);
+      column.totalHeight += height;
+    });
+    return {
+      columns: columns
+    };
+  };
+
+  var FakeScrollView = _wrapComponent("FakeScrollView")(function (_React$Component) {
+    _inherits(FakeScrollView, _React$Component);
+
+    function FakeScrollView() {
+      _classCallCheck(this, FakeScrollView);
+
+      return _possibleConstructorReturn(this, (FakeScrollView.__proto__ || Object.getPrototypeOf(FakeScrollView)).apply(this, arguments));
+    }
+
+    _createClass(FakeScrollView, [{
+      key: "render",
+      value: function render() {
+        return React.createElement(
+          _reactNative.View,
+          {
+            style: this.props.style,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 90
+            }
+          },
+          this.props.children
+        );
+      }
+    }]);
+
+    return FakeScrollView;
+  }(React.Component));
+
+  var MasonryList = _wrapComponent("MasonryList")((_temp2 = _class = function (_React$Component2) {
+    _inherits(MasonryList, _React$Component2);
+
+    function MasonryList() {
+      var _ref2;
+
+      var _temp, _this2, _ret;
+
+      _classCallCheck(this, MasonryList);
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _ret = (_temp = (_this2 = _possibleConstructorReturn(this, (_ref2 = MasonryList.__proto__ || Object.getPrototypeOf(MasonryList)).call.apply(_ref2, [this].concat(args))), _this2), _this2.state = _stateFromProps(_this2.props), _this2._listRefs = [], _this2._endsReached = 0, _this2._onLayout = function (event) {
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onLayout && list._onLayout(event);
+        });
+      }, _this2._onContentSizeChange = function (width, height) {
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onContentSizeChange && list._onContentSizeChange(width, height);
+        });
+      }, _this2._onScroll = function (event) {
+        if (_this2.props.onScroll) {
+          _this2.props.onScroll(event);
+        }
+
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onScroll && list._onScroll(event);
+        });
+      }, _this2._onScrollBeginDrag = function (event) {
+        if (_this2.props.onScrollBeginDrag) {
+          _this2.props.onScrollBeginDrag(event);
+        }
+
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onScrollBeginDrag && list._onScrollBeginDrag(event);
+        });
+      }, _this2._onScrollEndDrag = function (event) {
+        if (_this2.props.onScrollEndDrag) {
+          _this2.props.onScrollEndDrag(event);
+        }
+
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onScrollEndDrag && list._onScrollEndDrag(event);
+        });
+      }, _this2._onMomentumScrollEnd = function (event) {
+        if (_this2.props.onMomentumScrollEnd) {
+          _this2.props.onMomentumScrollEnd(event);
+        }
+
+        _this2._listRefs.forEach(function (list) {
+          return list && list._onMomentumScrollEnd && list._onMomentumScrollEnd(event);
+        });
+      }, _this2._getItemLayout = function (columnIndex, rowIndex) {
+        var column = _this2.state.columns[columnIndex];
+        var offset = 0;
+
+        for (var ii = 0; ii < rowIndex; ii += 1) {
+          offset += column.heights[ii];
+        }
+
+        return {
+          length: column.heights[rowIndex],
+          offset: offset,
+          index: rowIndex
+        };
+      }, _this2._renderScrollComponent = function () {
+        return React.createElement(FakeScrollView, {
+          style: styles.column,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 209
+          }
+        });
+      }, _this2._getItemCount = function (data) {
+        return data.length;
+      }, _this2._getItem = function (data, index) {
+        return data[index];
+      }, _this2._captureScrollRef = function (ref) {
+        return _this2._scrollRef = ref;
+      }, _temp), _possibleConstructorReturn(_this2, _ret);
+    }
+
+    _createClass(MasonryList, [{
+      key: "componentWillReceiveProps",
+      value: function componentWillReceiveProps(newProps) {
+        this.setState(_stateFromProps(newProps));
+      }
+    }, {
+      key: "getScrollResponder",
+      value: function getScrollResponder() {
+        if (this._scrollRef && this._scrollRef.getScrollResponder) {
+          return this._scrollRef.getScrollResponder();
+        }
+
+        return null;
+      }
+    }, {
+      key: "getScrollableNode",
+      value: function getScrollableNode() {
+        if (this._scrollRef && this._scrollRef.getScrollableNode) {
+          return this._scrollRef.getScrollableNode();
+        }
+
+        return (0, _reactNative.findNodeHandle)(this._scrollRef);
+      }
+    }, {
+      key: "scrollToOffset",
+      value: function scrollToOffset(_ref3) {
+        var offset = _ref3.offset,
+            animated = _ref3.animated;
+
+        if (this._scrollRef) {
+          this._scrollRef.scrollTo({
+            y: offset,
+            animated: animated
+          });
+        }
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        var _this3 = this;
+
+        var _props = this.props,
+            renderItem = _props.renderItem,
+            ListHeaderComponent = _props.ListHeaderComponent,
+            ListEmptyComponent = _props.ListEmptyComponent,
+            keyExtractor = _props.keyExtractor,
+            onEndReached = _props.onEndReached,
+            props = _objectWithoutProperties(_props, ["renderItem", "ListHeaderComponent", "ListEmptyComponent", "keyExtractor", "onEndReached"]);
+
+        var headerElement = void 0;
+
+        if (ListHeaderComponent) {
+          headerElement = React.createElement(ListHeaderComponent, {
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 228
+            }
+          });
+        }
+
+        var emptyElement = void 0;
+
+        if (ListEmptyComponent) {
+          emptyElement = React.createElement(ListEmptyComponent, {
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 232
+            }
+          });
+        }
+
+        var content = React.createElement(
+          _reactNative.View,
+          {
+            style: styles.contentContainer,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 236
+            }
+          },
+          this.state.columns.map(function (col) {
+            return React.createElement(_reactNative.VirtualizedList, _extends({}, props, {
+              ref: function ref(_ref5) {
+                return _this3._listRefs[col.index] = _ref5;
+              },
+              key: "$col_" + col.index,
+              data: col.data,
+              getItemCount: _this3._getItemCount,
+              getItem: _this3._getItem,
+              getItemLayout: function getItemLayout(data, index) {
+                return _this3._getItemLayout(col.index, index);
+              },
+              renderItem: function (_renderItem) {
+                function renderItem(_x) {
+                  return _renderItem.apply(this, arguments);
+                }
+
+                renderItem.toString = function () {
+                  return _renderItem.toString();
+                };
+
+                return renderItem;
+              }(function (_ref4) {
+                var item = _ref4.item,
+                    index = _ref4.index;
+                return renderItem({
+                  item: item,
+                  index: index,
+                  column: col.index
+                });
+              }),
+              renderScrollComponent: _this3._renderScrollComponent,
+              keyExtractor: keyExtractor,
+              onEndReached: onEndReached,
+              onEndReachedThreshold: _this3.props.onEndReachedThreshold,
+              removeClippedSubviews: false,
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 238
+              }
+            }));
+          })
+        );
+        var scrollComponent = React.cloneElement(this.props.renderScrollComponent(this.props), {
+          ref: this._captureScrollRef,
+          removeClippedSubviews: false,
+          onContentSizeChange: this._onContentSizeChange,
+          onLayout: this._onLayout,
+          onScroll: this._onScroll,
+          onScrollBeginDrag: this._onScrollBeginDrag,
+          onScrollEndDrag: this._onScrollEndDrag,
+          onMomentumScrollEnd: this._onMomentumScrollEnd
+        }, headerElement, emptyElement && this.props.data.length === 0 ? emptyElement : content);
+        return scrollComponent;
+      }
+    }]);
+
+    return MasonryList;
+  }(React.Component), _class.defaultProps = {
+    scrollEventThrottle: 50,
+    numColumns: 1,
+    renderScrollComponent: function renderScrollComponent(props) {
+      if (props.onRefresh && props.refreshing != null) {
+        return React.createElement(_reactNative.ScrollView, _extends({}, props, {
+          refreshControl: React.createElement(_reactNative.RefreshControl, {
+            refreshing: props.refreshing,
+            onRefresh: props.onRefresh,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 107
+            }
+          }),
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 104
+          }
+        }));
+      }
+
+      return React.createElement(_reactNative.ScrollView, _extends({}, props, {
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 115
+        }
+      }));
+    }
+  }, _temp2));
+
+  exports.default = MasonryList;
+
+  var styles = _reactNative.StyleSheet.create({
+    contentContainer: {
+      flexDirection: 'row'
+    },
+    column: {
+      flex: 1
+    }
+  });
+});

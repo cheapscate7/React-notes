@@ -1,0 +1,78 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Card/CardContent.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var CardContent = function CardContent(props) {
+    var index = props.index,
+        total = props.total,
+        siblings = props.siblings,
+        style = props.style;
+    var cover = 'withTheme(CardCover)';
+    var contentStyle = void 0,
+        prev = void 0,
+        next = void 0;
+
+    if (typeof index === 'number' && siblings) {
+      prev = siblings[index - 1];
+      next = siblings[index + 1];
+    }
+
+    if (prev === cover && next === cover || total === 1) {
+      contentStyle = styles.only;
+    } else if (index === 0) {
+      if (next === cover) {
+        contentStyle = styles.only;
+      } else {
+        contentStyle = styles.first;
+      }
+    } else if (typeof total === 'number' && index === total - 1) {
+      if (prev === cover) {
+        contentStyle = styles.only;
+      } else {
+        contentStyle = styles.last;
+      }
+    } else if (prev === cover) {
+      contentStyle = styles.first;
+    } else if (next === cover) {
+      contentStyle = styles.last;
+    }
+
+    return React.createElement(_reactNative.View, _extends({}, props, {
+      style: [styles.container, contentStyle, style],
+      __source: {
+        fileName: _jsxFileName,
+        lineNumber: 71
+      }
+    }));
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      paddingHorizontal: 16
+    },
+    first: {
+      paddingTop: 16
+    },
+    last: {
+      paddingBottom: 16
+    },
+    only: {
+      paddingVertical: 16
+    }
+  });
+
+  exports.default = CardContent;
+});

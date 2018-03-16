@@ -1,0 +1,16 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _reactNative = require(_dependencyMap[0], "react-native");
+
+  var isIOS = _reactNative.Platform.OS === 'ios';
+  var fonts = {
+    regular: isIOS ? 'Helvetica Neue' : 'sans-serif',
+    medium: isIOS ? 'HelveticaNeue-Medium' : 'sans-serif-medium',
+    light: isIOS ? 'HelveticaNeue-Light' : 'sans-serif-light',
+    thin: isIOS ? 'HelveticaNeue-Thin' : 'sans-serif-thin'
+  };
+  exports.default = fonts;
+});

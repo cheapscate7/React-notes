@@ -1,0 +1,159 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Toolbar/ToolbarAction.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _color = require(_dependencyMap[3], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _colors = require(_dependencyMap[4], "../../styles/colors");
+
+  var _TouchableRipple = require(_dependencyMap[5], "../TouchableRipple");
+
+  var _TouchableRipple2 = _interopRequireDefault(_TouchableRipple);
+
+  var _Icon = require(_dependencyMap[6], "../Icon");
+
+  var _Icon2 = _interopRequireDefault(_Icon);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    ToolbarAction: {
+      displayName: "ToolbarAction"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Toolbar/ToolbarAction.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var ANDROID_VERSION_LOLLIPOP = 21;
+
+  var ToolbarAction = _wrapComponent("ToolbarAction")(function (_React$Component) {
+    _inherits(ToolbarAction, _React$Component);
+
+    function ToolbarAction() {
+      _classCallCheck(this, ToolbarAction);
+
+      return _possibleConstructorReturn(this, (ToolbarAction.__proto__ || Object.getPrototypeOf(ToolbarAction)).apply(this, arguments));
+    }
+
+    _createClass(ToolbarAction, [{
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            dark = _props.dark,
+            icon = _props.icon,
+            onPress = _props.onPress,
+            size = _props.size,
+            style = _props.style,
+            rest = _objectWithoutProperties(_props, ["dark", "icon", "onPress", "size", "style"]);
+
+        var iconColor = dark ? _colors.white : (0, _color2.default)(_colors.black).alpha(0.54).rgb().string();
+        var rippleColor = (0, _color2.default)(iconColor).alpha(0.32).rgb().string();
+        return React.createElement(
+          _TouchableRipple2.default,
+          _extends({
+            borderless: true,
+            onPress: onPress,
+            rippleColor: rippleColor,
+            hitSlop: _reactNative.Platform.OS === 'android' && _reactNative.Platform.Version >= ANDROID_VERSION_LOLLIPOP ? {
+              top: 8,
+              left: 8,
+              bottom: 8,
+              right: 8
+            } : {
+              top: 4,
+              left: 4,
+              bottom: 4,
+              right: 4
+            },
+            style: [styles.button, style]
+          }, rest, {
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 53
+            }
+          }),
+          React.createElement(
+            _reactNative.View,
+            {
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 66
+              }
+            },
+            React.createElement(_Icon2.default, {
+              color: iconColor,
+              name: icon,
+              size: size || 24,
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 67
+              }
+            })
+          )
+        );
+      }
+    }]);
+
+    return ToolbarAction;
+  }(React.Component));
+
+  exports.default = ToolbarAction;
+
+  var styles = _reactNative.StyleSheet.create({
+    button: _reactNative.Platform.OS === 'android' && _reactNative.Platform.Version >= ANDROID_VERSION_LOLLIPOP ? {
+      height: 28,
+      width: 28,
+      marginHorizontal: 10,
+      paddingHorizontal: 2,
+      justifyContent: 'center',
+      alignItems: 'center'
+    } : {
+      height: 36,
+      width: 36,
+      marginHorizontal: 6,
+      borderRadius: 44 / 2,
+      justifyContent: 'center',
+      alignItems: 'center'
+    }
+  });
+});

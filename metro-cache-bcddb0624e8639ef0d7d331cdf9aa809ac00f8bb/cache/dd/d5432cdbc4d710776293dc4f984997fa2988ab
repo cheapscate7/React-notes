@@ -1,0 +1,41 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/Dialog/DialogScrollArea.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  var DialogScrollArea = function DialogScrollArea(_ref) {
+    var children = _ref.children,
+        style = _ref.style;
+    return React.createElement(
+      _reactNative.View,
+      {
+        style: [styles.container, style],
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 48
+        }
+      },
+      children
+    );
+  };
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      borderColor: 'rgba(0, 0, 0, .12)',
+      borderTopWidth: _reactNative.StyleSheet.hairlineWidth,
+      borderBottomWidth: _reactNative.StyleSheet.hairlineWidth,
+      paddingHorizontal: 24
+    }
+  });
+
+  exports.default = DialogScrollArea;
+});

@@ -1,0 +1,209 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/RadioButton.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _reactNative = require(_dependencyMap[2], "react-native");
+
+  var _color = require(_dependencyMap[3], "color");
+
+  var _color2 = _interopRequireDefault(_color);
+
+  var _TouchableRipple = require(_dependencyMap[4], "./TouchableRipple");
+
+  var _TouchableRipple2 = _interopRequireDefault(_TouchableRipple);
+
+  var _withTheme = require(_dependencyMap[5], "../core/withTheme");
+
+  var _withTheme2 = _interopRequireDefault(_withTheme);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    RadioButton: {
+      displayName: "RadioButton"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/RadioButton.js",
+    components: _components,
+    locals: [module],
+    imports: [React.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var BORDER_WIDTH = 2;
+
+  var RadioButton = _wrapComponent("RadioButton")(function (_React$Component) {
+    _inherits(RadioButton, _React$Component);
+
+    function RadioButton() {
+      var _ref;
+
+      var _temp, _this, _ret;
+
+      _classCallCheck(this, RadioButton);
+
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = RadioButton.__proto__ || Object.getPrototypeOf(RadioButton)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+        borderAnim: new _reactNative.Animated.Value(BORDER_WIDTH),
+        radioAnim: new _reactNative.Animated.Value(1)
+      }, _temp), _possibleConstructorReturn(_this, _ret);
+    }
+
+    _createClass(RadioButton, [{
+      key: "componentWillReceiveProps",
+      value: function componentWillReceiveProps(nextProps) {
+        if (nextProps.checked !== this.props.checked) {
+          if (_reactNative.Platform.OS === 'android') {
+            if (nextProps.checked) {
+              this.state.radioAnim.setValue(1.2);
+
+              _reactNative.Animated.timing(this.state.radioAnim, {
+                toValue: 1,
+                duration: 150
+              }).start();
+            } else {
+              this.state.borderAnim.setValue(10);
+
+              _reactNative.Animated.timing(this.state.borderAnim, {
+                toValue: BORDER_WIDTH,
+                duration: 150
+              }).start();
+            }
+          }
+        }
+      }
+    }, {
+      key: "render",
+      value: function render() {
+        var _props = this.props,
+            disabled = _props.disabled,
+            onPress = _props.onPress,
+            checked = _props.checked,
+            theme = _props.theme,
+            rest = _objectWithoutProperties(_props, ["disabled", "onPress", "checked", "theme"]);
+
+        var checkedColor = this.props.color || theme.colors.accent;
+        var uncheckedColor = theme.dark ? 'rgba(255, 255, 255, .7)' : 'rgba(0, 0, 0, .54)';
+        var rippleColor = void 0,
+            radioColor = void 0;
+
+        if (disabled) {
+          rippleColor = 'rgba(0, 0, 0, .16)';
+          radioColor = theme.colors.disabled;
+        } else {
+          rippleColor = (0, _color2.default)(checkedColor).fade(0.32).rgb().string();
+          radioColor = checked ? checkedColor : uncheckedColor;
+        }
+
+        return React.createElement(
+          _TouchableRipple2.default,
+          _extends({}, rest, {
+            borderless: true,
+            rippleColor: rippleColor,
+            onPress: disabled ? undefined : onPress,
+            style: styles.container,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 140
+            }
+          }),
+          React.createElement(
+            _reactNative.Animated.View,
+            {
+              style: [styles.radio, {
+                borderColor: radioColor,
+                borderWidth: this.state.borderAnim
+              }],
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 147
+              }
+            },
+            this.props.checked ? React.createElement(
+              _reactNative.View,
+              {
+                style: [_reactNative.StyleSheet.absoluteFill, styles.radioContainer],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 154
+                }
+              },
+              React.createElement(_reactNative.Animated.View, {
+                style: [styles.dot, {
+                  backgroundColor: radioColor,
+                  transform: [{
+                    scale: this.state.radioAnim
+                  }]
+                }],
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 155
+                }
+              })
+            ) : null
+          )
+        );
+      }
+    }]);
+
+    return RadioButton;
+  }(React.Component));
+
+  var styles = _reactNative.StyleSheet.create({
+    container: {
+      borderRadius: 18
+    },
+    radioContainer: {
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    radio: {
+      height: 20,
+      width: 20,
+      borderRadius: 10,
+      margin: 8
+    },
+    dot: {
+      height: 10,
+      width: 10,
+      borderRadius: 5
+    }
+  });
+
+  exports.default = (0, _withTheme2.default)(RadioButton);
+});

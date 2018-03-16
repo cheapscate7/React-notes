@@ -1,0 +1,68 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-native-paper/src/components/TouchableIcon.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var React = _interopRequireWildcard(_react);
+
+  var _reactNative = require(_dependencyMap[1], "react-native");
+
+  var _TouchableRipple = require(_dependencyMap[2], "./TouchableRipple");
+
+  var _TouchableRipple2 = _interopRequireDefault(_TouchableRipple);
+
+  var _Icon = require(_dependencyMap[3], "./Icon");
+
+  var _Icon2 = _interopRequireDefault(_Icon);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+  var TouchableIcon = function TouchableIcon(_ref) {
+    var name = _ref.name,
+        iconStyle = _ref.iconStyle,
+        onPress = _ref.onPress,
+        rest = _objectWithoutProperties(_ref, ["name", "iconStyle", "onPress"]);
+
+    return React.createElement(
+      _TouchableRipple2.default,
+      _extends({
+        onPress: onPress
+      }, rest, {
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 17
+        }
+      }),
+      React.createElement(
+        _reactNative.View,
+        {
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 18
+          }
+        },
+        React.createElement(_Icon2.default, {
+          style: iconStyle,
+          name: name,
+          size: 24,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 19
+          }
+        })
+      )
+    );
+  };
+
+  exports.default = TouchableIcon;
+});

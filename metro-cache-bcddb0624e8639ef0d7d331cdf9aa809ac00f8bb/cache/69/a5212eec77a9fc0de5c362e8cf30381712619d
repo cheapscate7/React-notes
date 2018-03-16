@@ -1,0 +1,43 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = shadow;
+
+  var _colors = require(_dependencyMap[0], "./colors");
+
+  var Colors = _interopRequireWildcard(_colors);
+
+  function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+  function shadow(elevation) {
+    var height = void 0,
+        radius = void 0;
+
+    switch (elevation) {
+      case 1:
+        height = 0.5;
+        radius = 0.75;
+        break;
+
+      case 2:
+        height = 0.75;
+        radius = 1.5;
+        break;
+
+      default:
+        height = elevation - 1;
+        radius = elevation;
+    }
+
+    return {
+      shadowColor: Colors.black,
+      shadowOffset: {
+        width: 0,
+        height: height
+      },
+      shadowOpacity: 0.24,
+      shadowRadius: radius
+    };
+  }
+});
