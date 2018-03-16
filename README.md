@@ -14,4 +14,4 @@ The aim was to create a notes app that visually looks simular to google Keep, us
 ## Thanks to:
 * [React Native Paper](https://github.com/callstack/react-native-paper)
 * [appAndFlow/masonryList](https://github.com/AppAndFlow/react-native-masonry-list)
-* The developers behind React Native
+* The developers behind React Native (of course)

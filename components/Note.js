@@ -11,12 +11,14 @@ class Note extends React.Component {
 
     componentDidMount(){
         //as the number of words in the content of a note decreases, make the font bigger
-        if(this.props.noteContent.split(" ").length < 10){  //less than 10 words
+        let contentLength = this.props.noteContent.split(" ").length;
+        if(contentLength > 5 && contentLength <= 10){  //less than 10 words
             this.setState({fontsize : 18});
         }
-        else if(this.props.noteContent.split(" ").length < 5 ){   //less than 5 and there is no title
-            this.setState({fontsize : 20});
+        else if(contentLength > 0 && contentLength <= 5 ){   //less than 5 and there is no title
+            this.setState({fontsize : 25});
         }
+
     }
 
     render() {
@@ -33,7 +35,7 @@ const noteStyles = StyleSheet.create({
   note: {
     margin: 5,
     width: 170,
-    //minHeight: 100,
+    minHeight: 90,
     maxHeight: 300,
     backgroundColor: "white",
     padding: 5,
@@ -41,10 +43,11 @@ const noteStyles = StyleSheet.create({
   },
   noteTitle: {
     fontWeight: "bold",
-    fontSize: 17,
+    fontSize: 16,
   },
   noteContent: {
-    //fontSize: {this.state.fontsize},
+    fontWeight: "100",
+    color: "#111111",
   },
 });
 

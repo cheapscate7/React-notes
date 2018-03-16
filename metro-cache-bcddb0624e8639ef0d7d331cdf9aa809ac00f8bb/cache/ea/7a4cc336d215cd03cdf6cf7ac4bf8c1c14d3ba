@@ -61,13 +61,15 @@ __d(function (global, require, module, exports, _dependencyMap) {
         _createClass(Note, [{
             key: "componentDidMount",
             value: function componentDidMount() {
-                if (this.props.noteContent.split(" ").length < 10) {
+                var contentLength = this.props.noteContent.split(" ").length;
+
+                if (contentLength > 5 && contentLength <= 10) {
                     this.setState({
                         fontsize: 18
                     });
-                } else if (this.props.noteContent.split(" ").length < 5) {
+                } else if (contentLength > 0 && contentLength <= 5) {
                     this.setState({
-                        fontsize: 20
+                        fontsize: 25
                     });
                 }
             }
@@ -80,7 +82,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
                         style: noteStyles.note,
                         __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 24
+                            lineNumber: 26
                         }
                     },
                     _react3.default.createElement(
@@ -89,7 +91,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
                             style: noteStyles.noteTitle,
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 25
+                                lineNumber: 27
                             }
                         },
                         this.props.noteTitle
@@ -102,7 +104,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
                             },
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 26
+                                lineNumber: 28
                             }
                         },
                         this.props.noteContent
@@ -118,6 +120,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
         note: {
             margin: 5,
             width: 170,
+            minHeight: 90,
             maxHeight: 300,
             backgroundColor: "white",
             padding: 5,
@@ -125,9 +128,12 @@ __d(function (global, require, module, exports, _dependencyMap) {
         },
         noteTitle: {
             fontWeight: "bold",
-            fontSize: 17
+            fontSize: 16
         },
-        noteContent: {}
+        noteContent: {
+            fontWeight: "100",
+            color: "#111111"
+        }
     });
 
     exports.default = Note;
