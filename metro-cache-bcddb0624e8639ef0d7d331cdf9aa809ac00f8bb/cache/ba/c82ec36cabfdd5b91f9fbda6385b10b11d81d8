@@ -1,0 +1,14 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  var _reactNavigation = require(_dependencyMap[0], "react-navigation");
+
+  var RootStack = (0, _reactNavigation.StackNavigator)({
+    Home: {
+      screen: DefaultView
+    },
+    NewNote: {
+      screen: NewNoteView
+    }
+  }, {
+    initialRouteName: 'Home'
+  });
+});

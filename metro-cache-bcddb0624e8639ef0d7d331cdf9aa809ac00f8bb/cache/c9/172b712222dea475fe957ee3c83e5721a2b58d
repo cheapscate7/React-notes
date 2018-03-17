@@ -1,0 +1,85 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _react2 = require(_dependencyMap[0], "react");
+
+  var _react3 = _interopRequireDefault(_react2);
+
+  var _index = require(_dependencyMap[1], "./../../../../react-transform-hmr/lib/index.js");
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-navigation/src/views/SwitchView/SwitchView.js";
+
+  var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  var _SceneView = require(_dependencyMap[2], "../SceneView");
+
+  var _SceneView2 = _interopRequireDefault(_SceneView);
+
+  var _withCachedChildNavigation = require(_dependencyMap[3], "../../withCachedChildNavigation");
+
+  var _withCachedChildNavigation2 = _interopRequireDefault(_withCachedChildNavigation);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+  var _components = {
+    SwitchContainer: {
+      displayName: "SwitchContainer"
+    }
+  };
+
+  var _reactTransformHmrLibIndexJs2 = (0, _index2.default)({
+    filename: "/Users/cheapscate7/Documents/React-notes/node_modules/react-navigation/src/views/SwitchView/SwitchView.js",
+    components: _components,
+    locals: [module],
+    imports: [_react3.default]
+  });
+
+  function _wrapComponent(id) {
+    return function (Component) {
+      return _reactTransformHmrLibIndexJs2(Component, id);
+    };
+  }
+
+  var SwitchContainer = _wrapComponent("SwitchContainer")(function (_React$Component) {
+    _inherits(SwitchContainer, _React$Component);
+
+    function SwitchContainer() {
+      _classCallCheck(this, SwitchContainer);
+
+      return _possibleConstructorReturn(this, (SwitchContainer.__proto__ || Object.getPrototypeOf(SwitchContainer)).apply(this, arguments));
+    }
+
+    _createClass(SwitchContainer, [{
+      key: "render",
+      value: function render() {
+        var screenProps = this.props.screenProps;
+        var route = this.props.navigation.state.routes[this.props.navigation.state.index];
+        var childNavigation = this.props.childNavigationProps[route.key];
+        var ChildComponent = this.props.router.getComponentForRouteName(route.routeName);
+        return _react3.default.createElement(_SceneView2.default, {
+          component: ChildComponent,
+          navigation: childNavigation,
+          screenProps: screenProps,
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 18
+          }
+        });
+      }
+    }]);
+
+    return SwitchContainer;
+  }(_react3.default.Component));
+
+  exports.default = (0, _withCachedChildNavigation2.default)(SwitchContainer);
+});

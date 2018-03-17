@@ -25,6 +25,7 @@
     "react-native": "0.52.0",
     "react-native-masonry": "^0.4.6",
     "react-native-paper": "^1.2.3",
-    "react-native-vector-icons": "^4.5.0"
+    "react-native-vector-icons": "^4.5.0",
+    "react-navigation": "^1.5.8"
   }
 }

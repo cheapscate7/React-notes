@@ -1,3 +1,5 @@
+import { StackNavigator } from 'react-navigation';
+
 import React from 'react';
 import { StyleSheet, Text, Button, View } from 'react-native';
 
@@ -11,7 +13,7 @@ class Footer extends React.Component {
       <View style={footerStyles.footerContainer}>
         <Button 
           onPress={() => {
-            Alert.alert('You tapped the button!');
+            this.props.navigation.navigate('NewNote');
           }}
           style={footerStyles.add} 
           color= "#e8e8e8"

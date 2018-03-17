@@ -1,0 +1,116 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  module.exports = {
+    get createNavigationContainer() {
+      return require(_dependencyMap[0], './createNavigationContainer').default;
+    },
+
+    get StateUtils() {
+      return require(_dependencyMap[1], './StateUtils').default;
+    },
+
+    get addNavigationHelpers() {
+      return require(_dependencyMap[2], './addNavigationHelpers').default;
+    },
+
+    get NavigationActions() {
+      return require(_dependencyMap[3], './NavigationActions').default;
+    },
+
+    get createNavigator() {
+      return require(_dependencyMap[4], './navigators/createNavigator').default;
+    },
+
+    get StackNavigator() {
+      return require(_dependencyMap[5], './navigators/StackNavigator').default;
+    },
+
+    get SwitchNavigator() {
+      return require(_dependencyMap[6], './navigators/SwitchNavigator').default;
+    },
+
+    get TabNavigator() {
+      return require(_dependencyMap[7], './navigators/TabNavigator').default;
+    },
+
+    get DrawerNavigator() {
+      return require(_dependencyMap[8], './navigators/DrawerNavigator').default;
+    },
+
+    get StackRouter() {
+      return require(_dependencyMap[9], './routers/StackRouter').default;
+    },
+
+    get TabRouter() {
+      return require(_dependencyMap[10], './routers/TabRouter').default;
+    },
+
+    get SwitchRouter() {
+      return require(_dependencyMap[11], './routers/SwitchRouter').default;
+    },
+
+    get Transitioner() {
+      return require(_dependencyMap[12], './views/Transitioner').default;
+    },
+
+    get CardStackTransitioner() {
+      return require(_dependencyMap[13], './views/CardStack/CardStackTransitioner').default;
+    },
+
+    get CardStack() {
+      return require(_dependencyMap[14], './views/CardStack/CardStack').default;
+    },
+
+    get Card() {
+      return require(_dependencyMap[15], './views/CardStack/Card').default;
+    },
+
+    get SafeAreaView() {
+      return require(_dependencyMap[16], "react-native-safe-area-view").default;
+    },
+
+    get Header() {
+      return require(_dependencyMap[17], './views/Header/Header').default;
+    },
+
+    get HeaderTitle() {
+      return require(_dependencyMap[18], './views/Header/HeaderTitle').default;
+    },
+
+    get HeaderBackButton() {
+      return require(_dependencyMap[19], './views/Header/HeaderBackButton').default;
+    },
+
+    get DrawerView() {
+      return require(_dependencyMap[20], './views/Drawer/DrawerView').default;
+    },
+
+    get DrawerItems() {
+      return require(_dependencyMap[21], './views/Drawer/DrawerNavigatorItems').default;
+    },
+
+    get TabView() {
+      return require(_dependencyMap[22], './views/TabView/TabView').default;
+    },
+
+    get TabBarTop() {
+      return require(_dependencyMap[23], './views/TabView/TabBarTop').default;
+    },
+
+    get TabBarBottom() {
+      return require(_dependencyMap[24], './views/TabView/TabBarBottom').default;
+    },
+
+    get SwitchView() {
+      return require(_dependencyMap[25], './views/SwitchView/SwitchView').default;
+    },
+
+    get withNavigation() {
+      return require(_dependencyMap[26], './views/withNavigation').default;
+    },
+
+    get withNavigationFocus() {
+      return require(_dependencyMap[27], './views/withNavigationFocus').default;
+    }
+
+  };
+});

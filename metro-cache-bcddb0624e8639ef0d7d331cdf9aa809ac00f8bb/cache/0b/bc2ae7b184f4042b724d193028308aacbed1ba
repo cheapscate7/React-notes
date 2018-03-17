@@ -1,0 +1,45 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/node_modules/react-navigation/src/navigators/SwitchNavigator.js";
+
+  var _react = require(_dependencyMap[0], "react");
+
+  var _react2 = _interopRequireDefault(_react);
+
+  var _SwitchRouter = require(_dependencyMap[1], "../routers/SwitchRouter");
+
+  var _SwitchRouter2 = _interopRequireDefault(_SwitchRouter);
+
+  var _SwitchView = require(_dependencyMap[2], "../views/SwitchView/SwitchView");
+
+  var _SwitchView2 = _interopRequireDefault(_SwitchView);
+
+  var _createNavigationContainer = require(_dependencyMap[3], "../createNavigationContainer");
+
+  var _createNavigationContainer2 = _interopRequireDefault(_createNavigationContainer);
+
+  var _createNavigator = require(_dependencyMap[4], "../navigators/createNavigator");
+
+  var _createNavigator2 = _interopRequireDefault(_createNavigator);
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+  exports.default = function (routeConfigMap) {
+    var switchConfig = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var router = (0, _SwitchRouter2.default)(routeConfigMap, switchConfig);
+    var navigator = (0, _createNavigator2.default)(router, routeConfigMap, switchConfig)(function (props) {
+      return _react2.default.createElement(_SwitchView2.default, _extends({}, props, {
+        __source: {
+          fileName: _jsxFileName,
+          lineNumber: 11
+        }
+      }));
+    });
+    return (0, _createNavigationContainer2.default)(navigator);
+  };
+});

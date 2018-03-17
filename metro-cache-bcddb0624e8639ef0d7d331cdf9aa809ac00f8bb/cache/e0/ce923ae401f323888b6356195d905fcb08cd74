@@ -15,7 +15,9 @@ __d(function (global, require, module, exports, _dependencyMap) {
 
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-  var _reactNative = require(_dependencyMap[2], "react-native");
+  var _reactNavigation = require(_dependencyMap[2], "react-navigation");
+
+  var _reactNative = require(_dependencyMap[3], "react-native");
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -56,25 +58,27 @@ __d(function (global, require, module, exports, _dependencyMap) {
     _createClass(Footer, [{
       key: "render",
       value: function render() {
+        var _this2 = this;
+
         return _react3.default.createElement(
           _reactNative.View,
           {
             style: footerStyles.footerContainer,
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 11
+              lineNumber: 13
             }
           },
           _react3.default.createElement(_reactNative.Button, {
             onPress: function onPress() {
-              Alert.alert('You tapped the button!');
+              _this2.props.navigation.navigate('NewNote');
             },
             style: footerStyles.add,
             color: "#e8e8e8",
             title: "add",
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 12
+              lineNumber: 14
             }
           })
         );

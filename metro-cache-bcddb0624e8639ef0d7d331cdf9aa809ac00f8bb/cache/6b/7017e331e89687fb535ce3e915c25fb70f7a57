@@ -1,0 +1,32 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  module.exports = {
+    get TabViewAnimated() {
+      return require(_dependencyMap[0], './TabViewAnimated').default;
+    },
+
+    get TabViewPagerPan() {
+      return require(_dependencyMap[1], './TabViewPagerPan').default;
+    },
+
+    get TabViewPagerScroll() {
+      return require(_dependencyMap[2], './TabViewPagerScroll').default;
+    },
+
+    get TabViewPagerAndroid() {
+      return require(_dependencyMap[3], './TabViewPagerAndroid').default;
+    },
+
+    get TabViewPagerExperimental() {
+      return require(_dependencyMap[4], './TabViewPagerExperimental').default;
+    },
+
+    get TabBar() {
+      return require(_dependencyMap[5], './TabBar').default;
+    },
+
+    get SceneMap() {
+      return require(_dependencyMap[6], './SceneMap').default;
+    }
+
+  };
+});

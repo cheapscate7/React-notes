@@ -11,23 +11,27 @@ __d(function (global, require, module, exports, _dependencyMap) {
 
   var _index2 = _interopRequireDefault(_index);
 
-  var _jsxFileName = "/Users/cheapscate7/Documents/React-notes/App.js";
-
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-  var _reactNative = require(_dependencyMap[2], "react-native");
+  var _class,
+      _temp,
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/App.js";
 
-  var _reactNativePaper = require(_dependencyMap[3], "react-native-paper");
+  var _reactNavigation = require(_dependencyMap[2], "react-navigation");
 
-  var _Header = require(_dependencyMap[4], "./components/Header.js");
+  var _reactNative = require(_dependencyMap[3], "react-native");
+
+  var _reactNativePaper = require(_dependencyMap[4], "react-native-paper");
+
+  var _Header = require(_dependencyMap[5], "./components/Header.js");
 
   var _Header2 = _interopRequireDefault(_Header);
 
-  var _NotesList = require(_dependencyMap[5], "./components/NotesList.js");
+  var _NotesList = require(_dependencyMap[6], "./components/NotesList.js");
 
   var _NotesList2 = _interopRequireDefault(_NotesList);
 
-  var _Footer = require(_dependencyMap[6], "./components/Footer.js");
+  var _Footer = require(_dependencyMap[7], "./components/Footer.js");
 
   var _Footer2 = _interopRequireDefault(_Footer);
 
@@ -40,6 +44,12 @@ __d(function (global, require, module, exports, _dependencyMap) {
   function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
   var _components = {
+    DefaultView: {
+      displayName: "DefaultView"
+    },
+    NewNoteView: {
+      displayName: "NewNoteView"
+    },
     App: {
       displayName: "App"
     }
@@ -58,16 +68,16 @@ __d(function (global, require, module, exports, _dependencyMap) {
     };
   }
 
-  var App = _wrapComponent("App")(function (_React$Component) {
-    _inherits(App, _React$Component);
+  var DefaultView = _wrapComponent("DefaultView")((_temp = _class = function (_React$Component) {
+    _inherits(DefaultView, _React$Component);
 
-    function App() {
-      _classCallCheck(this, App);
+    function DefaultView() {
+      _classCallCheck(this, DefaultView);
 
-      return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+      return _possibleConstructorReturn(this, (DefaultView.__proto__ || Object.getPrototypeOf(DefaultView)).apply(this, arguments));
     }
 
-    _createClass(App, [{
+    _createClass(DefaultView, [{
       key: "render",
       value: function render() {
         return _react3.default.createElement(
@@ -75,7 +85,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 13
+              lineNumber: 25
             }
           },
           _react3.default.createElement(
@@ -84,25 +94,25 @@ __d(function (global, require, module, exports, _dependencyMap) {
               style: styles.body,
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 14
+                lineNumber: 26
               }
             },
             _react3.default.createElement(_Header2.default, {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 15
+                lineNumber: 27
               }
             }),
             _react3.default.createElement(_NotesList2.default, {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 16
+                lineNumber: 28
               }
             }),
             _react3.default.createElement(_Footer2.default, {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 17
+                lineNumber: 29
               }
             })
           )
@@ -110,10 +120,10 @@ __d(function (global, require, module, exports, _dependencyMap) {
       }
     }]);
 
-    return App;
-  }(_react3.default.Component));
-
-  exports.default = App;
+    return DefaultView;
+  }(_react3.default.Component), _class.navigationOptions = {
+    header: null
+  }, _temp));
 
   var styles = _reactNative.StyleSheet.create({
     body: {
@@ -124,4 +134,87 @@ __d(function (global, require, module, exports, _dependencyMap) {
       marginTop: 5
     }
   });
+
+  var NewNoteView = _wrapComponent("NewNoteView")(function (_React$Component2) {
+    _inherits(NewNoteView, _React$Component2);
+
+    function NewNoteView(props) {
+      _classCallCheck(this, NewNoteView);
+
+      return _possibleConstructorReturn(this, (NewNoteView.__proto__ || Object.getPrototypeOf(NewNoteView)).call(this, props));
+    }
+
+    _createClass(NewNoteView, [{
+      key: "render",
+      value: function render() {
+        return _react3.default.createElement(
+          Toolbar,
+          {
+            style: newNoteStyles.newNoteContainer,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 58
+            }
+          },
+          _react3.default.createElement(ToolbarBackAction, {
+            onPress: this._goBack,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 59
+            }
+          }),
+          _react3.default.createElement(ToolbarContent, {
+            title: "New Note",
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 62
+            }
+          })
+        );
+      }
+    }]);
+
+    return NewNoteView;
+  }(_react3.default.Component));
+
+  var newNoteStyles = _reactNative.StyleSheet.create({
+    newNoteContainer: {}
+  });
+
+  var RootStack = (0, _reactNavigation.StackNavigator)({
+    Home: {
+      screen: DefaultView
+    },
+    NewNote: {
+      screen: NewNoteView
+    }
+  }, {
+    initialRouteName: 'Home'
+  });
+
+  var App = _wrapComponent("App")(function (_React$Component3) {
+    _inherits(App, _React$Component3);
+
+    function App() {
+      _classCallCheck(this, App);
+
+      return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+    }
+
+    _createClass(App, [{
+      key: "render",
+      value: function render() {
+        return _react3.default.createElement(RootStack, {
+          __source: {
+            fileName: _jsxFileName,
+            lineNumber: 92
+          }
+        });
+      }
+    }]);
+
+    return App;
+  }(_react3.default.Component));
+
+  exports.default = App;
 });
