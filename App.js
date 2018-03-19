@@ -4,10 +4,12 @@ import { StackNavigator } from 'react-navigation';
 import React from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { Toolbar, ToolbarBackAction, ToolbarContent, ToolbarAction } from 'react-native-paper';
 
 import Header from './components/Header.js';
 import NotesList from './components/NotesList.js';
 import Footer from './components/Footer.js';
+import NewNoteContent from './components/NewNote.js';
 
 
 /*
@@ -26,7 +28,7 @@ class DefaultView extends React.Component {
         <View style={styles.body}>
           <Header />            
           <NotesList />
-          <Footer />
+          <Footer navigation={this.props.navigation} />
         </View>
       </PaperProvider>
     );
@@ -49,30 +51,48 @@ const styles = StyleSheet.create({
   this view lets the user make a new note
 */
 class NewNoteView extends React.Component {
+
+  static navigationOptions = {
+    header: null,
+  };
+
   constructor(props) {
     super(props)
     }
 
   render() {
     return (
-      <Toolbar style={newNoteStyles.newNoteContainer}>
+      <PaperProvider>
+      <View style={newNoteViewStyles.newNoteContainer}>
+        <Toolbar style={newNoteViewStyles.newNoteHeader}>
           <ToolbarBackAction
-            onPress={this._goBack}
+            onPress={() => { this.props.navigation.goBack() }}
           />
           <ToolbarContent //style={headerStyles.title} subtitleStyle={headerStyles.subtitle}
             title="New Note"
           />
         </Toolbar>
+      </View>
+      </PaperProvider>
     );
   }
 }
 
-const newNoteStyles = StyleSheet.create({
+
+const newNoteViewStyles = StyleSheet.create({
+    newNoteHeader: {
+      backgroundColor: "#e8e8e8",
+    },
     newNoteContainer: {
-        //backgroundColor: "#e8e8e8",
+      backgroundColor: "#e8e8e8",
+      flex: 1,
     },
 });
 
+
+/*
+  Rooting
+*/
 const RootStack = StackNavigator(
   {
     Home: {

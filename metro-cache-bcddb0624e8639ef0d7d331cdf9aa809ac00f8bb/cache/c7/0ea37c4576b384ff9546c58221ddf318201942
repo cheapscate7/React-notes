@@ -1,0 +1,34 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var StatsListener = function () {
+        function StatsListener(collection_) {
+            this.collection_ = collection_;
+            this.last_ = null;
+        }
+
+        StatsListener.prototype.get = function () {
+            var newStats = this.collection_.get();
+            var delta = util_1.clone(newStats);
+
+            if (this.last_) {
+                util_1.forEach(this.last_, function (stat, value) {
+                    delta[stat] = delta[stat] - value;
+                });
+            }
+
+            this.last_ = newStats;
+            return delta;
+        };
+
+        return StatsListener;
+    }();
+
+    exports.StatsListener = StatsListener;
+});

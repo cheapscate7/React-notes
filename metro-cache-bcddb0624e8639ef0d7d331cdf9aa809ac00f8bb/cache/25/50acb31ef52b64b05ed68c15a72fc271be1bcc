@@ -1,0 +1,203 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[1], "../util/util");
+
+    var snap_1 = require(_dependencyMap[2], "./snap");
+
+    var __childrenNodeConstructor;
+
+    var LeafNode = function () {
+        function LeafNode(value_, priorityNode_) {
+            if (priorityNode_ === void 0) {
+                priorityNode_ = LeafNode.__childrenNodeConstructor.EMPTY_NODE;
+            }
+
+            this.value_ = value_;
+            this.priorityNode_ = priorityNode_;
+            this.lazyHash_ = null;
+            util_1.assert(this.value_ !== undefined && this.value_ !== null, "LeafNode shouldn't be created with null/undefined value.");
+            snap_1.validatePriorityNode(this.priorityNode_);
+        }
+
+        Object.defineProperty(LeafNode, "__childrenNodeConstructor", {
+            get: function get() {
+                return __childrenNodeConstructor;
+            },
+            set: function set(val) {
+                __childrenNodeConstructor = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        LeafNode.prototype.isLeafNode = function () {
+            return true;
+        };
+
+        LeafNode.prototype.getPriority = function () {
+            return this.priorityNode_;
+        };
+
+        LeafNode.prototype.updatePriority = function (newPriorityNode) {
+            return new LeafNode(this.value_, newPriorityNode);
+        };
+
+        LeafNode.prototype.getImmediateChild = function (childName) {
+            if (childName === '.priority') {
+                return this.priorityNode_;
+            } else {
+                return LeafNode.__childrenNodeConstructor.EMPTY_NODE;
+            }
+        };
+
+        LeafNode.prototype.getChild = function (path) {
+            if (path.isEmpty()) {
+                return this;
+            } else if (path.getFront() === '.priority') {
+                return this.priorityNode_;
+            } else {
+                return LeafNode.__childrenNodeConstructor.EMPTY_NODE;
+            }
+        };
+
+        LeafNode.prototype.hasChild = function () {
+            return false;
+        };
+
+        LeafNode.prototype.getPredecessorChildName = function (childName, childNode) {
+            return null;
+        };
+
+        LeafNode.prototype.updateImmediateChild = function (childName, newChildNode) {
+            if (childName === '.priority') {
+                return this.updatePriority(newChildNode);
+            } else if (newChildNode.isEmpty() && childName !== '.priority') {
+                return this;
+            } else {
+                return LeafNode.__childrenNodeConstructor.EMPTY_NODE.updateImmediateChild(childName, newChildNode).updatePriority(this.priorityNode_);
+            }
+        };
+
+        LeafNode.prototype.updateChild = function (path, newChildNode) {
+            var front = path.getFront();
+
+            if (front === null) {
+                return newChildNode;
+            } else if (newChildNode.isEmpty() && front !== '.priority') {
+                return this;
+            } else {
+                util_1.assert(front !== '.priority' || path.getLength() === 1, '.priority must be the last token in a path');
+                return this.updateImmediateChild(front, LeafNode.__childrenNodeConstructor.EMPTY_NODE.updateChild(path.popFront(), newChildNode));
+            }
+        };
+
+        LeafNode.prototype.isEmpty = function () {
+            return false;
+        };
+
+        LeafNode.prototype.numChildren = function () {
+            return 0;
+        };
+
+        LeafNode.prototype.forEachChild = function (index, action) {
+            return false;
+        };
+
+        LeafNode.prototype.val = function (exportFormat) {
+            if (exportFormat && !this.getPriority().isEmpty()) return {
+                '.value': this.getValue(),
+                '.priority': this.getPriority().val()
+            };else return this.getValue();
+        };
+
+        LeafNode.prototype.hash = function () {
+            if (this.lazyHash_ === null) {
+                var toHash = '';
+                if (!this.priorityNode_.isEmpty()) toHash += 'priority:' + snap_1.priorityHashText(this.priorityNode_.val()) + ':';
+                var type = typeof this.value_;
+                toHash += type + ':';
+
+                if (type === 'number') {
+                    toHash += util_2.doubleToIEEE754String(this.value_);
+                } else {
+                    toHash += this.value_;
+                }
+
+                this.lazyHash_ = util_2.sha1(toHash);
+            }
+
+            return this.lazyHash_;
+        };
+
+        LeafNode.prototype.getValue = function () {
+            return this.value_;
+        };
+
+        LeafNode.prototype.compareTo = function (other) {
+            if (other === LeafNode.__childrenNodeConstructor.EMPTY_NODE) {
+                return 1;
+            } else if (other instanceof LeafNode.__childrenNodeConstructor) {
+                return -1;
+            } else {
+                util_1.assert(other.isLeafNode(), 'Unknown node type');
+                return this.compareToLeafNode_(other);
+            }
+        };
+
+        LeafNode.prototype.compareToLeafNode_ = function (otherLeaf) {
+            var otherLeafType = typeof otherLeaf.value_;
+            var thisLeafType = typeof this.value_;
+            var otherIndex = LeafNode.VALUE_TYPE_ORDER.indexOf(otherLeafType);
+            var thisIndex = LeafNode.VALUE_TYPE_ORDER.indexOf(thisLeafType);
+            util_1.assert(otherIndex >= 0, 'Unknown leaf type: ' + otherLeafType);
+            util_1.assert(thisIndex >= 0, 'Unknown leaf type: ' + thisLeafType);
+
+            if (otherIndex === thisIndex) {
+                if (thisLeafType === 'object') {
+                    return 0;
+                } else {
+                    if (this.value_ < otherLeaf.value_) {
+                        return -1;
+                    } else if (this.value_ === otherLeaf.value_) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+            } else {
+                return thisIndex - otherIndex;
+            }
+        };
+
+        LeafNode.prototype.withIndex = function () {
+            return this;
+        };
+
+        LeafNode.prototype.isIndexed = function () {
+            return true;
+        };
+
+        LeafNode.prototype.equals = function (other) {
+            if (other === this) {
+                return true;
+            } else if (other.isLeafNode()) {
+                var otherLeaf = other;
+                return this.value_ === otherLeaf.value_ && this.priorityNode_.equals(otherLeaf.priorityNode_);
+            } else {
+                return false;
+            }
+        };
+
+        LeafNode.VALUE_TYPE_ORDER = ['object', 'boolean', 'number', 'string'];
+        return LeafNode;
+    }();
+
+    exports.LeafNode = LeafNode;
+});

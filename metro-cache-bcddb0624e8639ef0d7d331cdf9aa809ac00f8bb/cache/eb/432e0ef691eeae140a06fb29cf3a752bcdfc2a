@@ -1,0 +1,98 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var IndexedFilter_1 = require(_dependencyMap[0], "./IndexedFilter");
+
+    var PriorityIndex_1 = require(_dependencyMap[1], "../../snap/indexes/PriorityIndex");
+
+    var Node_1 = require(_dependencyMap[2], "../../../core/snap/Node");
+
+    var ChildrenNode_1 = require(_dependencyMap[3], "../../snap/ChildrenNode");
+
+    var RangedFilter = function () {
+        function RangedFilter(params) {
+            this.indexedFilter_ = new IndexedFilter_1.IndexedFilter(params.getIndex());
+            this.index_ = params.getIndex();
+            this.startPost_ = RangedFilter.getStartPost_(params);
+            this.endPost_ = RangedFilter.getEndPost_(params);
+        }
+
+        RangedFilter.prototype.getStartPost = function () {
+            return this.startPost_;
+        };
+
+        RangedFilter.prototype.getEndPost = function () {
+            return this.endPost_;
+        };
+
+        RangedFilter.prototype.matches = function (node) {
+            return this.index_.compare(this.getStartPost(), node) <= 0 && this.index_.compare(node, this.getEndPost()) <= 0;
+        };
+
+        RangedFilter.prototype.updateChild = function (snap, key, newChild, affectedPath, source, optChangeAccumulator) {
+            if (!this.matches(new Node_1.NamedNode(key, newChild))) {
+                newChild = ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+            }
+
+            return this.indexedFilter_.updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator);
+        };
+
+        RangedFilter.prototype.updateFullNode = function (oldSnap, newSnap, optChangeAccumulator) {
+            if (newSnap.isLeafNode()) {
+                newSnap = ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+            }
+
+            var filtered = newSnap.withIndex(this.index_);
+            filtered = filtered.updatePriority(ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+            var self = this;
+            newSnap.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (key, childNode) {
+                if (!self.matches(new Node_1.NamedNode(key, childNode))) {
+                    filtered = filtered.updateImmediateChild(key, ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+                }
+            });
+            return this.indexedFilter_.updateFullNode(oldSnap, filtered, optChangeAccumulator);
+        };
+
+        RangedFilter.prototype.updatePriority = function (oldSnap, newPriority) {
+            return oldSnap;
+        };
+
+        RangedFilter.prototype.filtersNodes = function () {
+            return true;
+        };
+
+        RangedFilter.prototype.getIndexedFilter = function () {
+            return this.indexedFilter_;
+        };
+
+        RangedFilter.prototype.getIndex = function () {
+            return this.index_;
+        };
+
+        RangedFilter.getStartPost_ = function (params) {
+            if (params.hasStart()) {
+                var startName = params.getIndexStartName();
+                return params.getIndex().makePost(params.getIndexStartValue(), startName);
+            } else {
+                return params.getIndex().minPost();
+            }
+        };
+
+        RangedFilter.getEndPost_ = function (params) {
+            if (params.hasEnd()) {
+                var endName = params.getIndexEndName();
+                return params.getIndex().makePost(params.getIndexEndValue(), endName);
+            } else {
+                return params.getIndex().maxPost();
+            }
+        };
+
+        return RangedFilter;
+    }();
+
+    exports.RangedFilter = RangedFilter;
+});

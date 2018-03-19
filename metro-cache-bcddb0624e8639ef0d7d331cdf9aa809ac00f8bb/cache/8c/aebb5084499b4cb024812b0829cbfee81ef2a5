@@ -1,0 +1,142 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var args = require(_dependencyMap[0], "./implementation/args");
+
+    var authwrapper_1 = require(_dependencyMap[1], "./implementation/authwrapper");
+
+    var location_1 = require(_dependencyMap[2], "./implementation/location");
+
+    var fbsPromiseImpl = require(_dependencyMap[3], "./implementation/promise_external");
+
+    var RequestExports = require(_dependencyMap[4], "./implementation/request");
+
+    var reference_1 = require(_dependencyMap[5], "./reference");
+
+    var Service = function () {
+        function Service(app, pool, url) {
+            this.bucket_ = null;
+
+            function maker(authWrapper, loc) {
+                return new reference_1.Reference(authWrapper, loc);
+            }
+
+            this.authWrapper_ = new authwrapper_1.AuthWrapper(app, maker, RequestExports.makeRequest, this, pool);
+            this.app_ = app;
+
+            if (url != null) {
+                this.bucket_ = location_1.Location.makeFromBucketSpec(url);
+            } else {
+                var authWrapperBucket = this.authWrapper_.bucket();
+
+                if (authWrapperBucket != null) {
+                    this.bucket_ = new location_1.Location(authWrapperBucket, '');
+                }
+            }
+
+            this.internals_ = new ServiceInternals(this);
+        }
+
+        Service.prototype.ref = function (path) {
+            function validator(path) {
+                if (/^[A-Za-z]+:\/\//.test(path)) {
+                    throw 'Expected child path but got a URL, use refFromURL instead.';
+                }
+            }
+
+            args.validate('ref', [args.stringSpec(validator, true)], arguments);
+
+            if (this.bucket_ == null) {
+                throw new Error('No Storage Bucket defined in Firebase Options.');
+            }
+
+            var ref = new reference_1.Reference(this.authWrapper_, this.bucket_);
+
+            if (path != null) {
+                return ref.child(path);
+            } else {
+                return ref;
+            }
+        };
+
+        Service.prototype.refFromURL = function (url) {
+            function validator(p) {
+                if (!/^[A-Za-z]+:\/\//.test(p)) {
+                    throw 'Expected full URL but got a child path, use ref instead.';
+                }
+
+                try {
+                    location_1.Location.makeFromUrl(p);
+                } catch (e) {
+                    throw 'Expected valid full URL but got an invalid one.';
+                }
+            }
+
+            args.validate('refFromURL', [args.stringSpec(validator, false)], arguments);
+            return new reference_1.Reference(this.authWrapper_, url);
+        };
+
+        Object.defineProperty(Service.prototype, "maxUploadRetryTime", {
+            get: function get() {
+                return this.authWrapper_.maxUploadRetryTime();
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Service.prototype.setMaxUploadRetryTime = function (time) {
+            args.validate('setMaxUploadRetryTime', [args.nonNegativeNumberSpec()], arguments);
+            this.authWrapper_.setMaxUploadRetryTime(time);
+        };
+
+        Object.defineProperty(Service.prototype, "maxOperationRetryTime", {
+            get: function get() {
+                return this.authWrapper_.maxOperationRetryTime();
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Service.prototype.setMaxOperationRetryTime = function (time) {
+            args.validate('setMaxOperationRetryTime', [args.nonNegativeNumberSpec()], arguments);
+            this.authWrapper_.setMaxOperationRetryTime(time);
+        };
+
+        Object.defineProperty(Service.prototype, "app", {
+            get: function get() {
+                return this.app_;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Service.prototype, "INTERNAL", {
+            get: function get() {
+                return this.internals_;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Service;
+    }();
+
+    exports.Service = Service;
+
+    var ServiceInternals = function () {
+        function ServiceInternals(service) {
+            this.service_ = service;
+        }
+
+        ServiceInternals.prototype.delete = function () {
+            this.service_.authWrapper_.deleteApp();
+            return fbsPromiseImpl.resolve(undefined);
+        };
+
+        return ServiceInternals;
+    }();
+
+    exports.ServiceInternals = ServiceInternals;
+});

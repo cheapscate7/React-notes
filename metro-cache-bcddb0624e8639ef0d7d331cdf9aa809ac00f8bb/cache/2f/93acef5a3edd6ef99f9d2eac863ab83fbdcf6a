@@ -1,0 +1,473 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[1], "./util/util");
+
+    var AckUserWrite_1 = require(_dependencyMap[2], "./operation/AckUserWrite");
+
+    var ChildrenNode_1 = require(_dependencyMap[3], "./snap/ChildrenNode");
+
+    var util_3 = require(_dependencyMap[0], "@firebase/util");
+
+    var ImmutableTree_1 = require(_dependencyMap[4], "./util/ImmutableTree");
+
+    var ListenComplete_1 = require(_dependencyMap[5], "./operation/ListenComplete");
+
+    var Merge_1 = require(_dependencyMap[6], "./operation/Merge");
+
+    var Operation_1 = require(_dependencyMap[7], "./operation/Operation");
+
+    var Overwrite_1 = require(_dependencyMap[8], "./operation/Overwrite");
+
+    var Path_1 = require(_dependencyMap[9], "./util/Path");
+
+    var SyncPoint_1 = require(_dependencyMap[10], "./SyncPoint");
+
+    var WriteTree_1 = require(_dependencyMap[11], "./WriteTree");
+
+    var SyncTree = function () {
+        function SyncTree(listenProvider_) {
+            this.listenProvider_ = listenProvider_;
+            this.syncPointTree_ = ImmutableTree_1.ImmutableTree.Empty;
+            this.pendingWriteTree_ = new WriteTree_1.WriteTree();
+            this.tagToQueryMap_ = {};
+            this.queryToTagMap_ = {};
+        }
+
+        SyncTree.prototype.applyUserOverwrite = function (path, newData, writeId, visible) {
+            this.pendingWriteTree_.addOverwrite(path, newData, writeId, visible);
+
+            if (!visible) {
+                return [];
+            } else {
+                return this.applyOperationToSyncPoints_(new Overwrite_1.Overwrite(Operation_1.OperationSource.User, path, newData));
+            }
+        };
+
+        SyncTree.prototype.applyUserMerge = function (path, changedChildren, writeId) {
+            this.pendingWriteTree_.addMerge(path, changedChildren, writeId);
+            var changeTree = ImmutableTree_1.ImmutableTree.fromObject(changedChildren);
+            return this.applyOperationToSyncPoints_(new Merge_1.Merge(Operation_1.OperationSource.User, path, changeTree));
+        };
+
+        SyncTree.prototype.ackUserWrite = function (writeId, revert) {
+            if (revert === void 0) {
+                revert = false;
+            }
+
+            var write = this.pendingWriteTree_.getWrite(writeId);
+            var needToReevaluate = this.pendingWriteTree_.removeWrite(writeId);
+
+            if (!needToReevaluate) {
+                return [];
+            } else {
+                var affectedTree_1 = ImmutableTree_1.ImmutableTree.Empty;
+
+                if (write.snap != null) {
+                    affectedTree_1 = affectedTree_1.set(Path_1.Path.Empty, true);
+                } else {
+                    util_3.forEach(write.children, function (pathString, node) {
+                        affectedTree_1 = affectedTree_1.set(new Path_1.Path(pathString), node);
+                    });
+                }
+
+                return this.applyOperationToSyncPoints_(new AckUserWrite_1.AckUserWrite(write.path, affectedTree_1, revert));
+            }
+        };
+
+        SyncTree.prototype.applyServerOverwrite = function (path, newData) {
+            return this.applyOperationToSyncPoints_(new Overwrite_1.Overwrite(Operation_1.OperationSource.Server, path, newData));
+        };
+
+        SyncTree.prototype.applyServerMerge = function (path, changedChildren) {
+            var changeTree = ImmutableTree_1.ImmutableTree.fromObject(changedChildren);
+            return this.applyOperationToSyncPoints_(new Merge_1.Merge(Operation_1.OperationSource.Server, path, changeTree));
+        };
+
+        SyncTree.prototype.applyListenComplete = function (path) {
+            return this.applyOperationToSyncPoints_(new ListenComplete_1.ListenComplete(Operation_1.OperationSource.Server, path));
+        };
+
+        SyncTree.prototype.applyTaggedQueryOverwrite = function (path, snap, tag) {
+            var queryKey = this.queryKeyForTag_(tag);
+
+            if (queryKey != null) {
+                var r = SyncTree.parseQueryKey_(queryKey);
+                var queryPath = r.path,
+                    queryId = r.queryId;
+                var relativePath = Path_1.Path.relativePath(queryPath, path);
+                var op = new Overwrite_1.Overwrite(Operation_1.OperationSource.forServerTaggedQuery(queryId), relativePath, snap);
+                return this.applyTaggedOperation_(queryPath, op);
+            } else {
+                return [];
+            }
+        };
+
+        SyncTree.prototype.applyTaggedQueryMerge = function (path, changedChildren, tag) {
+            var queryKey = this.queryKeyForTag_(tag);
+
+            if (queryKey) {
+                var r = SyncTree.parseQueryKey_(queryKey);
+                var queryPath = r.path,
+                    queryId = r.queryId;
+                var relativePath = Path_1.Path.relativePath(queryPath, path);
+                var changeTree = ImmutableTree_1.ImmutableTree.fromObject(changedChildren);
+                var op = new Merge_1.Merge(Operation_1.OperationSource.forServerTaggedQuery(queryId), relativePath, changeTree);
+                return this.applyTaggedOperation_(queryPath, op);
+            } else {
+                return [];
+            }
+        };
+
+        SyncTree.prototype.applyTaggedListenComplete = function (path, tag) {
+            var queryKey = this.queryKeyForTag_(tag);
+
+            if (queryKey) {
+                var r = SyncTree.parseQueryKey_(queryKey);
+                var queryPath = r.path,
+                    queryId = r.queryId;
+                var relativePath = Path_1.Path.relativePath(queryPath, path);
+                var op = new ListenComplete_1.ListenComplete(Operation_1.OperationSource.forServerTaggedQuery(queryId), relativePath);
+                return this.applyTaggedOperation_(queryPath, op);
+            } else {
+                return [];
+            }
+        };
+
+        SyncTree.prototype.addEventRegistration = function (query, eventRegistration) {
+            var path = query.path;
+            var serverCache = null;
+            var foundAncestorDefaultView = false;
+            this.syncPointTree_.foreachOnPath(path, function (pathToSyncPoint, sp) {
+                var relativePath = Path_1.Path.relativePath(pathToSyncPoint, path);
+                serverCache = serverCache || sp.getCompleteServerCache(relativePath);
+                foundAncestorDefaultView = foundAncestorDefaultView || sp.hasCompleteView();
+            });
+            var syncPoint = this.syncPointTree_.get(path);
+
+            if (!syncPoint) {
+                syncPoint = new SyncPoint_1.SyncPoint();
+                this.syncPointTree_ = this.syncPointTree_.set(path, syncPoint);
+            } else {
+                foundAncestorDefaultView = foundAncestorDefaultView || syncPoint.hasCompleteView();
+                serverCache = serverCache || syncPoint.getCompleteServerCache(Path_1.Path.Empty);
+            }
+
+            var serverCacheComplete;
+
+            if (serverCache != null) {
+                serverCacheComplete = true;
+            } else {
+                serverCacheComplete = false;
+                serverCache = ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+                var subtree = this.syncPointTree_.subtree(path);
+                subtree.foreachChild(function (childName, childSyncPoint) {
+                    var completeCache = childSyncPoint.getCompleteServerCache(Path_1.Path.Empty);
+
+                    if (completeCache) {
+                        serverCache = serverCache.updateImmediateChild(childName, completeCache);
+                    }
+                });
+            }
+
+            var viewAlreadyExists = syncPoint.viewExistsForQuery(query);
+
+            if (!viewAlreadyExists && !query.getQueryParams().loadsAllData()) {
+                var queryKey = SyncTree.makeQueryKey_(query);
+                util_1.assert(!(queryKey in this.queryToTagMap_), 'View does not exist, but we have a tag');
+                var tag = SyncTree.getNextQueryTag_();
+                this.queryToTagMap_[queryKey] = tag;
+                this.tagToQueryMap_['_' + tag] = queryKey;
+            }
+
+            var writesCache = this.pendingWriteTree_.childWrites(path);
+            var events = syncPoint.addEventRegistration(query, eventRegistration, writesCache, serverCache, serverCacheComplete);
+
+            if (!viewAlreadyExists && !foundAncestorDefaultView) {
+                var view = syncPoint.viewForQuery(query);
+                events = events.concat(this.setupListener_(query, view));
+            }
+
+            return events;
+        };
+
+        SyncTree.prototype.removeEventRegistration = function (query, eventRegistration, cancelError) {
+            var _this = this;
+
+            var path = query.path;
+            var maybeSyncPoint = this.syncPointTree_.get(path);
+            var cancelEvents = [];
+
+            if (maybeSyncPoint && (query.queryIdentifier() === 'default' || maybeSyncPoint.viewExistsForQuery(query))) {
+                var removedAndEvents = maybeSyncPoint.removeEventRegistration(query, eventRegistration, cancelError);
+
+                if (maybeSyncPoint.isEmpty()) {
+                    this.syncPointTree_ = this.syncPointTree_.remove(path);
+                }
+
+                var removed = removedAndEvents.removed;
+                cancelEvents = removedAndEvents.events;
+                var removingDefault = -1 !== removed.findIndex(function (query) {
+                    return query.getQueryParams().loadsAllData();
+                });
+                var covered = this.syncPointTree_.findOnPath(path, function (relativePath, parentSyncPoint) {
+                    return parentSyncPoint.hasCompleteView();
+                });
+
+                if (removingDefault && !covered) {
+                    var subtree = this.syncPointTree_.subtree(path);
+
+                    if (!subtree.isEmpty()) {
+                        var newViews = this.collectDistinctViewsForSubTree_(subtree);
+
+                        for (var i = 0; i < newViews.length; ++i) {
+                            var view = newViews[i],
+                                newQuery = view.getQuery();
+                            var listener = this.createListenerForView_(view);
+                            this.listenProvider_.startListening(SyncTree.queryForListening_(newQuery), this.tagForQuery_(newQuery), listener.hashFn, listener.onComplete);
+                        }
+                    } else {}
+                }
+
+                if (!covered && removed.length > 0 && !cancelError) {
+                    if (removingDefault) {
+                        var defaultTag = null;
+                        this.listenProvider_.stopListening(SyncTree.queryForListening_(query), defaultTag);
+                    } else {
+                        removed.forEach(function (queryToRemove) {
+                            var tagToRemove = _this.queryToTagMap_[SyncTree.makeQueryKey_(queryToRemove)];
+
+                            _this.listenProvider_.stopListening(SyncTree.queryForListening_(queryToRemove), tagToRemove);
+                        });
+                    }
+                }
+
+                this.removeTags_(removed);
+            } else {}
+
+            return cancelEvents;
+        };
+
+        SyncTree.prototype.calcCompleteEventCache = function (path, writeIdsToExclude) {
+            var includeHiddenSets = true;
+            var writeTree = this.pendingWriteTree_;
+            var serverCache = this.syncPointTree_.findOnPath(path, function (pathSoFar, syncPoint) {
+                var relativePath = Path_1.Path.relativePath(pathSoFar, path);
+                var serverCache = syncPoint.getCompleteServerCache(relativePath);
+
+                if (serverCache) {
+                    return serverCache;
+                }
+            });
+            return writeTree.calcCompleteEventCache(path, serverCache, writeIdsToExclude, includeHiddenSets);
+        };
+
+        SyncTree.prototype.collectDistinctViewsForSubTree_ = function (subtree) {
+            return subtree.fold(function (relativePath, maybeChildSyncPoint, childMap) {
+                if (maybeChildSyncPoint && maybeChildSyncPoint.hasCompleteView()) {
+                    var completeView = maybeChildSyncPoint.getCompleteView();
+                    return [completeView];
+                } else {
+                    var views_1 = [];
+
+                    if (maybeChildSyncPoint) {
+                        views_1 = maybeChildSyncPoint.getQueryViews();
+                    }
+
+                    util_3.forEach(childMap, function (key, childViews) {
+                        views_1 = views_1.concat(childViews);
+                    });
+                    return views_1;
+                }
+            });
+        };
+
+        SyncTree.prototype.removeTags_ = function (queries) {
+            for (var j = 0; j < queries.length; ++j) {
+                var removedQuery = queries[j];
+
+                if (!removedQuery.getQueryParams().loadsAllData()) {
+                    var removedQueryKey = SyncTree.makeQueryKey_(removedQuery);
+                    var removedQueryTag = this.queryToTagMap_[removedQueryKey];
+                    delete this.queryToTagMap_[removedQueryKey];
+                    delete this.tagToQueryMap_['_' + removedQueryTag];
+                }
+            }
+        };
+
+        SyncTree.queryForListening_ = function (query) {
+            if (query.getQueryParams().loadsAllData() && !query.getQueryParams().isDefault()) {
+                return query.getRef();
+            } else {
+                return query;
+            }
+        };
+
+        SyncTree.prototype.setupListener_ = function (query, view) {
+            var path = query.path;
+            var tag = this.tagForQuery_(query);
+            var listener = this.createListenerForView_(view);
+            var events = this.listenProvider_.startListening(SyncTree.queryForListening_(query), tag, listener.hashFn, listener.onComplete);
+            var subtree = this.syncPointTree_.subtree(path);
+
+            if (tag) {
+                util_1.assert(!subtree.value.hasCompleteView(), "If we're adding a query, it shouldn't be shadowed");
+            } else {
+                var queriesToStop = subtree.fold(function (relativePath, maybeChildSyncPoint, childMap) {
+                    if (!relativePath.isEmpty() && maybeChildSyncPoint && maybeChildSyncPoint.hasCompleteView()) {
+                        return [maybeChildSyncPoint.getCompleteView().getQuery()];
+                    } else {
+                        var queries_1 = [];
+
+                        if (maybeChildSyncPoint) {
+                            queries_1 = queries_1.concat(maybeChildSyncPoint.getQueryViews().map(function (view) {
+                                return view.getQuery();
+                            }));
+                        }
+
+                        util_3.forEach(childMap, function (key, childQueries) {
+                            queries_1 = queries_1.concat(childQueries);
+                        });
+                        return queries_1;
+                    }
+                });
+
+                for (var i = 0; i < queriesToStop.length; ++i) {
+                    var queryToStop = queriesToStop[i];
+                    this.listenProvider_.stopListening(SyncTree.queryForListening_(queryToStop), this.tagForQuery_(queryToStop));
+                }
+            }
+
+            return events;
+        };
+
+        SyncTree.prototype.createListenerForView_ = function (view) {
+            var _this = this;
+
+            var query = view.getQuery();
+            var tag = this.tagForQuery_(query);
+            return {
+                hashFn: function hashFn() {
+                    var cache = view.getServerCache() || ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+                    return cache.hash();
+                },
+                onComplete: function onComplete(status) {
+                    if (status === 'ok') {
+                        if (tag) {
+                            return _this.applyTaggedListenComplete(query.path, tag);
+                        } else {
+                            return _this.applyListenComplete(query.path);
+                        }
+                    } else {
+                        var error = util_2.errorForServerCode(status, query);
+                        return _this.removeEventRegistration(query, null, error);
+                    }
+                }
+            };
+        };
+
+        SyncTree.makeQueryKey_ = function (query) {
+            return query.path.toString() + '$' + query.queryIdentifier();
+        };
+
+        SyncTree.parseQueryKey_ = function (queryKey) {
+            var splitIndex = queryKey.indexOf('$');
+            util_1.assert(splitIndex !== -1 && splitIndex < queryKey.length - 1, 'Bad queryKey.');
+            return {
+                queryId: queryKey.substr(splitIndex + 1),
+                path: new Path_1.Path(queryKey.substr(0, splitIndex))
+            };
+        };
+
+        SyncTree.prototype.queryKeyForTag_ = function (tag) {
+            return this.tagToQueryMap_['_' + tag];
+        };
+
+        SyncTree.prototype.tagForQuery_ = function (query) {
+            var queryKey = SyncTree.makeQueryKey_(query);
+            return util_3.safeGet(this.queryToTagMap_, queryKey);
+        };
+
+        SyncTree.getNextQueryTag_ = function () {
+            return SyncTree.nextQueryTag_++;
+        };
+
+        SyncTree.prototype.applyTaggedOperation_ = function (queryPath, operation) {
+            var syncPoint = this.syncPointTree_.get(queryPath);
+            util_1.assert(syncPoint, "Missing sync point for query tag that we're tracking");
+            var writesCache = this.pendingWriteTree_.childWrites(queryPath);
+            return syncPoint.applyOperation(operation, writesCache, null);
+        };
+
+        SyncTree.prototype.applyOperationToSyncPoints_ = function (operation) {
+            return this.applyOperationHelper_(operation, this.syncPointTree_, null, this.pendingWriteTree_.childWrites(Path_1.Path.Empty));
+        };
+
+        SyncTree.prototype.applyOperationHelper_ = function (operation, syncPointTree, serverCache, writesCache) {
+            if (operation.path.isEmpty()) {
+                return this.applyOperationDescendantsHelper_(operation, syncPointTree, serverCache, writesCache);
+            } else {
+                var syncPoint = syncPointTree.get(Path_1.Path.Empty);
+
+                if (serverCache == null && syncPoint != null) {
+                    serverCache = syncPoint.getCompleteServerCache(Path_1.Path.Empty);
+                }
+
+                var events = [];
+                var childName = operation.path.getFront();
+                var childOperation = operation.operationForChild(childName);
+                var childTree = syncPointTree.children.get(childName);
+
+                if (childTree && childOperation) {
+                    var childServerCache = serverCache ? serverCache.getImmediateChild(childName) : null;
+                    var childWritesCache = writesCache.child(childName);
+                    events = events.concat(this.applyOperationHelper_(childOperation, childTree, childServerCache, childWritesCache));
+                }
+
+                if (syncPoint) {
+                    events = events.concat(syncPoint.applyOperation(operation, writesCache, serverCache));
+                }
+
+                return events;
+            }
+        };
+
+        SyncTree.prototype.applyOperationDescendantsHelper_ = function (operation, syncPointTree, serverCache, writesCache) {
+            var _this = this;
+
+            var syncPoint = syncPointTree.get(Path_1.Path.Empty);
+
+            if (serverCache == null && syncPoint != null) {
+                serverCache = syncPoint.getCompleteServerCache(Path_1.Path.Empty);
+            }
+
+            var events = [];
+            syncPointTree.children.inorderTraversal(function (childName, childTree) {
+                var childServerCache = serverCache ? serverCache.getImmediateChild(childName) : null;
+                var childWritesCache = writesCache.child(childName);
+                var childOperation = operation.operationForChild(childName);
+
+                if (childOperation) {
+                    events = events.concat(_this.applyOperationDescendantsHelper_(childOperation, childTree, childServerCache, childWritesCache));
+                }
+            });
+
+            if (syncPoint) {
+                events = events.concat(syncPoint.applyOperation(operation, writesCache, serverCache));
+            }
+
+            return events;
+        };
+
+        SyncTree.nextQueryTag_ = 1;
+        return SyncTree;
+    }();
+
+    exports.SyncTree = SyncTree;
+});

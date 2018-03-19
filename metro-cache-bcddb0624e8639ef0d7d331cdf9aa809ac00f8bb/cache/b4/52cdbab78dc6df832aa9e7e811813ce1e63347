@@ -1,0 +1,75 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var Path_1 = require(_dependencyMap[1], "./Path");
+
+    var SparseSnapshotTree_1 = require(_dependencyMap[2], "../SparseSnapshotTree");
+
+    var LeafNode_1 = require(_dependencyMap[3], "../snap/LeafNode");
+
+    var nodeFromJSON_1 = require(_dependencyMap[4], "../snap/nodeFromJSON");
+
+    var PriorityIndex_1 = require(_dependencyMap[5], "../snap/indexes/PriorityIndex");
+
+    exports.generateWithValues = function (values) {
+        values = values || {};
+        values['timestamp'] = values['timestamp'] || new Date().getTime();
+        return values;
+    };
+
+    exports.resolveDeferredValue = function (value, serverValues) {
+        if (!value || typeof value !== 'object') {
+            return value;
+        } else {
+            util_1.assert('.sv' in value, 'Unexpected leaf node or priority contents');
+            return serverValues[value['.sv']];
+        }
+    };
+
+    exports.resolveDeferredValueTree = function (tree, serverValues) {
+        var resolvedTree = new SparseSnapshotTree_1.SparseSnapshotTree();
+        tree.forEachTree(new Path_1.Path(''), function (path, node) {
+            resolvedTree.remember(path, exports.resolveDeferredValueSnapshot(node, serverValues));
+        });
+        return resolvedTree;
+    };
+
+    exports.resolveDeferredValueSnapshot = function (node, serverValues) {
+        var rawPri = node.getPriority().val();
+        var priority = exports.resolveDeferredValue(rawPri, serverValues);
+        var newNode;
+
+        if (node.isLeafNode()) {
+            var leafNode = node;
+            var value = exports.resolveDeferredValue(leafNode.getValue(), serverValues);
+
+            if (value !== leafNode.getValue() || priority !== leafNode.getPriority().val()) {
+                return new LeafNode_1.LeafNode(value, nodeFromJSON_1.nodeFromJSON(priority));
+            } else {
+                return node;
+            }
+        } else {
+            var childrenNode = node;
+            newNode = childrenNode;
+
+            if (priority !== childrenNode.getPriority().val()) {
+                newNode = newNode.updatePriority(new LeafNode_1.LeafNode(priority));
+            }
+
+            childrenNode.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (childName, childNode) {
+                var newChildNode = exports.resolveDeferredValueSnapshot(childNode, serverValues);
+
+                if (newChildNode !== childNode) {
+                    newNode = newNode.updateImmediateChild(childName, newChildNode);
+                }
+            });
+            return newNode;
+        }
+    };
+});

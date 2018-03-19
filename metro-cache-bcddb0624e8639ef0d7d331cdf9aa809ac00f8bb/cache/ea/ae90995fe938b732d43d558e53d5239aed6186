@@ -1,0 +1,46 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var Change = function () {
+    function Change(type, snapshotNode, childName, oldSnap, prevName) {
+      this.type = type;
+      this.snapshotNode = snapshotNode;
+      this.childName = childName;
+      this.oldSnap = oldSnap;
+      this.prevName = prevName;
+    }
+
+    Change.valueChange = function (snapshot) {
+      return new Change(Change.VALUE, snapshot);
+    };
+
+    Change.childAddedChange = function (childKey, snapshot) {
+      return new Change(Change.CHILD_ADDED, snapshot, childKey);
+    };
+
+    Change.childRemovedChange = function (childKey, snapshot) {
+      return new Change(Change.CHILD_REMOVED, snapshot, childKey);
+    };
+
+    Change.childChangedChange = function (childKey, newSnapshot, oldSnapshot) {
+      return new Change(Change.CHILD_CHANGED, newSnapshot, childKey, oldSnapshot);
+    };
+
+    Change.childMovedChange = function (childKey, snapshot) {
+      return new Change(Change.CHILD_MOVED, snapshot, childKey);
+    };
+
+    Change.CHILD_ADDED = 'child_added';
+    Change.CHILD_REMOVED = 'child_removed';
+    Change.CHILD_CHANGED = 'child_changed';
+    Change.CHILD_MOVED = 'child_moved';
+    Change.VALUE = 'value';
+    return Change;
+  }();
+
+  exports.Change = Change;
+});

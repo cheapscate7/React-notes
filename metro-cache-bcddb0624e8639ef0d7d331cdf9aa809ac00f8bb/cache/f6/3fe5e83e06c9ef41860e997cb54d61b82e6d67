@@ -1,0 +1,30 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var type = require(_dependencyMap[0], "./type");
+
+    var Observer = function () {
+        function Observer(nextOrObserver, opt_error, opt_complete) {
+            var asFunctions = type.isFunction(nextOrObserver) || type.isDef(opt_error) || type.isDef(opt_complete);
+
+            if (asFunctions) {
+                this.next = nextOrObserver;
+                this.error = opt_error || null;
+                this.complete = opt_complete || null;
+            } else {
+                var observer = nextOrObserver;
+                this.next = observer.next || null;
+                this.error = observer.error || null;
+                this.complete = observer.complete || null;
+            }
+        }
+
+        return Observer;
+    }();
+
+    exports.Observer = Observer;
+});

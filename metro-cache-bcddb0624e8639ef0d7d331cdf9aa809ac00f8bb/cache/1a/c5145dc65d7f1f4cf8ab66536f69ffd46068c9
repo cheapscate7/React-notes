@@ -1,0 +1,12 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var firebaseApp_1 = require(_dependencyMap[0], "./src/firebaseApp");
+
+  exports.firebase = firebaseApp_1.createFirebaseNamespace();
+  exports.default = exports.firebase;
+});

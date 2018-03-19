@@ -1,0 +1,115 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function start(f, callback, timeout) {
+        var waitSeconds = 1;
+        var timeoutId = null;
+        var hitTimeout = false;
+        var cancelState = 0;
+
+        function canceled() {
+            return cancelState === 2;
+        }
+
+        var triggeredCallback = false;
+
+        function triggerCallback() {
+            if (!triggeredCallback) {
+                triggeredCallback = true;
+                callback.apply(null, arguments);
+            }
+        }
+
+        function callWithDelay(millis) {
+            timeoutId = setTimeout(function () {
+                timeoutId = null;
+                f(handler, canceled());
+            }, millis);
+        }
+
+        function handler(success) {
+            var var_args = [];
+
+            for (var _i = 1; _i < arguments.length; _i++) {
+                var_args[_i - 1] = arguments[_i];
+            }
+
+            if (triggeredCallback) {
+                return;
+            }
+
+            if (success) {
+                triggerCallback.apply(null, arguments);
+                return;
+            }
+
+            var mustStop = canceled() || hitTimeout;
+
+            if (mustStop) {
+                triggerCallback.apply(null, arguments);
+                return;
+            }
+
+            if (waitSeconds < 64) {
+                waitSeconds *= 2;
+            }
+
+            var waitMillis;
+
+            if (cancelState === 1) {
+                cancelState = 2;
+                waitMillis = 0;
+            } else {
+                waitMillis = (waitSeconds + Math.random()) * 1000;
+            }
+
+            callWithDelay(waitMillis);
+        }
+
+        var stopped = false;
+
+        function stop(wasTimeout) {
+            if (stopped) {
+                return;
+            }
+
+            stopped = true;
+
+            if (triggeredCallback) {
+                return;
+            }
+
+            if (timeoutId !== null) {
+                if (!wasTimeout) {
+                    cancelState = 2;
+                }
+
+                clearTimeout(timeoutId);
+                callWithDelay(0);
+            } else {
+                if (!wasTimeout) {
+                    cancelState = 1;
+                }
+            }
+        }
+
+        callWithDelay(0);
+        setTimeout(function () {
+            hitTimeout = true;
+            stop(true);
+        }, timeout);
+        return stop;
+    }
+
+    exports.start = start;
+
+    function stop(id) {
+        id(false);
+    }
+
+    exports.stop = stop;
+});

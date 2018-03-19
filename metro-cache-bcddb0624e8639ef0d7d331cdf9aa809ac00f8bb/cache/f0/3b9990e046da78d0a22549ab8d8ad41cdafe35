@@ -1,0 +1,155 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var Path_1 = require(_dependencyMap[1], "./Path");
+
+    var util_2 = require(_dependencyMap[0], "@firebase/util");
+
+    var TreeNode = function () {
+        function TreeNode() {
+            this.children = {};
+            this.childCount = 0;
+            this.value = null;
+        }
+
+        return TreeNode;
+    }();
+
+    exports.TreeNode = TreeNode;
+
+    var Tree = function () {
+        function Tree(name_, parent_, node_) {
+            if (name_ === void 0) {
+                name_ = '';
+            }
+
+            if (parent_ === void 0) {
+                parent_ = null;
+            }
+
+            if (node_ === void 0) {
+                node_ = new TreeNode();
+            }
+
+            this.name_ = name_;
+            this.parent_ = parent_;
+            this.node_ = node_;
+        }
+
+        Tree.prototype.subTree = function (pathObj) {
+            var path = pathObj instanceof Path_1.Path ? pathObj : new Path_1.Path(pathObj);
+            var child = this,
+                next;
+
+            while ((next = path.getFront()) !== null) {
+                var childNode = util_2.safeGet(child.node_.children, next) || new TreeNode();
+                child = new Tree(next, child, childNode);
+                path = path.popFront();
+            }
+
+            return child;
+        };
+
+        Tree.prototype.getValue = function () {
+            return this.node_.value;
+        };
+
+        Tree.prototype.setValue = function (value) {
+            util_1.assert(typeof value !== 'undefined', 'Cannot set value to undefined');
+            this.node_.value = value;
+            this.updateParents_();
+        };
+
+        Tree.prototype.clear = function () {
+            this.node_.value = null;
+            this.node_.children = {};
+            this.node_.childCount = 0;
+            this.updateParents_();
+        };
+
+        Tree.prototype.hasChildren = function () {
+            return this.node_.childCount > 0;
+        };
+
+        Tree.prototype.isEmpty = function () {
+            return this.getValue() === null && !this.hasChildren();
+        };
+
+        Tree.prototype.forEachChild = function (action) {
+            var _this = this;
+
+            util_2.forEach(this.node_.children, function (child, childTree) {
+                action(new Tree(child, _this, childTree));
+            });
+        };
+
+        Tree.prototype.forEachDescendant = function (action, includeSelf, childrenFirst) {
+            if (includeSelf && !childrenFirst) action(this);
+            this.forEachChild(function (child) {
+                child.forEachDescendant(action, true, childrenFirst);
+            });
+            if (includeSelf && childrenFirst) action(this);
+        };
+
+        Tree.prototype.forEachAncestor = function (action, includeSelf) {
+            var node = includeSelf ? this : this.parent();
+
+            while (node !== null) {
+                if (action(node)) {
+                    return true;
+                }
+
+                node = node.parent();
+            }
+
+            return false;
+        };
+
+        Tree.prototype.forEachImmediateDescendantWithValue = function (action) {
+            this.forEachChild(function (child) {
+                if (child.getValue() !== null) action(child);else child.forEachImmediateDescendantWithValue(action);
+            });
+        };
+
+        Tree.prototype.path = function () {
+            return new Path_1.Path(this.parent_ === null ? this.name_ : this.parent_.path() + '/' + this.name_);
+        };
+
+        Tree.prototype.name = function () {
+            return this.name_;
+        };
+
+        Tree.prototype.parent = function () {
+            return this.parent_;
+        };
+
+        Tree.prototype.updateParents_ = function () {
+            if (this.parent_ !== null) this.parent_.updateChild_(this.name_, this);
+        };
+
+        Tree.prototype.updateChild_ = function (childName, child) {
+            var childEmpty = child.isEmpty();
+            var childExists = util_2.contains(this.node_.children, childName);
+
+            if (childEmpty && childExists) {
+                delete this.node_.children[childName];
+                this.node_.childCount--;
+                this.updateParents_();
+            } else if (!childEmpty && !childExists) {
+                this.node_.children[childName] = child.node_;
+                this.node_.childCount++;
+                this.updateParents_();
+            }
+        };
+
+        return Tree;
+    }();
+
+    exports.Tree = Tree;
+});

@@ -1,0 +1,110 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var validation_1 = require(_dependencyMap[1], "../core/util/validation");
+
+    var Path_1 = require(_dependencyMap[2], "../core/util/Path");
+
+    var PriorityIndex_1 = require(_dependencyMap[3], "../core/snap/indexes/PriorityIndex");
+
+    var DataSnapshot = function () {
+        function DataSnapshot(node_, ref_, index_) {
+            this.node_ = node_;
+            this.ref_ = ref_;
+            this.index_ = index_;
+        }
+
+        DataSnapshot.prototype.val = function () {
+            util_1.validateArgCount('DataSnapshot.val', 0, 0, arguments.length);
+            return this.node_.val();
+        };
+
+        DataSnapshot.prototype.exportVal = function () {
+            util_1.validateArgCount('DataSnapshot.exportVal', 0, 0, arguments.length);
+            return this.node_.val(true);
+        };
+
+        DataSnapshot.prototype.toJSON = function () {
+            util_1.validateArgCount('DataSnapshot.toJSON', 0, 1, arguments.length);
+            return this.exportVal();
+        };
+
+        DataSnapshot.prototype.exists = function () {
+            util_1.validateArgCount('DataSnapshot.exists', 0, 0, arguments.length);
+            return !this.node_.isEmpty();
+        };
+
+        DataSnapshot.prototype.child = function (childPathString) {
+            util_1.validateArgCount('DataSnapshot.child', 0, 1, arguments.length);
+            childPathString = String(childPathString);
+            validation_1.validatePathString('DataSnapshot.child', 1, childPathString, false);
+            var childPath = new Path_1.Path(childPathString);
+            var childRef = this.ref_.child(childPath);
+            return new DataSnapshot(this.node_.getChild(childPath), childRef, PriorityIndex_1.PRIORITY_INDEX);
+        };
+
+        DataSnapshot.prototype.hasChild = function (childPathString) {
+            util_1.validateArgCount('DataSnapshot.hasChild', 1, 1, arguments.length);
+            validation_1.validatePathString('DataSnapshot.hasChild', 1, childPathString, false);
+            var childPath = new Path_1.Path(childPathString);
+            return !this.node_.getChild(childPath).isEmpty();
+        };
+
+        DataSnapshot.prototype.getPriority = function () {
+            util_1.validateArgCount('DataSnapshot.getPriority', 0, 0, arguments.length);
+            return this.node_.getPriority().val();
+        };
+
+        DataSnapshot.prototype.forEach = function (action) {
+            var _this = this;
+
+            util_1.validateArgCount('DataSnapshot.forEach', 1, 1, arguments.length);
+            util_1.validateCallback('DataSnapshot.forEach', 1, action, false);
+            if (this.node_.isLeafNode()) return false;
+            var childrenNode = this.node_;
+            return !!childrenNode.forEachChild(this.index_, function (key, node) {
+                return action(new DataSnapshot(node, _this.ref_.child(key), PriorityIndex_1.PRIORITY_INDEX));
+            });
+        };
+
+        DataSnapshot.prototype.hasChildren = function () {
+            util_1.validateArgCount('DataSnapshot.hasChildren', 0, 0, arguments.length);
+            if (this.node_.isLeafNode()) return false;else return !this.node_.isEmpty();
+        };
+
+        Object.defineProperty(DataSnapshot.prototype, "key", {
+            get: function get() {
+                return this.ref_.getKey();
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        DataSnapshot.prototype.numChildren = function () {
+            util_1.validateArgCount('DataSnapshot.numChildren', 0, 0, arguments.length);
+            return this.node_.numChildren();
+        };
+
+        DataSnapshot.prototype.getRef = function () {
+            util_1.validateArgCount('DataSnapshot.ref', 0, 0, arguments.length);
+            return this.ref_;
+        };
+
+        Object.defineProperty(DataSnapshot.prototype, "ref", {
+            get: function get() {
+                return this.getRef();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DataSnapshot;
+    }();
+
+    exports.DataSnapshot = DataSnapshot;
+});

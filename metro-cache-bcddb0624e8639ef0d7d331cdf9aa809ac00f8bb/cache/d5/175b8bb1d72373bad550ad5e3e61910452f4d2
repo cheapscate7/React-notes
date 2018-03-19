@@ -1,0 +1,37 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function contains(obj, prop) {
+        return Object.prototype.hasOwnProperty.call(obj, prop);
+    }
+
+    exports.contains = contains;
+
+    function forEach(obj, f) {
+        for (var key in obj) {
+            if (contains(obj, key)) {
+                f(key, obj[key]);
+            }
+        }
+    }
+
+    exports.forEach = forEach;
+
+    function clone(obj) {
+        if (obj == null) {
+            return {};
+        }
+
+        var c = {};
+        forEach(obj, function (key, val) {
+            c[key] = val;
+        });
+        return c;
+    }
+
+    exports.clone = clone;
+});

@@ -1,0 +1,65 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var Index_1 = require(_dependencyMap[1], "./Index");
+
+    var Node_1 = require(_dependencyMap[2], "../Node");
+
+    var util_1 = require(_dependencyMap[3], "../../util/util");
+
+    var nodeFromJSON_1 = require(_dependencyMap[4], "../nodeFromJSON");
+
+    var ValueIndex = function (_super) {
+        tslib_1.__extends(ValueIndex, _super);
+
+        function ValueIndex() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+
+        ValueIndex.prototype.compare = function (a, b) {
+            var indexCmp = a.node.compareTo(b.node);
+
+            if (indexCmp === 0) {
+                return util_1.nameCompare(a.name, b.name);
+            } else {
+                return indexCmp;
+            }
+        };
+
+        ValueIndex.prototype.isDefinedOn = function (node) {
+            return true;
+        };
+
+        ValueIndex.prototype.indexedValueChanged = function (oldNode, newNode) {
+            return !oldNode.equals(newNode);
+        };
+
+        ValueIndex.prototype.minPost = function () {
+            return Node_1.NamedNode.MIN;
+        };
+
+        ValueIndex.prototype.maxPost = function () {
+            return Node_1.NamedNode.MAX;
+        };
+
+        ValueIndex.prototype.makePost = function (indexValue, name) {
+            var valueNode = nodeFromJSON_1.nodeFromJSON(indexValue);
+            return new Node_1.NamedNode(name, valueNode);
+        };
+
+        ValueIndex.prototype.toString = function () {
+            return '.value';
+        };
+
+        return ValueIndex;
+    }(Index_1.Index);
+
+    exports.ValueIndex = ValueIndex;
+    exports.VALUE_INDEX = new ValueIndex();
+});

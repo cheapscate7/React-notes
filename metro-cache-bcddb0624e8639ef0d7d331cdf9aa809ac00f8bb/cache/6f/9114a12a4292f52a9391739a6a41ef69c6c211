@@ -1,0 +1,480 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var ServerValues_1 = require(_dependencyMap[0], "./util/ServerValues");
+
+    var nodeFromJSON_1 = require(_dependencyMap[1], "./snap/nodeFromJSON");
+
+    var Path_1 = require(_dependencyMap[2], "./util/Path");
+
+    var SparseSnapshotTree_1 = require(_dependencyMap[3], "./SparseSnapshotTree");
+
+    var SyncTree_1 = require(_dependencyMap[4], "./SyncTree");
+
+    var SnapshotHolder_1 = require(_dependencyMap[5], "./SnapshotHolder");
+
+    var util_1 = require(_dependencyMap[6], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[7], "./util/util");
+
+    var util_3 = require(_dependencyMap[6], "@firebase/util");
+
+    var AuthTokenProvider_1 = require(_dependencyMap[8], "./AuthTokenProvider");
+
+    var StatsManager_1 = require(_dependencyMap[9], "./stats/StatsManager");
+
+    var StatsReporter_1 = require(_dependencyMap[10], "./stats/StatsReporter");
+
+    var StatsListener_1 = require(_dependencyMap[11], "./stats/StatsListener");
+
+    var EventQueue_1 = require(_dependencyMap[12], "./view/EventQueue");
+
+    var PersistentConnection_1 = require(_dependencyMap[13], "./PersistentConnection");
+
+    var ReadonlyRestClient_1 = require(_dependencyMap[14], "./ReadonlyRestClient");
+
+    var Database_1 = require(_dependencyMap[15], "../api/Database");
+
+    var INTERRUPT_REASON = 'repo_interrupt';
+
+    var Repo = function () {
+        function Repo(repoInfo_, forceRestClient, app) {
+            var _this = this;
+
+            this.repoInfo_ = repoInfo_;
+            this.app = app;
+            this.dataUpdateCount = 0;
+            this.statsListener_ = null;
+            this.eventQueue_ = new EventQueue_1.EventQueue();
+            this.nextWriteId_ = 1;
+            this.interceptServerDataCallback_ = null;
+            this.onDisconnect_ = new SparseSnapshotTree_1.SparseSnapshotTree();
+            this.persistentConnection_ = null;
+            var authTokenProvider = new AuthTokenProvider_1.AuthTokenProvider(app);
+            this.stats_ = StatsManager_1.StatsManager.getCollection(repoInfo_);
+
+            if (forceRestClient || util_2.beingCrawled()) {
+                this.server_ = new ReadonlyRestClient_1.ReadonlyRestClient(this.repoInfo_, this.onDataUpdate_.bind(this), authTokenProvider);
+                setTimeout(this.onConnectStatus_.bind(this, true), 0);
+            } else {
+                var authOverride = app.options['databaseAuthVariableOverride'];
+
+                if (typeof authOverride !== 'undefined' && authOverride !== null) {
+                    if (typeof authOverride !== 'object') {
+                        throw new Error('Only objects are supported for option databaseAuthVariableOverride');
+                    }
+
+                    try {
+                        util_1.stringify(authOverride);
+                    } catch (e) {
+                        throw new Error('Invalid authOverride provided: ' + e);
+                    }
+                }
+
+                this.persistentConnection_ = new PersistentConnection_1.PersistentConnection(this.repoInfo_, this.onDataUpdate_.bind(this), this.onConnectStatus_.bind(this), this.onServerInfoUpdate_.bind(this), authTokenProvider, authOverride);
+                this.server_ = this.persistentConnection_;
+            }
+
+            authTokenProvider.addTokenChangeListener(function (token) {
+                _this.server_.refreshAuthToken(token);
+            });
+            this.statsReporter_ = StatsManager_1.StatsManager.getOrCreateReporter(repoInfo_, function () {
+                return new StatsReporter_1.StatsReporter(_this.stats_, _this.server_);
+            });
+            this.transactions_init_();
+            this.infoData_ = new SnapshotHolder_1.SnapshotHolder();
+            this.infoSyncTree_ = new SyncTree_1.SyncTree({
+                startListening: function startListening(query, tag, currentHashFn, onComplete) {
+                    var infoEvents = [];
+
+                    var node = _this.infoData_.getNode(query.path);
+
+                    if (!node.isEmpty()) {
+                        infoEvents = _this.infoSyncTree_.applyServerOverwrite(query.path, node);
+                        setTimeout(function () {
+                            onComplete('ok');
+                        }, 0);
+                    }
+
+                    return infoEvents;
+                },
+                stopListening: function stopListening() {}
+            });
+            this.updateInfo_('connected', false);
+            this.serverSyncTree_ = new SyncTree_1.SyncTree({
+                startListening: function startListening(query, tag, currentHashFn, onComplete) {
+                    _this.server_.listen(query, currentHashFn, tag, function (status, data) {
+                        var events = onComplete(status, data);
+
+                        _this.eventQueue_.raiseEventsForChangedPath(query.path, events);
+                    });
+
+                    return [];
+                },
+                stopListening: function stopListening(query, tag) {
+                    _this.server_.unlisten(query, tag);
+                }
+            });
+        }
+
+        Repo.prototype.toString = function () {
+            return (this.repoInfo_.secure ? 'https://' : 'http://') + this.repoInfo_.host;
+        };
+
+        Repo.prototype.name = function () {
+            return this.repoInfo_.namespace;
+        };
+
+        Repo.prototype.serverTime = function () {
+            var offsetNode = this.infoData_.getNode(new Path_1.Path('.info/serverTimeOffset'));
+            var offset = offsetNode.val() || 0;
+            return new Date().getTime() + offset;
+        };
+
+        Repo.prototype.generateServerValues = function () {
+            return ServerValues_1.generateWithValues({
+                timestamp: this.serverTime()
+            });
+        };
+
+        Repo.prototype.onDataUpdate_ = function (pathString, data, isMerge, tag) {
+            this.dataUpdateCount++;
+            var path = new Path_1.Path(pathString);
+            data = this.interceptServerDataCallback_ ? this.interceptServerDataCallback_(pathString, data) : data;
+            var events = [];
+
+            if (tag) {
+                if (isMerge) {
+                    var taggedChildren = util_3.map(data, function (raw) {
+                        return nodeFromJSON_1.nodeFromJSON(raw);
+                    });
+                    events = this.serverSyncTree_.applyTaggedQueryMerge(path, taggedChildren, tag);
+                } else {
+                    var taggedSnap = nodeFromJSON_1.nodeFromJSON(data);
+                    events = this.serverSyncTree_.applyTaggedQueryOverwrite(path, taggedSnap, tag);
+                }
+            } else if (isMerge) {
+                var changedChildren = util_3.map(data, function (raw) {
+                    return nodeFromJSON_1.nodeFromJSON(raw);
+                });
+                events = this.serverSyncTree_.applyServerMerge(path, changedChildren);
+            } else {
+                var snap = nodeFromJSON_1.nodeFromJSON(data);
+                events = this.serverSyncTree_.applyServerOverwrite(path, snap);
+            }
+
+            var affectedPath = path;
+
+            if (events.length > 0) {
+                affectedPath = this.rerunTransactions_(path);
+            }
+
+            this.eventQueue_.raiseEventsForChangedPath(affectedPath, events);
+        };
+
+        Repo.prototype.interceptServerData_ = function (callback) {
+            this.interceptServerDataCallback_ = callback;
+        };
+
+        Repo.prototype.onConnectStatus_ = function (connectStatus) {
+            this.updateInfo_('connected', connectStatus);
+
+            if (connectStatus === false) {
+                this.runOnDisconnectEvents_();
+            }
+        };
+
+        Repo.prototype.onServerInfoUpdate_ = function (updates) {
+            var _this = this;
+
+            util_2.each(updates, function (value, key) {
+                _this.updateInfo_(key, value);
+            });
+        };
+
+        Repo.prototype.updateInfo_ = function (pathString, value) {
+            var path = new Path_1.Path('/.info/' + pathString);
+            var newNode = nodeFromJSON_1.nodeFromJSON(value);
+            this.infoData_.updateSnapshot(path, newNode);
+            var events = this.infoSyncTree_.applyServerOverwrite(path, newNode);
+            this.eventQueue_.raiseEventsForChangedPath(path, events);
+        };
+
+        Repo.prototype.getNextWriteId_ = function () {
+            return this.nextWriteId_++;
+        };
+
+        Repo.prototype.setWithPriority = function (path, newVal, newPriority, onComplete) {
+            var _this = this;
+
+            this.log_('set', {
+                path: path.toString(),
+                value: newVal,
+                priority: newPriority
+            });
+            var serverValues = this.generateServerValues();
+            var newNodeUnresolved = nodeFromJSON_1.nodeFromJSON(newVal, newPriority);
+            var newNode = ServerValues_1.resolveDeferredValueSnapshot(newNodeUnresolved, serverValues);
+            var writeId = this.getNextWriteId_();
+            var events = this.serverSyncTree_.applyUserOverwrite(path, newNode, writeId, true);
+            this.eventQueue_.queueEvents(events);
+            this.server_.put(path.toString(), newNodeUnresolved.val(true), function (status, errorReason) {
+                var success = status === 'ok';
+
+                if (!success) {
+                    util_2.warn('set at ' + path + ' failed: ' + status);
+                }
+
+                var clearEvents = _this.serverSyncTree_.ackUserWrite(writeId, !success);
+
+                _this.eventQueue_.raiseEventsForChangedPath(path, clearEvents);
+
+                _this.callOnCompleteCallback(onComplete, status, errorReason);
+            });
+            var affectedPath = this.abortTransactions_(path);
+            this.rerunTransactions_(affectedPath);
+            this.eventQueue_.raiseEventsForChangedPath(affectedPath, []);
+        };
+
+        Repo.prototype.update = function (path, childrenToMerge, onComplete) {
+            var _this = this;
+
+            this.log_('update', {
+                path: path.toString(),
+                value: childrenToMerge
+            });
+            var empty = true;
+            var serverValues = this.generateServerValues();
+            var changedChildren = {};
+            util_3.forEach(childrenToMerge, function (changedKey, changedValue) {
+                empty = false;
+                var newNodeUnresolved = nodeFromJSON_1.nodeFromJSON(changedValue);
+                changedChildren[changedKey] = ServerValues_1.resolveDeferredValueSnapshot(newNodeUnresolved, serverValues);
+            });
+
+            if (!empty) {
+                var writeId_1 = this.getNextWriteId_();
+                var events = this.serverSyncTree_.applyUserMerge(path, changedChildren, writeId_1);
+                this.eventQueue_.queueEvents(events);
+                this.server_.merge(path.toString(), childrenToMerge, function (status, errorReason) {
+                    var success = status === 'ok';
+
+                    if (!success) {
+                        util_2.warn('update at ' + path + ' failed: ' + status);
+                    }
+
+                    var clearEvents = _this.serverSyncTree_.ackUserWrite(writeId_1, !success);
+
+                    var affectedPath = clearEvents.length > 0 ? _this.rerunTransactions_(path) : path;
+
+                    _this.eventQueue_.raiseEventsForChangedPath(affectedPath, clearEvents);
+
+                    _this.callOnCompleteCallback(onComplete, status, errorReason);
+                });
+                util_3.forEach(childrenToMerge, function (changedPath) {
+                    var affectedPath = _this.abortTransactions_(path.child(changedPath));
+
+                    _this.rerunTransactions_(affectedPath);
+                });
+                this.eventQueue_.raiseEventsForChangedPath(path, []);
+            } else {
+                util_2.log("update() called with empty data.  Don't do anything.");
+                this.callOnCompleteCallback(onComplete, 'ok');
+            }
+        };
+
+        Repo.prototype.runOnDisconnectEvents_ = function () {
+            var _this = this;
+
+            this.log_('onDisconnectEvents');
+            var serverValues = this.generateServerValues();
+            var resolvedOnDisconnectTree = ServerValues_1.resolveDeferredValueTree(this.onDisconnect_, serverValues);
+            var events = [];
+            resolvedOnDisconnectTree.forEachTree(Path_1.Path.Empty, function (path, snap) {
+                events = events.concat(_this.serverSyncTree_.applyServerOverwrite(path, snap));
+
+                var affectedPath = _this.abortTransactions_(path);
+
+                _this.rerunTransactions_(affectedPath);
+            });
+            this.onDisconnect_ = new SparseSnapshotTree_1.SparseSnapshotTree();
+            this.eventQueue_.raiseEventsForChangedPath(Path_1.Path.Empty, events);
+        };
+
+        Repo.prototype.onDisconnectCancel = function (path, onComplete) {
+            var _this = this;
+
+            this.server_.onDisconnectCancel(path.toString(), function (status, errorReason) {
+                if (status === 'ok') {
+                    _this.onDisconnect_.forget(path);
+                }
+
+                _this.callOnCompleteCallback(onComplete, status, errorReason);
+            });
+        };
+
+        Repo.prototype.onDisconnectSet = function (path, value, onComplete) {
+            var _this = this;
+
+            var newNode = nodeFromJSON_1.nodeFromJSON(value);
+            this.server_.onDisconnectPut(path.toString(), newNode.val(true), function (status, errorReason) {
+                if (status === 'ok') {
+                    _this.onDisconnect_.remember(path, newNode);
+                }
+
+                _this.callOnCompleteCallback(onComplete, status, errorReason);
+            });
+        };
+
+        Repo.prototype.onDisconnectSetWithPriority = function (path, value, priority, onComplete) {
+            var _this = this;
+
+            var newNode = nodeFromJSON_1.nodeFromJSON(value, priority);
+            this.server_.onDisconnectPut(path.toString(), newNode.val(true), function (status, errorReason) {
+                if (status === 'ok') {
+                    _this.onDisconnect_.remember(path, newNode);
+                }
+
+                _this.callOnCompleteCallback(onComplete, status, errorReason);
+            });
+        };
+
+        Repo.prototype.onDisconnectUpdate = function (path, childrenToMerge, onComplete) {
+            var _this = this;
+
+            if (util_3.isEmpty(childrenToMerge)) {
+                util_2.log("onDisconnect().update() called with empty data.  Don't do anything.");
+                this.callOnCompleteCallback(onComplete, 'ok');
+                return;
+            }
+
+            this.server_.onDisconnectMerge(path.toString(), childrenToMerge, function (status, errorReason) {
+                if (status === 'ok') {
+                    util_3.forEach(childrenToMerge, function (childName, childNode) {
+                        var newChildNode = nodeFromJSON_1.nodeFromJSON(childNode);
+
+                        _this.onDisconnect_.remember(path.child(childName), newChildNode);
+                    });
+                }
+
+                _this.callOnCompleteCallback(onComplete, status, errorReason);
+            });
+        };
+
+        Repo.prototype.addEventCallbackForQuery = function (query, eventRegistration) {
+            var events;
+
+            if (query.path.getFront() === '.info') {
+                events = this.infoSyncTree_.addEventRegistration(query, eventRegistration);
+            } else {
+                events = this.serverSyncTree_.addEventRegistration(query, eventRegistration);
+            }
+
+            this.eventQueue_.raiseEventsAtPath(query.path, events);
+        };
+
+        Repo.prototype.removeEventCallbackForQuery = function (query, eventRegistration) {
+            var events;
+
+            if (query.path.getFront() === '.info') {
+                events = this.infoSyncTree_.removeEventRegistration(query, eventRegistration);
+            } else {
+                events = this.serverSyncTree_.removeEventRegistration(query, eventRegistration);
+            }
+
+            this.eventQueue_.raiseEventsAtPath(query.path, events);
+        };
+
+        Repo.prototype.interrupt = function () {
+            if (this.persistentConnection_) {
+                this.persistentConnection_.interrupt(INTERRUPT_REASON);
+            }
+        };
+
+        Repo.prototype.resume = function () {
+            if (this.persistentConnection_) {
+                this.persistentConnection_.resume(INTERRUPT_REASON);
+            }
+        };
+
+        Repo.prototype.stats = function (showDelta) {
+            if (showDelta === void 0) {
+                showDelta = false;
+            }
+
+            if (typeof console === 'undefined') return;
+            var stats;
+
+            if (showDelta) {
+                if (!this.statsListener_) this.statsListener_ = new StatsListener_1.StatsListener(this.stats_);
+                stats = this.statsListener_.get();
+            } else {
+                stats = this.stats_.get();
+            }
+
+            var longestName = Object.keys(stats).reduce(function (previousValue, currentValue) {
+                return Math.max(currentValue.length, previousValue);
+            }, 0);
+            util_3.forEach(stats, function (stat, value) {
+                for (var i = stat.length; i < longestName + 2; i++) {
+                    stat += ' ';
+                }
+
+                console.log(stat + value);
+            });
+        };
+
+        Repo.prototype.statsIncrementCounter = function (metric) {
+            this.stats_.incrementCounter(metric);
+            this.statsReporter_.includeStat(metric);
+        };
+
+        Repo.prototype.log_ = function () {
+            var var_args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                var_args[_i] = arguments[_i];
+            }
+
+            var prefix = '';
+
+            if (this.persistentConnection_) {
+                prefix = this.persistentConnection_.id + ':';
+            }
+
+            util_2.log.apply(void 0, [prefix].concat(var_args));
+        };
+
+        Repo.prototype.callOnCompleteCallback = function (callback, status, errorReason) {
+            if (callback) {
+                util_2.exceptionGuard(function () {
+                    if (status == 'ok') {
+                        callback(null);
+                    } else {
+                        var code = (status || 'error').toUpperCase();
+                        var message = code;
+                        if (errorReason) message += ': ' + errorReason;
+                        var error = new Error(message);
+                        error.code = code;
+                        callback(error);
+                    }
+                });
+            }
+        };
+
+        Object.defineProperty(Repo.prototype, "database", {
+            get: function get() {
+                return this.__database || (this.__database = new Database_1.Database(this));
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Repo;
+    }();
+
+    exports.Repo = Repo;
+});

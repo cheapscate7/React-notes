@@ -1,0 +1,68 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var BrowserPollConnection_1 = require(_dependencyMap[0], "./BrowserPollConnection");
+
+    var WebSocketConnection_1 = require(_dependencyMap[1], "./WebSocketConnection");
+
+    var util_1 = require(_dependencyMap[2], "../core/util/util");
+
+    var TransportManager = function () {
+        function TransportManager(repoInfo) {
+            this.initTransports_(repoInfo);
+        }
+
+        Object.defineProperty(TransportManager, "ALL_TRANSPORTS", {
+            get: function get() {
+                return [BrowserPollConnection_1.BrowserPollConnection, WebSocketConnection_1.WebSocketConnection];
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        TransportManager.prototype.initTransports_ = function (repoInfo) {
+            var isWebSocketsAvailable = WebSocketConnection_1.WebSocketConnection && WebSocketConnection_1.WebSocketConnection['isAvailable']();
+            var isSkipPollConnection = isWebSocketsAvailable && !WebSocketConnection_1.WebSocketConnection.previouslyFailed();
+
+            if (repoInfo.webSocketOnly) {
+                if (!isWebSocketsAvailable) util_1.warn("wss:// URL used, but browser isn't known to support websockets.  Trying anyway.");
+                isSkipPollConnection = true;
+            }
+
+            if (isSkipPollConnection) {
+                this.transports_ = [WebSocketConnection_1.WebSocketConnection];
+            } else {
+                var transports_1 = this.transports_ = [];
+                util_1.each(TransportManager.ALL_TRANSPORTS, function (i, transport) {
+                    if (transport && transport['isAvailable']()) {
+                        transports_1.push(transport);
+                    }
+                });
+            }
+        };
+
+        TransportManager.prototype.initialTransport = function () {
+            if (this.transports_.length > 0) {
+                return this.transports_[0];
+            } else {
+                throw new Error('No transports available');
+            }
+        };
+
+        TransportManager.prototype.upgradeTransport = function () {
+            if (this.transports_.length > 1) {
+                return this.transports_[1];
+            } else {
+                return null;
+            }
+        };
+
+        return TransportManager;
+    }();
+
+    exports.TransportManager = TransportManager;
+});

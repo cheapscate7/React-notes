@@ -1,0 +1,50 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var DOMStorageWrapper = function () {
+        function DOMStorageWrapper(domStorage_) {
+            this.domStorage_ = domStorage_;
+            this.prefix_ = 'firebase:';
+        }
+
+        DOMStorageWrapper.prototype.set = function (key, value) {
+            if (value == null) {
+                this.domStorage_.removeItem(this.prefixedName_(key));
+            } else {
+                this.domStorage_.setItem(this.prefixedName_(key), util_1.stringify(value));
+            }
+        };
+
+        DOMStorageWrapper.prototype.get = function (key) {
+            var storedVal = this.domStorage_.getItem(this.prefixedName_(key));
+
+            if (storedVal == null) {
+                return null;
+            } else {
+                return util_1.jsonEval(storedVal);
+            }
+        };
+
+        DOMStorageWrapper.prototype.remove = function (key) {
+            this.domStorage_.removeItem(this.prefixedName_(key));
+        };
+
+        DOMStorageWrapper.prototype.prefixedName_ = function (name) {
+            return this.prefix_ + name;
+        };
+
+        DOMStorageWrapper.prototype.toString = function () {
+            return this.domStorage_.toString();
+        };
+
+        return DOMStorageWrapper;
+    }();
+
+    exports.DOMStorageWrapper = DOMStorageWrapper;
+});

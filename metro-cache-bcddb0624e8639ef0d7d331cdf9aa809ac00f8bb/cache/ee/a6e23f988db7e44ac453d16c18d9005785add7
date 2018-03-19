@@ -1,0 +1,77 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    exports.validateArgCount = function (fnName, minCount, maxCount, argCount) {
+        var argError;
+
+        if (argCount < minCount) {
+            argError = 'at least ' + minCount;
+        } else if (argCount > maxCount) {
+            argError = maxCount === 0 ? 'none' : 'no more than ' + maxCount;
+        }
+
+        if (argError) {
+            var error = fnName + ' failed: Was called with ' + argCount + (argCount === 1 ? ' argument.' : ' arguments.') + ' Expects ' + argError + '.';
+            throw new Error(error);
+        }
+    };
+
+    function errorPrefix(fnName, argumentNumber, optional) {
+        var argName = '';
+
+        switch (argumentNumber) {
+            case 1:
+                argName = optional ? 'first' : 'First';
+                break;
+
+            case 2:
+                argName = optional ? 'second' : 'Second';
+                break;
+
+            case 3:
+                argName = optional ? 'third' : 'Third';
+                break;
+
+            case 4:
+                argName = optional ? 'fourth' : 'Fourth';
+                break;
+
+            default:
+                throw new Error('errorPrefix called with argumentNumber > 4.  Need to update it?');
+        }
+
+        var error = fnName + ' failed: ';
+        error += argName + ' argument ';
+        return error;
+    }
+
+    exports.errorPrefix = errorPrefix;
+
+    function validateNamespace(fnName, argumentNumber, namespace, optional) {
+        if (optional && !namespace) return;
+
+        if (typeof namespace !== 'string') {
+            throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid firebase namespace.');
+        }
+    }
+
+    exports.validateNamespace = validateNamespace;
+
+    function validateCallback(fnName, argumentNumber, callback, optional) {
+        if (optional && !callback) return;
+        if (typeof callback !== 'function') throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid function.');
+    }
+
+    exports.validateCallback = validateCallback;
+
+    function validateContextObject(fnName, argumentNumber, context, optional) {
+        if (optional && !context) return;
+        if (typeof context !== 'object' || context === null) throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid context object.');
+    }
+
+    exports.validateContextObject = validateContextObject;
+});

@@ -1,0 +1,72 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var Index_1 = require(_dependencyMap[1], "./Index");
+
+    var Node_1 = require(_dependencyMap[2], "../Node");
+
+    var util_1 = require(_dependencyMap[3], "../../util/util");
+
+    var util_2 = require(_dependencyMap[4], "@firebase/util");
+
+    var __EMPTY_NODE;
+
+    var KeyIndex = function (_super) {
+        tslib_1.__extends(KeyIndex, _super);
+
+        function KeyIndex() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+
+        Object.defineProperty(KeyIndex, "__EMPTY_NODE", {
+            get: function get() {
+                return __EMPTY_NODE;
+            },
+            set: function set(val) {
+                __EMPTY_NODE = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        KeyIndex.prototype.compare = function (a, b) {
+            return util_1.nameCompare(a.name, b.name);
+        };
+
+        KeyIndex.prototype.isDefinedOn = function (node) {
+            throw util_2.assertionError('KeyIndex.isDefinedOn not expected to be called.');
+        };
+
+        KeyIndex.prototype.indexedValueChanged = function (oldNode, newNode) {
+            return false;
+        };
+
+        KeyIndex.prototype.minPost = function () {
+            return Node_1.NamedNode.MIN;
+        };
+
+        KeyIndex.prototype.maxPost = function () {
+            return new Node_1.NamedNode(util_1.MAX_NAME, __EMPTY_NODE);
+        };
+
+        KeyIndex.prototype.makePost = function (indexValue, name) {
+            util_2.assert(typeof indexValue === 'string', 'KeyIndex indexValue must always be a string.');
+            return new Node_1.NamedNode(indexValue, __EMPTY_NODE);
+        };
+
+        KeyIndex.prototype.toString = function () {
+            return '.key';
+        };
+
+        return KeyIndex;
+    }(Index_1.Index);
+
+    exports.KeyIndex = KeyIndex;
+    exports.KEY_INDEX = new KeyIndex();
+});

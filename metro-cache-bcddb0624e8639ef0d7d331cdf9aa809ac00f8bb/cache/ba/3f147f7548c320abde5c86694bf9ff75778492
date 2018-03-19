@@ -1,0 +1,380 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[0], "@firebase/util");
+
+    var Path_1 = require(_dependencyMap[1], "./util/Path");
+
+    var CompoundWrite_1 = require(_dependencyMap[2], "./CompoundWrite");
+
+    var PriorityIndex_1 = require(_dependencyMap[3], "./snap/indexes/PriorityIndex");
+
+    var ChildrenNode_1 = require(_dependencyMap[4], "./snap/ChildrenNode");
+
+    var WriteTree = function () {
+        function WriteTree() {
+            this.visibleWrites_ = CompoundWrite_1.CompoundWrite.Empty;
+            this.allWrites_ = [];
+            this.lastWriteId_ = -1;
+        }
+
+        WriteTree.prototype.childWrites = function (path) {
+            return new WriteTreeRef(path, this);
+        };
+
+        WriteTree.prototype.addOverwrite = function (path, snap, writeId, visible) {
+            util_2.assert(writeId > this.lastWriteId_, 'Stacking an older write on top of newer ones');
+
+            if (visible === undefined) {
+                visible = true;
+            }
+
+            this.allWrites_.push({
+                path: path,
+                snap: snap,
+                writeId: writeId,
+                visible: visible
+            });
+
+            if (visible) {
+                this.visibleWrites_ = this.visibleWrites_.addWrite(path, snap);
+            }
+
+            this.lastWriteId_ = writeId;
+        };
+
+        WriteTree.prototype.addMerge = function (path, changedChildren, writeId) {
+            util_2.assert(writeId > this.lastWriteId_, 'Stacking an older merge on top of newer ones');
+            this.allWrites_.push({
+                path: path,
+                children: changedChildren,
+                writeId: writeId,
+                visible: true
+            });
+            this.visibleWrites_ = this.visibleWrites_.addWrites(path, changedChildren);
+            this.lastWriteId_ = writeId;
+        };
+
+        WriteTree.prototype.getWrite = function (writeId) {
+            for (var i = 0; i < this.allWrites_.length; i++) {
+                var record = this.allWrites_[i];
+
+                if (record.writeId === writeId) {
+                    return record;
+                }
+            }
+
+            return null;
+        };
+
+        WriteTree.prototype.removeWrite = function (writeId) {
+            var _this = this;
+
+            var idx = this.allWrites_.findIndex(function (s) {
+                return s.writeId === writeId;
+            });
+            util_2.assert(idx >= 0, 'removeWrite called with nonexistent writeId.');
+            var writeToRemove = this.allWrites_[idx];
+            this.allWrites_.splice(idx, 1);
+            var removedWriteWasVisible = writeToRemove.visible;
+            var removedWriteOverlapsWithOtherWrites = false;
+            var i = this.allWrites_.length - 1;
+
+            while (removedWriteWasVisible && i >= 0) {
+                var currentWrite = this.allWrites_[i];
+
+                if (currentWrite.visible) {
+                    if (i >= idx && this.recordContainsPath_(currentWrite, writeToRemove.path)) {
+                        removedWriteWasVisible = false;
+                    } else if (writeToRemove.path.contains(currentWrite.path)) {
+                        removedWriteOverlapsWithOtherWrites = true;
+                    }
+                }
+
+                i--;
+            }
+
+            if (!removedWriteWasVisible) {
+                return false;
+            } else if (removedWriteOverlapsWithOtherWrites) {
+                this.resetTree_();
+                return true;
+            } else {
+                if (writeToRemove.snap) {
+                    this.visibleWrites_ = this.visibleWrites_.removeWrite(writeToRemove.path);
+                } else {
+                    var children = writeToRemove.children;
+                    util_1.forEach(children, function (childName) {
+                        _this.visibleWrites_ = _this.visibleWrites_.removeWrite(writeToRemove.path.child(childName));
+                    });
+                }
+
+                return true;
+            }
+        };
+
+        WriteTree.prototype.getCompleteWriteData = function (path) {
+            return this.visibleWrites_.getCompleteNode(path);
+        };
+
+        WriteTree.prototype.calcCompleteEventCache = function (treePath, completeServerCache, writeIdsToExclude, includeHiddenWrites) {
+            if (!writeIdsToExclude && !includeHiddenWrites) {
+                var shadowingNode = this.visibleWrites_.getCompleteNode(treePath);
+
+                if (shadowingNode != null) {
+                    return shadowingNode;
+                } else {
+                    var subMerge = this.visibleWrites_.childCompoundWrite(treePath);
+
+                    if (subMerge.isEmpty()) {
+                        return completeServerCache;
+                    } else if (completeServerCache == null && !subMerge.hasCompleteWrite(Path_1.Path.Empty)) {
+                        return null;
+                    } else {
+                        var layeredCache = completeServerCache || ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+                        return subMerge.apply(layeredCache);
+                    }
+                }
+            } else {
+                var merge = this.visibleWrites_.childCompoundWrite(treePath);
+
+                if (!includeHiddenWrites && merge.isEmpty()) {
+                    return completeServerCache;
+                } else {
+                    if (!includeHiddenWrites && completeServerCache == null && !merge.hasCompleteWrite(Path_1.Path.Empty)) {
+                        return null;
+                    } else {
+                        var filter = function filter(write) {
+                            return (write.visible || includeHiddenWrites) && (!writeIdsToExclude || !~writeIdsToExclude.indexOf(write.writeId)) && (write.path.contains(treePath) || treePath.contains(write.path));
+                        };
+
+                        var mergeAtPath = WriteTree.layerTree_(this.allWrites_, filter, treePath);
+                        var layeredCache = completeServerCache || ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+                        return mergeAtPath.apply(layeredCache);
+                    }
+                }
+            }
+        };
+
+        WriteTree.prototype.calcCompleteEventChildren = function (treePath, completeServerChildren) {
+            var completeChildren = ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+            var topLevelSet = this.visibleWrites_.getCompleteNode(treePath);
+
+            if (topLevelSet) {
+                if (!topLevelSet.isLeafNode()) {
+                    topLevelSet.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (childName, childSnap) {
+                        completeChildren = completeChildren.updateImmediateChild(childName, childSnap);
+                    });
+                }
+
+                return completeChildren;
+            } else if (completeServerChildren) {
+                var merge_1 = this.visibleWrites_.childCompoundWrite(treePath);
+                completeServerChildren.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (childName, childNode) {
+                    var node = merge_1.childCompoundWrite(new Path_1.Path(childName)).apply(childNode);
+                    completeChildren = completeChildren.updateImmediateChild(childName, node);
+                });
+                merge_1.getCompleteChildren().forEach(function (namedNode) {
+                    completeChildren = completeChildren.updateImmediateChild(namedNode.name, namedNode.node);
+                });
+                return completeChildren;
+            } else {
+                var merge = this.visibleWrites_.childCompoundWrite(treePath);
+                merge.getCompleteChildren().forEach(function (namedNode) {
+                    completeChildren = completeChildren.updateImmediateChild(namedNode.name, namedNode.node);
+                });
+                return completeChildren;
+            }
+        };
+
+        WriteTree.prototype.calcEventCacheAfterServerOverwrite = function (treePath, childPath, existingEventSnap, existingServerSnap) {
+            util_2.assert(existingEventSnap || existingServerSnap, 'Either existingEventSnap or existingServerSnap must exist');
+            var path = treePath.child(childPath);
+
+            if (this.visibleWrites_.hasCompleteWrite(path)) {
+                return null;
+            } else {
+                var childMerge = this.visibleWrites_.childCompoundWrite(path);
+
+                if (childMerge.isEmpty()) {
+                    return existingServerSnap.getChild(childPath);
+                } else {
+                    return childMerge.apply(existingServerSnap.getChild(childPath));
+                }
+            }
+        };
+
+        WriteTree.prototype.calcCompleteChild = function (treePath, childKey, existingServerSnap) {
+            var path = treePath.child(childKey);
+            var shadowingNode = this.visibleWrites_.getCompleteNode(path);
+
+            if (shadowingNode != null) {
+                return shadowingNode;
+            } else {
+                if (existingServerSnap.isCompleteForChild(childKey)) {
+                    var childMerge = this.visibleWrites_.childCompoundWrite(path);
+                    return childMerge.apply(existingServerSnap.getNode().getImmediateChild(childKey));
+                } else {
+                    return null;
+                }
+            }
+        };
+
+        WriteTree.prototype.shadowingWrite = function (path) {
+            return this.visibleWrites_.getCompleteNode(path);
+        };
+
+        WriteTree.prototype.calcIndexedSlice = function (treePath, completeServerData, startPost, count, reverse, index) {
+            var toIterate;
+            var merge = this.visibleWrites_.childCompoundWrite(treePath);
+            var shadowingNode = merge.getCompleteNode(Path_1.Path.Empty);
+
+            if (shadowingNode != null) {
+                toIterate = shadowingNode;
+            } else if (completeServerData != null) {
+                toIterate = merge.apply(completeServerData);
+            } else {
+                return [];
+            }
+
+            toIterate = toIterate.withIndex(index);
+
+            if (!toIterate.isEmpty() && !toIterate.isLeafNode()) {
+                var nodes = [];
+                var cmp = index.getCompare();
+                var iter = reverse ? toIterate.getReverseIteratorFrom(startPost, index) : toIterate.getIteratorFrom(startPost, index);
+                var next = iter.getNext();
+
+                while (next && nodes.length < count) {
+                    if (cmp(next, startPost) !== 0) {
+                        nodes.push(next);
+                    }
+
+                    next = iter.getNext();
+                }
+
+                return nodes;
+            } else {
+                return [];
+            }
+        };
+
+        WriteTree.prototype.recordContainsPath_ = function (writeRecord, path) {
+            if (writeRecord.snap) {
+                return writeRecord.path.contains(path);
+            } else {
+                return !!util_1.findKey(writeRecord.children, function (childSnap, childName) {
+                    return writeRecord.path.child(childName).contains(path);
+                });
+            }
+        };
+
+        WriteTree.prototype.resetTree_ = function () {
+            this.visibleWrites_ = WriteTree.layerTree_(this.allWrites_, WriteTree.DefaultFilter_, Path_1.Path.Empty);
+
+            if (this.allWrites_.length > 0) {
+                this.lastWriteId_ = this.allWrites_[this.allWrites_.length - 1].writeId;
+            } else {
+                this.lastWriteId_ = -1;
+            }
+        };
+
+        WriteTree.DefaultFilter_ = function (write) {
+            return write.visible;
+        };
+
+        WriteTree.layerTree_ = function (writes, filter, treeRoot) {
+            var compoundWrite = CompoundWrite_1.CompoundWrite.Empty;
+
+            for (var i = 0; i < writes.length; ++i) {
+                var write = writes[i];
+
+                if (filter(write)) {
+                    var writePath = write.path;
+                    var relativePath = void 0;
+
+                    if (write.snap) {
+                        if (treeRoot.contains(writePath)) {
+                            relativePath = Path_1.Path.relativePath(treeRoot, writePath);
+                            compoundWrite = compoundWrite.addWrite(relativePath, write.snap);
+                        } else if (writePath.contains(treeRoot)) {
+                            relativePath = Path_1.Path.relativePath(writePath, treeRoot);
+                            compoundWrite = compoundWrite.addWrite(Path_1.Path.Empty, write.snap.getChild(relativePath));
+                        } else {}
+                    } else if (write.children) {
+                        if (treeRoot.contains(writePath)) {
+                            relativePath = Path_1.Path.relativePath(treeRoot, writePath);
+                            compoundWrite = compoundWrite.addWrites(relativePath, write.children);
+                        } else if (writePath.contains(treeRoot)) {
+                            relativePath = Path_1.Path.relativePath(writePath, treeRoot);
+
+                            if (relativePath.isEmpty()) {
+                                compoundWrite = compoundWrite.addWrites(Path_1.Path.Empty, write.children);
+                            } else {
+                                var child = util_1.safeGet(write.children, relativePath.getFront());
+
+                                if (child) {
+                                    var deepNode = child.getChild(relativePath.popFront());
+                                    compoundWrite = compoundWrite.addWrite(Path_1.Path.Empty, deepNode);
+                                }
+                            }
+                        } else {}
+                    } else {
+                        throw util_2.assertionError('WriteRecord should have .snap or .children');
+                    }
+                }
+            }
+
+            return compoundWrite;
+        };
+
+        return WriteTree;
+    }();
+
+    exports.WriteTree = WriteTree;
+
+    var WriteTreeRef = function () {
+        function WriteTreeRef(path, writeTree) {
+            this.treePath_ = path;
+            this.writeTree_ = writeTree;
+        }
+
+        WriteTreeRef.prototype.calcCompleteEventCache = function (completeServerCache, writeIdsToExclude, includeHiddenWrites) {
+            return this.writeTree_.calcCompleteEventCache(this.treePath_, completeServerCache, writeIdsToExclude, includeHiddenWrites);
+        };
+
+        WriteTreeRef.prototype.calcCompleteEventChildren = function (completeServerChildren) {
+            return this.writeTree_.calcCompleteEventChildren(this.treePath_, completeServerChildren);
+        };
+
+        WriteTreeRef.prototype.calcEventCacheAfterServerOverwrite = function (path, existingEventSnap, existingServerSnap) {
+            return this.writeTree_.calcEventCacheAfterServerOverwrite(this.treePath_, path, existingEventSnap, existingServerSnap);
+        };
+
+        WriteTreeRef.prototype.shadowingWrite = function (path) {
+            return this.writeTree_.shadowingWrite(this.treePath_.child(path));
+        };
+
+        WriteTreeRef.prototype.calcIndexedSlice = function (completeServerData, startPost, count, reverse, index) {
+            return this.writeTree_.calcIndexedSlice(this.treePath_, completeServerData, startPost, count, reverse, index);
+        };
+
+        WriteTreeRef.prototype.calcCompleteChild = function (childKey, existingServerCache) {
+            return this.writeTree_.calcCompleteChild(this.treePath_, childKey, existingServerCache);
+        };
+
+        WriteTreeRef.prototype.child = function (childName) {
+            return new WriteTreeRef(this.treePath_.child(childName), this.writeTree_);
+        };
+
+        return WriteTreeRef;
+    }();
+
+    exports.WriteTreeRef = WriteTreeRef;
+});

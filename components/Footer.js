@@ -1,4 +1,4 @@
-import { StackNavigator } from 'react-navigation';
+import { withNavigation } from 'react-navigation';
 
 import React from 'react';
 import { StyleSheet, Text, Button, View } from 'react-native';
@@ -37,4 +37,4 @@ const footerStyles = StyleSheet.create({
   },
 });
 
-export default Footer
+export default withNavigation(Footer)

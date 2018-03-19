@@ -1,0 +1,442 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var Reference_1 = require(_dependencyMap[1], "../api/Reference");
+
+    var DataSnapshot_1 = require(_dependencyMap[2], "../api/DataSnapshot");
+
+    var Path_1 = require(_dependencyMap[3], "./util/Path");
+
+    var Tree_1 = require(_dependencyMap[4], "./util/Tree");
+
+    var PriorityIndex_1 = require(_dependencyMap[5], "./snap/indexes/PriorityIndex");
+
+    var util_2 = require(_dependencyMap[6], "./util/util");
+
+    var ServerValues_1 = require(_dependencyMap[7], "./util/ServerValues");
+
+    var validation_1 = require(_dependencyMap[8], "./util/validation");
+
+    var util_3 = require(_dependencyMap[0], "@firebase/util");
+
+    var nodeFromJSON_1 = require(_dependencyMap[9], "./snap/nodeFromJSON");
+
+    var ChildrenNode_1 = require(_dependencyMap[10], "./snap/ChildrenNode");
+
+    var Repo_1 = require(_dependencyMap[11], "./Repo");
+
+    var TransactionStatus;
+
+    (function (TransactionStatus) {
+        TransactionStatus[TransactionStatus["RUN"] = 0] = "RUN";
+        TransactionStatus[TransactionStatus["SENT"] = 1] = "SENT";
+        TransactionStatus[TransactionStatus["COMPLETED"] = 2] = "COMPLETED";
+        TransactionStatus[TransactionStatus["SENT_NEEDS_ABORT"] = 3] = "SENT_NEEDS_ABORT";
+        TransactionStatus[TransactionStatus["NEEDS_ABORT"] = 4] = "NEEDS_ABORT";
+    })(TransactionStatus = exports.TransactionStatus || (exports.TransactionStatus = {}));
+
+    Repo_1.Repo.MAX_TRANSACTION_RETRIES_ = 25;
+
+    Repo_1.Repo.prototype.transactions_init_ = function () {
+        this.transactionQueueTree_ = new Tree_1.Tree();
+    };
+
+    Repo_1.Repo.prototype.startTransaction = function (path, transactionUpdate, onComplete, applyLocally) {
+        this.log_('transaction on ' + path);
+
+        var valueCallback = function valueCallback() {};
+
+        var watchRef = new Reference_1.Reference(this, path);
+        watchRef.on('value', valueCallback);
+
+        var unwatcher = function unwatcher() {
+            watchRef.off('value', valueCallback);
+        };
+
+        var transaction = {
+            path: path,
+            update: transactionUpdate,
+            onComplete: onComplete,
+            status: null,
+            order: util_2.LUIDGenerator(),
+            applyLocally: applyLocally,
+            retryCount: 0,
+            unwatcher: unwatcher,
+            abortReason: null,
+            currentWriteId: null,
+            currentInputSnapshot: null,
+            currentOutputSnapshotRaw: null,
+            currentOutputSnapshotResolved: null
+        };
+        var currentState = this.getLatestState_(path);
+        transaction.currentInputSnapshot = currentState;
+        var newVal = transaction.update(currentState.val());
+
+        if (newVal === undefined) {
+            transaction.unwatcher();
+            transaction.currentOutputSnapshotRaw = null;
+            transaction.currentOutputSnapshotResolved = null;
+
+            if (transaction.onComplete) {
+                var snapshot = new DataSnapshot_1.DataSnapshot(transaction.currentInputSnapshot, new Reference_1.Reference(this, transaction.path), PriorityIndex_1.PRIORITY_INDEX);
+                transaction.onComplete(null, false, snapshot);
+            }
+        } else {
+            validation_1.validateFirebaseData('transaction failed: Data returned ', newVal, transaction.path);
+            transaction.status = TransactionStatus.RUN;
+            var queueNode = this.transactionQueueTree_.subTree(path);
+            var nodeQueue = queueNode.getValue() || [];
+            nodeQueue.push(transaction);
+            queueNode.setValue(nodeQueue);
+            var priorityForNode = void 0;
+
+            if (typeof newVal === 'object' && newVal !== null && util_3.contains(newVal, '.priority')) {
+                priorityForNode = util_3.safeGet(newVal, '.priority');
+                util_1.assert(validation_1.isValidPriority(priorityForNode), 'Invalid priority returned by transaction. ' + 'Priority must be a valid string, finite number, server value, or null.');
+            } else {
+                var currentNode = this.serverSyncTree_.calcCompleteEventCache(path) || ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+                priorityForNode = currentNode.getPriority().val();
+            }
+
+            priorityForNode = priorityForNode;
+            var serverValues = this.generateServerValues();
+            var newNodeUnresolved = nodeFromJSON_1.nodeFromJSON(newVal, priorityForNode);
+            var newNode = ServerValues_1.resolveDeferredValueSnapshot(newNodeUnresolved, serverValues);
+            transaction.currentOutputSnapshotRaw = newNodeUnresolved;
+            transaction.currentOutputSnapshotResolved = newNode;
+            transaction.currentWriteId = this.getNextWriteId_();
+            var events = this.serverSyncTree_.applyUserOverwrite(path, newNode, transaction.currentWriteId, transaction.applyLocally);
+            this.eventQueue_.raiseEventsForChangedPath(path, events);
+            this.sendReadyTransactions_();
+        }
+    };
+
+    Repo_1.Repo.prototype.getLatestState_ = function (path, excludeSets) {
+        return this.serverSyncTree_.calcCompleteEventCache(path, excludeSets) || ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+    };
+
+    Repo_1.Repo.prototype.sendReadyTransactions_ = function (node) {
+        var _this = this;
+
+        if (node === void 0) {
+            node = this.transactionQueueTree_;
+        }
+
+        if (!node) {
+            this.pruneCompletedTransactionsBelowNode_(node);
+        }
+
+        if (node.getValue() !== null) {
+            var queue = this.buildTransactionQueue_(node);
+            util_1.assert(queue.length > 0, 'Sending zero length transaction queue');
+            var allRun = queue.every(function (transaction) {
+                return transaction.status === TransactionStatus.RUN;
+            });
+
+            if (allRun) {
+                this.sendTransactionQueue_(node.path(), queue);
+            }
+        } else if (node.hasChildren()) {
+            node.forEachChild(function (childNode) {
+                _this.sendReadyTransactions_(childNode);
+            });
+        }
+    };
+
+    Repo_1.Repo.prototype.sendTransactionQueue_ = function (path, queue) {
+        var _this = this;
+
+        var setsToIgnore = queue.map(function (txn) {
+            return txn.currentWriteId;
+        });
+        var latestState = this.getLatestState_(path, setsToIgnore);
+        var snapToSend = latestState;
+        var latestHash = latestState.hash();
+
+        for (var i = 0; i < queue.length; i++) {
+            var txn = queue[i];
+            util_1.assert(txn.status === TransactionStatus.RUN, 'tryToSendTransactionQueue_: items in queue should all be run.');
+            txn.status = TransactionStatus.SENT;
+            txn.retryCount++;
+            var relativePath = Path_1.Path.relativePath(path, txn.path);
+            snapToSend = snapToSend.updateChild(relativePath, txn.currentOutputSnapshotRaw);
+        }
+
+        var dataToSend = snapToSend.val(true);
+        var pathToSend = path;
+        this.server_.put(pathToSend.toString(), dataToSend, function (status) {
+            _this.log_('transaction put response', {
+                path: pathToSend.toString(),
+                status: status
+            });
+
+            var events = [];
+
+            if (status === 'ok') {
+                var callbacks = [];
+
+                for (var i = 0; i < queue.length; i++) {
+                    queue[i].status = TransactionStatus.COMPLETED;
+                    events = events.concat(_this.serverSyncTree_.ackUserWrite(queue[i].currentWriteId));
+
+                    if (queue[i].onComplete) {
+                        var node = queue[i].currentOutputSnapshotResolved;
+                        var ref = new Reference_1.Reference(_this, queue[i].path);
+                        var snapshot = new DataSnapshot_1.DataSnapshot(node, ref, PriorityIndex_1.PRIORITY_INDEX);
+                        callbacks.push(queue[i].onComplete.bind(null, null, true, snapshot));
+                    }
+
+                    queue[i].unwatcher();
+                }
+
+                _this.pruneCompletedTransactionsBelowNode_(_this.transactionQueueTree_.subTree(path));
+
+                _this.sendReadyTransactions_();
+
+                _this.eventQueue_.raiseEventsForChangedPath(path, events);
+
+                for (var i = 0; i < callbacks.length; i++) {
+                    util_2.exceptionGuard(callbacks[i]);
+                }
+            } else {
+                if (status === 'datastale') {
+                    for (var i = 0; i < queue.length; i++) {
+                        if (queue[i].status === TransactionStatus.SENT_NEEDS_ABORT) queue[i].status = TransactionStatus.NEEDS_ABORT;else queue[i].status = TransactionStatus.RUN;
+                    }
+                } else {
+                    util_2.warn('transaction at ' + pathToSend.toString() + ' failed: ' + status);
+
+                    for (var i = 0; i < queue.length; i++) {
+                        queue[i].status = TransactionStatus.NEEDS_ABORT;
+                        queue[i].abortReason = status;
+                    }
+                }
+
+                _this.rerunTransactions_(path);
+            }
+        }, latestHash);
+    };
+
+    Repo_1.Repo.prototype.rerunTransactions_ = function (changedPath) {
+        var rootMostTransactionNode = this.getAncestorTransactionNode_(changedPath);
+        var path = rootMostTransactionNode.path();
+        var queue = this.buildTransactionQueue_(rootMostTransactionNode);
+        this.rerunTransactionQueue_(queue, path);
+        return path;
+    };
+
+    Repo_1.Repo.prototype.rerunTransactionQueue_ = function (queue, path) {
+        if (queue.length === 0) {
+            return;
+        }
+
+        var callbacks = [];
+        var events = [];
+        var txnsToRerun = queue.filter(function (q) {
+            return q.status === TransactionStatus.RUN;
+        });
+        var setsToIgnore = txnsToRerun.map(function (q) {
+            return q.currentWriteId;
+        });
+
+        for (var i = 0; i < queue.length; i++) {
+            var transaction = queue[i];
+            var relativePath = Path_1.Path.relativePath(path, transaction.path);
+            var abortTransaction = false,
+                abortReason = void 0;
+            util_1.assert(relativePath !== null, 'rerunTransactionsUnderNode_: relativePath should not be null.');
+
+            if (transaction.status === TransactionStatus.NEEDS_ABORT) {
+                abortTransaction = true;
+                abortReason = transaction.abortReason;
+                events = events.concat(this.serverSyncTree_.ackUserWrite(transaction.currentWriteId, true));
+            } else if (transaction.status === TransactionStatus.RUN) {
+                if (transaction.retryCount >= Repo_1.Repo.MAX_TRANSACTION_RETRIES_) {
+                    abortTransaction = true;
+                    abortReason = 'maxretry';
+                    events = events.concat(this.serverSyncTree_.ackUserWrite(transaction.currentWriteId, true));
+                } else {
+                    var currentNode = this.getLatestState_(transaction.path, setsToIgnore);
+                    transaction.currentInputSnapshot = currentNode;
+                    var newData = queue[i].update(currentNode.val());
+
+                    if (newData !== undefined) {
+                        validation_1.validateFirebaseData('transaction failed: Data returned ', newData, transaction.path);
+                        var newDataNode = nodeFromJSON_1.nodeFromJSON(newData);
+                        var hasExplicitPriority = typeof newData === 'object' && newData != null && util_3.contains(newData, '.priority');
+
+                        if (!hasExplicitPriority) {
+                            newDataNode = newDataNode.updatePriority(currentNode.getPriority());
+                        }
+
+                        var oldWriteId = transaction.currentWriteId;
+                        var serverValues = this.generateServerValues();
+                        var newNodeResolved = ServerValues_1.resolveDeferredValueSnapshot(newDataNode, serverValues);
+                        transaction.currentOutputSnapshotRaw = newDataNode;
+                        transaction.currentOutputSnapshotResolved = newNodeResolved;
+                        transaction.currentWriteId = this.getNextWriteId_();
+                        setsToIgnore.splice(setsToIgnore.indexOf(oldWriteId), 1);
+                        events = events.concat(this.serverSyncTree_.applyUserOverwrite(transaction.path, newNodeResolved, transaction.currentWriteId, transaction.applyLocally));
+                        events = events.concat(this.serverSyncTree_.ackUserWrite(oldWriteId, true));
+                    } else {
+                        abortTransaction = true;
+                        abortReason = 'nodata';
+                        events = events.concat(this.serverSyncTree_.ackUserWrite(transaction.currentWriteId, true));
+                    }
+                }
+            }
+
+            this.eventQueue_.raiseEventsForChangedPath(path, events);
+            events = [];
+
+            if (abortTransaction) {
+                queue[i].status = TransactionStatus.COMPLETED;
+
+                (function (unwatcher) {
+                    setTimeout(unwatcher, Math.floor(0));
+                })(queue[i].unwatcher);
+
+                if (queue[i].onComplete) {
+                    if (abortReason === 'nodata') {
+                        var ref = new Reference_1.Reference(this, queue[i].path);
+                        var lastInput = queue[i].currentInputSnapshot;
+                        var snapshot = new DataSnapshot_1.DataSnapshot(lastInput, ref, PriorityIndex_1.PRIORITY_INDEX);
+                        callbacks.push(queue[i].onComplete.bind(null, null, false, snapshot));
+                    } else {
+                        callbacks.push(queue[i].onComplete.bind(null, new Error(abortReason), false, null));
+                    }
+                }
+            }
+        }
+
+        this.pruneCompletedTransactionsBelowNode_(this.transactionQueueTree_);
+
+        for (var i = 0; i < callbacks.length; i++) {
+            util_2.exceptionGuard(callbacks[i]);
+        }
+
+        this.sendReadyTransactions_();
+    };
+
+    Repo_1.Repo.prototype.getAncestorTransactionNode_ = function (path) {
+        var front;
+        var transactionNode = this.transactionQueueTree_;
+
+        while ((front = path.getFront()) !== null && transactionNode.getValue() === null) {
+            transactionNode = transactionNode.subTree(front);
+            path = path.popFront();
+        }
+
+        return transactionNode;
+    };
+
+    Repo_1.Repo.prototype.buildTransactionQueue_ = function (transactionNode) {
+        var transactionQueue = [];
+        this.aggregateTransactionQueuesForNode_(transactionNode, transactionQueue);
+        transactionQueue.sort(function (a, b) {
+            return a.order - b.order;
+        });
+        return transactionQueue;
+    };
+
+    Repo_1.Repo.prototype.aggregateTransactionQueuesForNode_ = function (node, queue) {
+        var _this = this;
+
+        var nodeQueue = node.getValue();
+
+        if (nodeQueue !== null) {
+            for (var i = 0; i < nodeQueue.length; i++) {
+                queue.push(nodeQueue[i]);
+            }
+        }
+
+        node.forEachChild(function (child) {
+            _this.aggregateTransactionQueuesForNode_(child, queue);
+        });
+    };
+
+    Repo_1.Repo.prototype.pruneCompletedTransactionsBelowNode_ = function (node) {
+        var _this = this;
+
+        var queue = node.getValue();
+
+        if (queue) {
+            var to = 0;
+
+            for (var from = 0; from < queue.length; from++) {
+                if (queue[from].status !== TransactionStatus.COMPLETED) {
+                    queue[to] = queue[from];
+                    to++;
+                }
+            }
+
+            queue.length = to;
+            node.setValue(queue.length > 0 ? queue : null);
+        }
+
+        node.forEachChild(function (childNode) {
+            _this.pruneCompletedTransactionsBelowNode_(childNode);
+        });
+    };
+
+    Repo_1.Repo.prototype.abortTransactions_ = function (path) {
+        var _this = this;
+
+        var affectedPath = this.getAncestorTransactionNode_(path).path();
+        var transactionNode = this.transactionQueueTree_.subTree(path);
+        transactionNode.forEachAncestor(function (node) {
+            _this.abortTransactionsOnNode_(node);
+        });
+        this.abortTransactionsOnNode_(transactionNode);
+        transactionNode.forEachDescendant(function (node) {
+            _this.abortTransactionsOnNode_(node);
+        });
+        return affectedPath;
+    };
+
+    Repo_1.Repo.prototype.abortTransactionsOnNode_ = function (node) {
+        var queue = node.getValue();
+
+        if (queue !== null) {
+            var callbacks = [];
+            var events = [];
+            var lastSent = -1;
+
+            for (var i = 0; i < queue.length; i++) {
+                if (queue[i].status === TransactionStatus.SENT_NEEDS_ABORT) {} else if (queue[i].status === TransactionStatus.SENT) {
+                    util_1.assert(lastSent === i - 1, 'All SENT items should be at beginning of queue.');
+                    lastSent = i;
+                    queue[i].status = TransactionStatus.SENT_NEEDS_ABORT;
+                    queue[i].abortReason = 'set';
+                } else {
+                    util_1.assert(queue[i].status === TransactionStatus.RUN, 'Unexpected transaction status in abort');
+                    queue[i].unwatcher();
+                    events = events.concat(this.serverSyncTree_.ackUserWrite(queue[i].currentWriteId, true));
+
+                    if (queue[i].onComplete) {
+                        var snapshot = null;
+                        callbacks.push(queue[i].onComplete.bind(null, new Error('set'), false, snapshot));
+                    }
+                }
+            }
+
+            if (lastSent === -1) {
+                node.setValue(null);
+            } else {
+                queue.length = lastSent + 1;
+            }
+
+            this.eventQueue_.raiseEventsForChangedPath(node.path(), events);
+
+            for (var i = 0; i < callbacks.length; i++) {
+                util_2.exceptionGuard(callbacks[i]);
+            }
+        }
+    };
+});

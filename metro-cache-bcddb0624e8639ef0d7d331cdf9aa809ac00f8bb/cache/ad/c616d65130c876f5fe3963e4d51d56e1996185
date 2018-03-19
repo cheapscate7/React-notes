@@ -1,0 +1,99 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[0], "@firebase/util");
+
+    var storage_1 = require(_dependencyMap[1], "./storage/storage");
+
+    var Constants_1 = require(_dependencyMap[2], "../realtime/Constants");
+
+    var RepoInfo = function () {
+        function RepoInfo(host, secure, namespace, webSocketOnly, persistenceKey) {
+            if (persistenceKey === void 0) {
+                persistenceKey = '';
+            }
+
+            this.secure = secure;
+            this.namespace = namespace;
+            this.webSocketOnly = webSocketOnly;
+            this.persistenceKey = persistenceKey;
+            this.host = host.toLowerCase();
+            this.domain = this.host.substr(this.host.indexOf('.') + 1);
+            this.internalHost = storage_1.PersistentStorage.get('host:' + host) || this.host;
+        }
+
+        RepoInfo.prototype.needsQueryParam = function () {
+            return this.host !== this.internalHost || this.isCustomHost();
+        };
+
+        RepoInfo.prototype.isCacheableHost = function () {
+            return this.internalHost.substr(0, 2) === 's-';
+        };
+
+        RepoInfo.prototype.isDemoHost = function () {
+            return this.domain === 'firebaseio-demo.com';
+        };
+
+        RepoInfo.prototype.isCustomHost = function () {
+            return this.domain !== 'firebaseio.com' && this.domain !== 'firebaseio-demo.com';
+        };
+
+        RepoInfo.prototype.updateHost = function (newHost) {
+            if (newHost !== this.internalHost) {
+                this.internalHost = newHost;
+
+                if (this.isCacheableHost()) {
+                    storage_1.PersistentStorage.set('host:' + this.host, this.internalHost);
+                }
+            }
+        };
+
+        RepoInfo.prototype.connectionURL = function (type, params) {
+            util_1.assert(typeof type === 'string', 'typeof type must == string');
+            util_1.assert(typeof params === 'object', 'typeof params must == object');
+            var connURL;
+
+            if (type === Constants_1.WEBSOCKET) {
+                connURL = (this.secure ? 'wss://' : 'ws://') + this.internalHost + '/.ws?';
+            } else if (type === Constants_1.LONG_POLLING) {
+                connURL = (this.secure ? 'https://' : 'http://') + this.internalHost + '/.lp?';
+            } else {
+                throw new Error('Unknown connection type: ' + type);
+            }
+
+            if (this.needsQueryParam()) {
+                params['ns'] = this.namespace;
+            }
+
+            var pairs = [];
+            util_2.forEach(params, function (key, value) {
+                pairs.push(key + '=' + value);
+            });
+            return connURL + pairs.join('&');
+        };
+
+        RepoInfo.prototype.toString = function () {
+            var str = this.toURLString();
+
+            if (this.persistenceKey) {
+                str += '<' + this.persistenceKey + '>';
+            }
+
+            return str;
+        };
+
+        RepoInfo.prototype.toURLString = function () {
+            return (this.secure ? 'https://' : 'http://') + this.host;
+        };
+
+        return RepoInfo;
+    }();
+
+    exports.RepoInfo = RepoInfo;
+});

@@ -1,0 +1,69 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var EventEmitter = function () {
+        function EventEmitter(allowedEvents_) {
+            this.allowedEvents_ = allowedEvents_;
+            this.listeners_ = {};
+            util_1.assert(Array.isArray(allowedEvents_) && allowedEvents_.length > 0, 'Requires a non-empty array');
+        }
+
+        EventEmitter.prototype.trigger = function (eventType) {
+            var var_args = [];
+
+            for (var _i = 1; _i < arguments.length; _i++) {
+                var_args[_i - 1] = arguments[_i];
+            }
+
+            if (Array.isArray(this.listeners_[eventType])) {
+                var listeners = this.listeners_[eventType].slice();
+
+                for (var i = 0; i < listeners.length; i++) {
+                    listeners[i].callback.apply(listeners[i].context, var_args);
+                }
+            }
+        };
+
+        EventEmitter.prototype.on = function (eventType, callback, context) {
+            this.validateEventType_(eventType);
+            this.listeners_[eventType] = this.listeners_[eventType] || [];
+            this.listeners_[eventType].push({
+                callback: callback,
+                context: context
+            });
+            var eventData = this.getInitialEvent(eventType);
+
+            if (eventData) {
+                callback.apply(context, eventData);
+            }
+        };
+
+        EventEmitter.prototype.off = function (eventType, callback, context) {
+            this.validateEventType_(eventType);
+            var listeners = this.listeners_[eventType] || [];
+
+            for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i].callback === callback && (!context || context === listeners[i].context)) {
+                    listeners.splice(i, 1);
+                    return;
+                }
+            }
+        };
+
+        EventEmitter.prototype.validateEventType_ = function (eventType) {
+            util_1.assert(this.allowedEvents_.find(function (et) {
+                return et === eventType;
+            }), 'Unknown event: ' + eventType);
+        };
+
+        return EventEmitter;
+    }();
+
+    exports.EventEmitter = EventEmitter;
+});

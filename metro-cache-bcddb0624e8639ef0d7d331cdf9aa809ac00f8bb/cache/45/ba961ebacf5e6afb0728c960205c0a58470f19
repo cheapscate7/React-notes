@@ -1,0 +1,55 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[1], "../util/util");
+
+    var StatsListener_1 = require(_dependencyMap[2], "./StatsListener");
+
+    var FIRST_STATS_MIN_TIME = 10 * 1000;
+    var FIRST_STATS_MAX_TIME = 30 * 1000;
+    var REPORT_STATS_INTERVAL = 5 * 60 * 1000;
+
+    var StatsReporter = function () {
+        function StatsReporter(collection, server_) {
+            this.server_ = server_;
+            this.statsToReport_ = {};
+            this.statsListener_ = new StatsListener_1.StatsListener(collection);
+            var timeout = FIRST_STATS_MIN_TIME + (FIRST_STATS_MAX_TIME - FIRST_STATS_MIN_TIME) * Math.random();
+            util_2.setTimeoutNonBlocking(this.reportStats_.bind(this), Math.floor(timeout));
+        }
+
+        StatsReporter.prototype.includeStat = function (stat) {
+            this.statsToReport_[stat] = true;
+        };
+
+        StatsReporter.prototype.reportStats_ = function () {
+            var _this = this;
+
+            var stats = this.statsListener_.get();
+            var reportedStats = {};
+            var haveStatsToReport = false;
+            util_1.forEach(stats, function (stat, value) {
+                if (value > 0 && util_1.contains(_this.statsToReport_, stat)) {
+                    reportedStats[stat] = value;
+                    haveStatsToReport = true;
+                }
+            });
+
+            if (haveStatsToReport) {
+                this.server_.reportStats(reportedStats);
+            }
+
+            util_2.setTimeoutNonBlocking(this.reportStats_.bind(this), Math.floor(Math.random() * 2 * REPORT_STATS_INTERVAL));
+        };
+
+        return StatsReporter;
+    }();
+
+    exports.StatsReporter = StatsReporter;
+});

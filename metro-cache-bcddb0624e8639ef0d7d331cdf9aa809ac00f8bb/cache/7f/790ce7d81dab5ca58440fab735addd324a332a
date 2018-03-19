@@ -1,0 +1,61 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var util_1 = require(_dependencyMap[1], "@firebase/util");
+
+    var EventEmitter_1 = require(_dependencyMap[2], "./EventEmitter");
+
+    var util_2 = require(_dependencyMap[1], "@firebase/util");
+
+    var OnlineMonitor = function (_super) {
+        tslib_1.__extends(OnlineMonitor, _super);
+
+        function OnlineMonitor() {
+            var _this = _super.call(this, ['online']) || this;
+
+            _this.online_ = true;
+
+            if (typeof window !== 'undefined' && typeof window.addEventListener !== 'undefined' && !util_2.isMobileCordova()) {
+                window.addEventListener('online', function () {
+                    if (!_this.online_) {
+                        _this.online_ = true;
+
+                        _this.trigger('online', true);
+                    }
+                }, false);
+                window.addEventListener('offline', function () {
+                    if (_this.online_) {
+                        _this.online_ = false;
+
+                        _this.trigger('online', false);
+                    }
+                }, false);
+            }
+
+            return _this;
+        }
+
+        OnlineMonitor.getInstance = function () {
+            return new OnlineMonitor();
+        };
+
+        OnlineMonitor.prototype.getInitialEvent = function (eventType) {
+            util_1.assert(eventType === 'online', 'Unknown event type: ' + eventType);
+            return [this.online_];
+        };
+
+        OnlineMonitor.prototype.currentlyOnline = function () {
+            return this.online_;
+        };
+
+        return OnlineMonitor;
+    }(EventEmitter_1.EventEmitter);
+
+    exports.OnlineMonitor = OnlineMonitor;
+});

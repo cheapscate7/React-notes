@@ -1,0 +1,65 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var app_1 = require(_dependencyMap[0], "@firebase/app");
+
+    var Database_1 = require(_dependencyMap[1], "./src/api/Database");
+
+    exports.Database = Database_1.Database;
+
+    var Query_1 = require(_dependencyMap[2], "./src/api/Query");
+
+    exports.Query = Query_1.Query;
+
+    var Reference_1 = require(_dependencyMap[3], "./src/api/Reference");
+
+    exports.Reference = Reference_1.Reference;
+
+    var util_1 = require(_dependencyMap[4], "./src/core/util/util");
+
+    exports.enableLogging = util_1.enableLogging;
+
+    var RepoManager_1 = require(_dependencyMap[5], "./src/core/RepoManager");
+
+    var INTERNAL = require(_dependencyMap[6], "./src/api/internal");
+
+    var TEST_ACCESS = require(_dependencyMap[7], "./src/api/test_access");
+
+    var util_2 = require(_dependencyMap[8], "@firebase/util");
+
+    var ServerValue = Database_1.Database.ServerValue;
+    exports.ServerValue = ServerValue;
+
+    function registerDatabase(instance) {
+        var namespace = instance.INTERNAL.registerService('database', function (app, unused, url) {
+            return RepoManager_1.RepoManager.getInstance().databaseFromApp(app, url);
+        }, {
+            Reference: Reference_1.Reference,
+            Query: Query_1.Query,
+            Database: Database_1.Database,
+            enableLogging: util_1.enableLogging,
+            INTERNAL: INTERNAL,
+            ServerValue: ServerValue,
+            TEST_ACCESS: TEST_ACCESS
+        }, null, true);
+
+        if (util_2.isNodeSdk()) {
+            module.exports = namespace;
+        }
+    }
+
+    exports.registerDatabase = registerDatabase;
+    registerDatabase(app_1.default);
+
+    var DataSnapshot_1 = require(_dependencyMap[9], "./src/api/DataSnapshot");
+
+    exports.DataSnapshot = DataSnapshot_1.DataSnapshot;
+
+    var onDisconnect_1 = require(_dependencyMap[10], "./src/api/onDisconnect");
+
+    exports.OnDisconnect = onDisconnect_1.OnDisconnect;
+});

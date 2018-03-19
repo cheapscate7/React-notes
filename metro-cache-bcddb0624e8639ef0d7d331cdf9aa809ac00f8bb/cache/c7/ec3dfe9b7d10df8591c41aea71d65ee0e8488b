@@ -15,7 +15,9 @@ __d(function (global, require, module, exports, _dependencyMap) {
 
   var _class,
       _temp,
-      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/App.js";
+      _jsxFileName = "/Users/cheapscate7/Documents/React-notes/App.js",
+      _class2,
+      _temp2;
 
   var _reactNavigation = require(_dependencyMap[2], "react-navigation");
 
@@ -34,6 +36,10 @@ __d(function (global, require, module, exports, _dependencyMap) {
   var _Footer = require(_dependencyMap[7], "./components/Footer.js");
 
   var _Footer2 = _interopRequireDefault(_Footer);
+
+  var _NewNote = require(_dependencyMap[8], "./components/NewNote.js");
+
+  var _NewNote2 = _interopRequireDefault(_NewNote);
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -85,7 +91,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 25
+              lineNumber: 27
             }
           },
           _react3.default.createElement(
@@ -94,25 +100,26 @@ __d(function (global, require, module, exports, _dependencyMap) {
               style: styles.body,
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 26
+                lineNumber: 28
               }
             },
             _react3.default.createElement(_Header2.default, {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 29
               }
             }),
             _react3.default.createElement(_NotesList2.default, {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 28
+                lineNumber: 30
               }
             }),
             _react3.default.createElement(_Footer2.default, {
+              navigation: this.props.navigation,
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 29
+                lineNumber: 31
               }
             })
           )
@@ -135,7 +142,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
     }
   });
 
-  var NewNoteView = _wrapComponent("NewNoteView")(function (_React$Component2) {
+  var NewNoteView = _wrapComponent("NewNoteView")((_temp2 = _class2 = function (_React$Component2) {
     _inherits(NewNoteView, _React$Component2);
 
     function NewNoteView(props) {
@@ -147,38 +154,69 @@ __d(function (global, require, module, exports, _dependencyMap) {
     _createClass(NewNoteView, [{
       key: "render",
       value: function render() {
+        var _this3 = this;
+
         return _react3.default.createElement(
-          Toolbar,
+          _reactNativePaper.Provider,
           {
-            style: newNoteStyles.newNoteContainer,
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 58
+              lineNumber: 65
             }
           },
-          _react3.default.createElement(ToolbarBackAction, {
-            onPress: this._goBack,
-            __source: {
-              fileName: _jsxFileName,
-              lineNumber: 59
-            }
-          }),
-          _react3.default.createElement(ToolbarContent, {
-            title: "New Note",
-            __source: {
-              fileName: _jsxFileName,
-              lineNumber: 62
-            }
-          })
+          _react3.default.createElement(
+            _reactNative.View,
+            {
+              style: newNoteViewStyles.newNoteContainer,
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 66
+              }
+            },
+            _react3.default.createElement(
+              _reactNativePaper.Toolbar,
+              {
+                style: newNoteViewStyles.newNoteHeader,
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 67
+                }
+              },
+              _react3.default.createElement(_reactNativePaper.ToolbarBackAction, {
+                onPress: function onPress() {
+                  _this3.props.navigation.goBack();
+                },
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 68
+                }
+              }),
+              _react3.default.createElement(_reactNativePaper.ToolbarContent, {
+                title: "New Note",
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 71
+                }
+              })
+            )
+          )
         );
       }
     }]);
 
     return NewNoteView;
-  }(_react3.default.Component));
+  }(_react3.default.Component), _class2.navigationOptions = {
+    header: null
+  }, _temp2));
 
-  var newNoteStyles = _reactNative.StyleSheet.create({
-    newNoteContainer: {}
+  var newNoteViewStyles = _reactNative.StyleSheet.create({
+    newNoteHeader: {
+      backgroundColor: "#e8e8e8"
+    },
+    newNoteContainer: {
+      backgroundColor: "#e8e8e8",
+      flex: 1
+    }
   });
 
   var RootStack = (0, _reactNavigation.StackNavigator)({
@@ -207,7 +245,7 @@ __d(function (global, require, module, exports, _dependencyMap) {
         return _react3.default.createElement(RootStack, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 92
+            lineNumber: 112
           }
         });
       }

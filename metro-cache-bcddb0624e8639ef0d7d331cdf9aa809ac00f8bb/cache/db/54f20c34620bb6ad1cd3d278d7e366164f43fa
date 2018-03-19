@@ -1,0 +1,148 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.instances = [];
+    var LogLevel;
+
+    (function (LogLevel) {
+        LogLevel[LogLevel["DEBUG"] = 0] = "DEBUG";
+        LogLevel[LogLevel["VERBOSE"] = 1] = "VERBOSE";
+        LogLevel[LogLevel["INFO"] = 2] = "INFO";
+        LogLevel[LogLevel["WARN"] = 3] = "WARN";
+        LogLevel[LogLevel["ERROR"] = 4] = "ERROR";
+        LogLevel[LogLevel["SILENT"] = 5] = "SILENT";
+    })(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
+
+    var defaultLogLevel = LogLevel.INFO;
+
+    var defaultLogHandler = function defaultLogHandler(instance, logType) {
+        var args = [];
+
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+
+        if (logType < instance.logLevel) return;
+        var now = new Date().toISOString();
+
+        switch (logType) {
+            case LogLevel.DEBUG:
+                console.log.apply(console, ["[" + now + "]  " + instance.name + ":"].concat(args));
+                break;
+
+            case LogLevel.VERBOSE:
+                console.log.apply(console, ["[" + now + "]  " + instance.name + ":"].concat(args));
+                break;
+
+            case LogLevel.INFO:
+                console.info.apply(console, ["[" + now + "]  " + instance.name + ":"].concat(args));
+                break;
+
+            case LogLevel.WARN:
+                console.warn.apply(console, ["[" + now + "]  " + instance.name + ":"].concat(args));
+                break;
+
+            case LogLevel.ERROR:
+                console.error.apply(console, ["[" + now + "]  " + instance.name + ":"].concat(args));
+                break;
+
+            default:
+                throw new Error("Attempted to log a message with an invalid logType (value: " + logType + ")");
+        }
+    };
+
+    var Logger = function () {
+        function Logger(name) {
+            this.name = name;
+            this._logLevel = defaultLogLevel;
+            this._logHandler = defaultLogHandler;
+            exports.instances.push(this);
+        }
+
+        Object.defineProperty(Logger.prototype, "logLevel", {
+            get: function get() {
+                return this._logLevel;
+            },
+            set: function set(val) {
+                if (!(val in LogLevel)) {
+                    throw new TypeError('Invalid value assigned to `logLevel`');
+                }
+
+                this._logLevel = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Logger.prototype, "logHandler", {
+            get: function get() {
+                return this._logHandler;
+            },
+            set: function set(val) {
+                if (typeof val !== 'function') {
+                    throw new TypeError('Value assigned to `logHandler` must be a function');
+                }
+
+                this._logHandler = val;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Logger.prototype.debug = function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            this._logHandler.apply(this, [this, LogLevel.DEBUG].concat(args));
+        };
+
+        Logger.prototype.log = function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            this._logHandler.apply(this, [this, LogLevel.VERBOSE].concat(args));
+        };
+
+        Logger.prototype.info = function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            this._logHandler.apply(this, [this, LogLevel.INFO].concat(args));
+        };
+
+        Logger.prototype.warn = function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            this._logHandler.apply(this, [this, LogLevel.WARN].concat(args));
+        };
+
+        Logger.prototype.error = function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            this._logHandler.apply(this, [this, LogLevel.ERROR].concat(args));
+        };
+
+        return Logger;
+    }();
+
+    exports.Logger = Logger;
+});

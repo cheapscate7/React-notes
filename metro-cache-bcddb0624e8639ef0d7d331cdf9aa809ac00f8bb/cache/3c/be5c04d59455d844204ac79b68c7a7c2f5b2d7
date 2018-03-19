@@ -1,0 +1,215 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var RangedFilter_1 = require(_dependencyMap[0], "./RangedFilter");
+
+    var ChildrenNode_1 = require(_dependencyMap[1], "../../snap/ChildrenNode");
+
+    var Node_1 = require(_dependencyMap[2], "../../snap/Node");
+
+    var util_1 = require(_dependencyMap[3], "@firebase/util");
+
+    var Change_1 = require(_dependencyMap[4], "../Change");
+
+    var LimitedFilter = function () {
+        function LimitedFilter(params) {
+            this.rangedFilter_ = new RangedFilter_1.RangedFilter(params);
+            this.index_ = params.getIndex();
+            this.limit_ = params.getLimit();
+            this.reverse_ = !params.isViewFromLeft();
+        }
+
+        LimitedFilter.prototype.updateChild = function (snap, key, newChild, affectedPath, source, optChangeAccumulator) {
+            if (!this.rangedFilter_.matches(new Node_1.NamedNode(key, newChild))) {
+                newChild = ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+            }
+
+            if (snap.getImmediateChild(key).equals(newChild)) {
+                return snap;
+            } else if (snap.numChildren() < this.limit_) {
+                return this.rangedFilter_.getIndexedFilter().updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator);
+            } else {
+                return this.fullLimitUpdateChild_(snap, key, newChild, source, optChangeAccumulator);
+            }
+        };
+
+        LimitedFilter.prototype.updateFullNode = function (oldSnap, newSnap, optChangeAccumulator) {
+            var filtered;
+
+            if (newSnap.isLeafNode() || newSnap.isEmpty()) {
+                filtered = ChildrenNode_1.ChildrenNode.EMPTY_NODE.withIndex(this.index_);
+            } else {
+                if (this.limit_ * 2 < newSnap.numChildren() && newSnap.isIndexed(this.index_)) {
+                    filtered = ChildrenNode_1.ChildrenNode.EMPTY_NODE.withIndex(this.index_);
+                    var iterator = void 0;
+
+                    if (this.reverse_) {
+                        iterator = newSnap.getReverseIteratorFrom(this.rangedFilter_.getEndPost(), this.index_);
+                    } else {
+                        iterator = newSnap.getIteratorFrom(this.rangedFilter_.getStartPost(), this.index_);
+                    }
+
+                    var count = 0;
+
+                    while (iterator.hasNext() && count < this.limit_) {
+                        var next = iterator.getNext();
+                        var inRange = void 0;
+
+                        if (this.reverse_) {
+                            inRange = this.index_.compare(this.rangedFilter_.getStartPost(), next) <= 0;
+                        } else {
+                            inRange = this.index_.compare(next, this.rangedFilter_.getEndPost()) <= 0;
+                        }
+
+                        if (inRange) {
+                            filtered = filtered.updateImmediateChild(next.name, next.node);
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    filtered = newSnap.withIndex(this.index_);
+                    filtered = filtered.updatePriority(ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+                    var startPost = void 0;
+                    var endPost = void 0;
+                    var cmp = void 0;
+                    var iterator = void 0;
+
+                    if (this.reverse_) {
+                        iterator = filtered.getReverseIterator(this.index_);
+                        startPost = this.rangedFilter_.getEndPost();
+                        endPost = this.rangedFilter_.getStartPost();
+                        var indexCompare_1 = this.index_.getCompare();
+
+                        cmp = function cmp(a, b) {
+                            return indexCompare_1(b, a);
+                        };
+                    } else {
+                        iterator = filtered.getIterator(this.index_);
+                        startPost = this.rangedFilter_.getStartPost();
+                        endPost = this.rangedFilter_.getEndPost();
+                        cmp = this.index_.getCompare();
+                    }
+
+                    var count = 0;
+                    var foundStartPost = false;
+
+                    while (iterator.hasNext()) {
+                        var next = iterator.getNext();
+
+                        if (!foundStartPost && cmp(startPost, next) <= 0) {
+                            foundStartPost = true;
+                        }
+
+                        var inRange = foundStartPost && count < this.limit_ && cmp(next, endPost) <= 0;
+
+                        if (inRange) {
+                            count++;
+                        } else {
+                            filtered = filtered.updateImmediateChild(next.name, ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+                        }
+                    }
+                }
+            }
+
+            return this.rangedFilter_.getIndexedFilter().updateFullNode(oldSnap, filtered, optChangeAccumulator);
+        };
+
+        LimitedFilter.prototype.updatePriority = function (oldSnap, newPriority) {
+            return oldSnap;
+        };
+
+        LimitedFilter.prototype.filtersNodes = function () {
+            return true;
+        };
+
+        LimitedFilter.prototype.getIndexedFilter = function () {
+            return this.rangedFilter_.getIndexedFilter();
+        };
+
+        LimitedFilter.prototype.getIndex = function () {
+            return this.index_;
+        };
+
+        LimitedFilter.prototype.fullLimitUpdateChild_ = function (snap, childKey, childSnap, source, changeAccumulator) {
+            var cmp;
+
+            if (this.reverse_) {
+                var indexCmp_1 = this.index_.getCompare();
+
+                cmp = function cmp(a, b) {
+                    return indexCmp_1(b, a);
+                };
+            } else {
+                cmp = this.index_.getCompare();
+            }
+
+            var oldEventCache = snap;
+            util_1.assert(oldEventCache.numChildren() == this.limit_, '');
+            var newChildNamedNode = new Node_1.NamedNode(childKey, childSnap);
+            var windowBoundary = this.reverse_ ? oldEventCache.getFirstChild(this.index_) : oldEventCache.getLastChild(this.index_);
+            var inRange = this.rangedFilter_.matches(newChildNamedNode);
+
+            if (oldEventCache.hasChild(childKey)) {
+                var oldChildSnap = oldEventCache.getImmediateChild(childKey);
+                var nextChild = source.getChildAfterChild(this.index_, windowBoundary, this.reverse_);
+
+                while (nextChild != null && (nextChild.name == childKey || oldEventCache.hasChild(nextChild.name))) {
+                    nextChild = source.getChildAfterChild(this.index_, nextChild, this.reverse_);
+                }
+
+                var compareNext = nextChild == null ? 1 : cmp(nextChild, newChildNamedNode);
+                var remainsInWindow = inRange && !childSnap.isEmpty() && compareNext >= 0;
+
+                if (remainsInWindow) {
+                    if (changeAccumulator != null) {
+                        changeAccumulator.trackChildChange(Change_1.Change.childChangedChange(childKey, childSnap, oldChildSnap));
+                    }
+
+                    return oldEventCache.updateImmediateChild(childKey, childSnap);
+                } else {
+                    if (changeAccumulator != null) {
+                        changeAccumulator.trackChildChange(Change_1.Change.childRemovedChange(childKey, oldChildSnap));
+                    }
+
+                    var newEventCache = oldEventCache.updateImmediateChild(childKey, ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+                    var nextChildInRange = nextChild != null && this.rangedFilter_.matches(nextChild);
+
+                    if (nextChildInRange) {
+                        if (changeAccumulator != null) {
+                            changeAccumulator.trackChildChange(Change_1.Change.childAddedChange(nextChild.name, nextChild.node));
+                        }
+
+                        return newEventCache.updateImmediateChild(nextChild.name, nextChild.node);
+                    } else {
+                        return newEventCache;
+                    }
+                }
+            } else if (childSnap.isEmpty()) {
+                return snap;
+            } else if (inRange) {
+                if (cmp(windowBoundary, newChildNamedNode) >= 0) {
+                    if (changeAccumulator != null) {
+                        changeAccumulator.trackChildChange(Change_1.Change.childRemovedChange(windowBoundary.name, windowBoundary.node));
+                        changeAccumulator.trackChildChange(Change_1.Change.childAddedChange(childKey, childSnap));
+                    }
+
+                    return oldEventCache.updateImmediateChild(childKey, childSnap).updateImmediateChild(windowBoundary.name, ChildrenNode_1.ChildrenNode.EMPTY_NODE);
+                } else {
+                    return snap;
+                }
+            } else {
+                return snap;
+            }
+        };
+
+        return LimitedFilter;
+    }();
+
+    exports.LimitedFilter = LimitedFilter;
+});

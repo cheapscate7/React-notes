@@ -1,0 +1,264 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "./util");
+
+    var util_2 = require(_dependencyMap[1], "@firebase/util");
+
+    var Path = function () {
+        function Path(pathOrString, pieceNum) {
+            if (pieceNum === void 0) {
+                this.pieces_ = pathOrString.split('/');
+                var copyTo = 0;
+
+                for (var i = 0; i < this.pieces_.length; i++) {
+                    if (this.pieces_[i].length > 0) {
+                        this.pieces_[copyTo] = this.pieces_[i];
+                        copyTo++;
+                    }
+                }
+
+                this.pieces_.length = copyTo;
+                this.pieceNum_ = 0;
+            } else {
+                this.pieces_ = pathOrString;
+                this.pieceNum_ = pieceNum;
+            }
+        }
+
+        Object.defineProperty(Path, "Empty", {
+            get: function get() {
+                return new Path('');
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Path.prototype.getFront = function () {
+            if (this.pieceNum_ >= this.pieces_.length) return null;
+            return this.pieces_[this.pieceNum_];
+        };
+
+        Path.prototype.getLength = function () {
+            return this.pieces_.length - this.pieceNum_;
+        };
+
+        Path.prototype.popFront = function () {
+            var pieceNum = this.pieceNum_;
+
+            if (pieceNum < this.pieces_.length) {
+                pieceNum++;
+            }
+
+            return new Path(this.pieces_, pieceNum);
+        };
+
+        Path.prototype.getBack = function () {
+            if (this.pieceNum_ < this.pieces_.length) return this.pieces_[this.pieces_.length - 1];
+            return null;
+        };
+
+        Path.prototype.toString = function () {
+            var pathString = '';
+
+            for (var i = this.pieceNum_; i < this.pieces_.length; i++) {
+                if (this.pieces_[i] !== '') pathString += '/' + this.pieces_[i];
+            }
+
+            return pathString || '/';
+        };
+
+        Path.prototype.toUrlEncodedString = function () {
+            var pathString = '';
+
+            for (var i = this.pieceNum_; i < this.pieces_.length; i++) {
+                if (this.pieces_[i] !== '') pathString += '/' + encodeURIComponent(String(this.pieces_[i]));
+            }
+
+            return pathString || '/';
+        };
+
+        Path.prototype.slice = function (begin) {
+            if (begin === void 0) {
+                begin = 0;
+            }
+
+            return this.pieces_.slice(this.pieceNum_ + begin);
+        };
+
+        Path.prototype.parent = function () {
+            if (this.pieceNum_ >= this.pieces_.length) return null;
+            var pieces = [];
+
+            for (var i = this.pieceNum_; i < this.pieces_.length - 1; i++) {
+                pieces.push(this.pieces_[i]);
+            }
+
+            return new Path(pieces, 0);
+        };
+
+        Path.prototype.child = function (childPathObj) {
+            var pieces = [];
+
+            for (var i = this.pieceNum_; i < this.pieces_.length; i++) {
+                pieces.push(this.pieces_[i]);
+            }
+
+            if (childPathObj instanceof Path) {
+                for (var i = childPathObj.pieceNum_; i < childPathObj.pieces_.length; i++) {
+                    pieces.push(childPathObj.pieces_[i]);
+                }
+            } else {
+                var childPieces = childPathObj.split('/');
+
+                for (var i = 0; i < childPieces.length; i++) {
+                    if (childPieces[i].length > 0) pieces.push(childPieces[i]);
+                }
+            }
+
+            return new Path(pieces, 0);
+        };
+
+        Path.prototype.isEmpty = function () {
+            return this.pieceNum_ >= this.pieces_.length;
+        };
+
+        Path.relativePath = function (outerPath, innerPath) {
+            var outer = outerPath.getFront(),
+                inner = innerPath.getFront();
+
+            if (outer === null) {
+                return innerPath;
+            } else if (outer === inner) {
+                return Path.relativePath(outerPath.popFront(), innerPath.popFront());
+            } else {
+                throw new Error('INTERNAL ERROR: innerPath (' + innerPath + ') is not within ' + 'outerPath (' + outerPath + ')');
+            }
+        };
+
+        Path.comparePaths = function (left, right) {
+            var leftKeys = left.slice();
+            var rightKeys = right.slice();
+
+            for (var i = 0; i < leftKeys.length && i < rightKeys.length; i++) {
+                var cmp = util_1.nameCompare(leftKeys[i], rightKeys[i]);
+                if (cmp !== 0) return cmp;
+            }
+
+            if (leftKeys.length === rightKeys.length) return 0;
+            return leftKeys.length < rightKeys.length ? -1 : 1;
+        };
+
+        Path.prototype.equals = function (other) {
+            if (this.getLength() !== other.getLength()) {
+                return false;
+            }
+
+            for (var i = this.pieceNum_, j = other.pieceNum_; i <= this.pieces_.length; i++, j++) {
+                if (this.pieces_[i] !== other.pieces_[j]) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        Path.prototype.contains = function (other) {
+            var i = this.pieceNum_;
+            var j = other.pieceNum_;
+
+            if (this.getLength() > other.getLength()) {
+                return false;
+            }
+
+            while (i < this.pieces_.length) {
+                if (this.pieces_[i] !== other.pieces_[j]) {
+                    return false;
+                }
+
+                ++i;
+                ++j;
+            }
+
+            return true;
+        };
+
+        return Path;
+    }();
+
+    exports.Path = Path;
+
+    var ValidationPath = function () {
+        function ValidationPath(path, errorPrefix_) {
+            this.errorPrefix_ = errorPrefix_;
+            this.parts_ = path.slice();
+            this.byteLength_ = Math.max(1, this.parts_.length);
+
+            for (var i = 0; i < this.parts_.length; i++) {
+                this.byteLength_ += util_2.stringLength(this.parts_[i]);
+            }
+
+            this.checkValid_();
+        }
+
+        Object.defineProperty(ValidationPath, "MAX_PATH_DEPTH", {
+            get: function get() {
+                return 32;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ValidationPath, "MAX_PATH_LENGTH_BYTES", {
+            get: function get() {
+                return 768;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        ValidationPath.prototype.push = function (child) {
+            if (this.parts_.length > 0) {
+                this.byteLength_ += 1;
+            }
+
+            this.parts_.push(child);
+            this.byteLength_ += util_2.stringLength(child);
+            this.checkValid_();
+        };
+
+        ValidationPath.prototype.pop = function () {
+            var last = this.parts_.pop();
+            this.byteLength_ -= util_2.stringLength(last);
+
+            if (this.parts_.length > 0) {
+                this.byteLength_ -= 1;
+            }
+        };
+
+        ValidationPath.prototype.checkValid_ = function () {
+            if (this.byteLength_ > ValidationPath.MAX_PATH_LENGTH_BYTES) {
+                throw new Error(this.errorPrefix_ + 'has a key path longer than ' + ValidationPath.MAX_PATH_LENGTH_BYTES + ' bytes (' + this.byteLength_ + ').');
+            }
+
+            if (this.parts_.length > ValidationPath.MAX_PATH_DEPTH) {
+                throw new Error(this.errorPrefix_ + 'path specified exceeds the maximum depth that can be written (' + ValidationPath.MAX_PATH_DEPTH + ') or object contains a cycle ' + this.toErrorString());
+            }
+        };
+
+        ValidationPath.prototype.toErrorString = function () {
+            if (this.parts_.length == 0) {
+                return '';
+            }
+
+            return "in property '" + this.parts_.join('.') + "'";
+        };
+
+        return ValidationPath;
+    }();
+
+    exports.ValidationPath = ValidationPath;
+});

@@ -1,0 +1,266 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var SortedMap_1 = require(_dependencyMap[0], "./SortedMap");
+
+    var Path_1 = require(_dependencyMap[1], "./Path");
+
+    var util_1 = require(_dependencyMap[2], "./util");
+
+    var util_2 = require(_dependencyMap[3], "@firebase/util");
+
+    var emptyChildrenSingleton;
+
+    var EmptyChildren = function EmptyChildren() {
+        if (!emptyChildrenSingleton) {
+            emptyChildrenSingleton = new SortedMap_1.SortedMap(util_1.stringCompare);
+        }
+
+        return emptyChildrenSingleton;
+    };
+
+    var ImmutableTree = function () {
+        function ImmutableTree(value, children) {
+            if (children === void 0) {
+                children = EmptyChildren();
+            }
+
+            this.value = value;
+            this.children = children;
+        }
+
+        ImmutableTree.fromObject = function (obj) {
+            var tree = ImmutableTree.Empty;
+            util_2.forEach(obj, function (childPath, childSnap) {
+                tree = tree.set(new Path_1.Path(childPath), childSnap);
+            });
+            return tree;
+        };
+
+        ImmutableTree.prototype.isEmpty = function () {
+            return this.value === null && this.children.isEmpty();
+        };
+
+        ImmutableTree.prototype.findRootMostMatchingPathAndValue = function (relativePath, predicate) {
+            if (this.value != null && predicate(this.value)) {
+                return {
+                    path: Path_1.Path.Empty,
+                    value: this.value
+                };
+            } else {
+                if (relativePath.isEmpty()) {
+                    return null;
+                } else {
+                    var front = relativePath.getFront();
+                    var child = this.children.get(front);
+
+                    if (child !== null) {
+                        var childExistingPathAndValue = child.findRootMostMatchingPathAndValue(relativePath.popFront(), predicate);
+
+                        if (childExistingPathAndValue != null) {
+                            var fullPath = new Path_1.Path(front).child(childExistingPathAndValue.path);
+                            return {
+                                path: fullPath,
+                                value: childExistingPathAndValue.value
+                            };
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        };
+
+        ImmutableTree.prototype.findRootMostValueAndPath = function (relativePath) {
+            return this.findRootMostMatchingPathAndValue(relativePath, function () {
+                return true;
+            });
+        };
+
+        ImmutableTree.prototype.subtree = function (relativePath) {
+            if (relativePath.isEmpty()) {
+                return this;
+            } else {
+                var front = relativePath.getFront();
+                var childTree = this.children.get(front);
+
+                if (childTree !== null) {
+                    return childTree.subtree(relativePath.popFront());
+                } else {
+                    return ImmutableTree.Empty;
+                }
+            }
+        };
+
+        ImmutableTree.prototype.set = function (relativePath, toSet) {
+            if (relativePath.isEmpty()) {
+                return new ImmutableTree(toSet, this.children);
+            } else {
+                var front = relativePath.getFront();
+                var child = this.children.get(front) || ImmutableTree.Empty;
+                var newChild = child.set(relativePath.popFront(), toSet);
+                var newChildren = this.children.insert(front, newChild);
+                return new ImmutableTree(this.value, newChildren);
+            }
+        };
+
+        ImmutableTree.prototype.remove = function (relativePath) {
+            if (relativePath.isEmpty()) {
+                if (this.children.isEmpty()) {
+                    return ImmutableTree.Empty;
+                } else {
+                    return new ImmutableTree(null, this.children);
+                }
+            } else {
+                var front = relativePath.getFront();
+                var child = this.children.get(front);
+
+                if (child) {
+                    var newChild = child.remove(relativePath.popFront());
+                    var newChildren = void 0;
+
+                    if (newChild.isEmpty()) {
+                        newChildren = this.children.remove(front);
+                    } else {
+                        newChildren = this.children.insert(front, newChild);
+                    }
+
+                    if (this.value === null && newChildren.isEmpty()) {
+                        return ImmutableTree.Empty;
+                    } else {
+                        return new ImmutableTree(this.value, newChildren);
+                    }
+                } else {
+                    return this;
+                }
+            }
+        };
+
+        ImmutableTree.prototype.get = function (relativePath) {
+            if (relativePath.isEmpty()) {
+                return this.value;
+            } else {
+                var front = relativePath.getFront();
+                var child = this.children.get(front);
+
+                if (child) {
+                    return child.get(relativePath.popFront());
+                } else {
+                    return null;
+                }
+            }
+        };
+
+        ImmutableTree.prototype.setTree = function (relativePath, newTree) {
+            if (relativePath.isEmpty()) {
+                return newTree;
+            } else {
+                var front = relativePath.getFront();
+                var child = this.children.get(front) || ImmutableTree.Empty;
+                var newChild = child.setTree(relativePath.popFront(), newTree);
+                var newChildren = void 0;
+
+                if (newChild.isEmpty()) {
+                    newChildren = this.children.remove(front);
+                } else {
+                    newChildren = this.children.insert(front, newChild);
+                }
+
+                return new ImmutableTree(this.value, newChildren);
+            }
+        };
+
+        ImmutableTree.prototype.fold = function (fn) {
+            return this.fold_(Path_1.Path.Empty, fn);
+        };
+
+        ImmutableTree.prototype.fold_ = function (pathSoFar, fn) {
+            var accum = {};
+            this.children.inorderTraversal(function (childKey, childTree) {
+                accum[childKey] = childTree.fold_(pathSoFar.child(childKey), fn);
+            });
+            return fn(pathSoFar, this.value, accum);
+        };
+
+        ImmutableTree.prototype.findOnPath = function (path, f) {
+            return this.findOnPath_(path, Path_1.Path.Empty, f);
+        };
+
+        ImmutableTree.prototype.findOnPath_ = function (pathToFollow, pathSoFar, f) {
+            var result = this.value ? f(pathSoFar, this.value) : false;
+
+            if (result) {
+                return result;
+            } else {
+                if (pathToFollow.isEmpty()) {
+                    return null;
+                } else {
+                    var front = pathToFollow.getFront();
+                    var nextChild = this.children.get(front);
+
+                    if (nextChild) {
+                        return nextChild.findOnPath_(pathToFollow.popFront(), pathSoFar.child(front), f);
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        };
+
+        ImmutableTree.prototype.foreachOnPath = function (path, f) {
+            return this.foreachOnPath_(path, Path_1.Path.Empty, f);
+        };
+
+        ImmutableTree.prototype.foreachOnPath_ = function (pathToFollow, currentRelativePath, f) {
+            if (pathToFollow.isEmpty()) {
+                return this;
+            } else {
+                if (this.value) {
+                    f(currentRelativePath, this.value);
+                }
+
+                var front = pathToFollow.getFront();
+                var nextChild = this.children.get(front);
+
+                if (nextChild) {
+                    return nextChild.foreachOnPath_(pathToFollow.popFront(), currentRelativePath.child(front), f);
+                } else {
+                    return ImmutableTree.Empty;
+                }
+            }
+        };
+
+        ImmutableTree.prototype.foreach = function (f) {
+            this.foreach_(Path_1.Path.Empty, f);
+        };
+
+        ImmutableTree.prototype.foreach_ = function (currentRelativePath, f) {
+            this.children.inorderTraversal(function (childName, childTree) {
+                childTree.foreach_(currentRelativePath.child(childName), f);
+            });
+
+            if (this.value) {
+                f(currentRelativePath, this.value);
+            }
+        };
+
+        ImmutableTree.prototype.foreachChild = function (f) {
+            this.children.inorderTraversal(function (childName, childTree) {
+                if (childTree.value) {
+                    f(childName, childTree.value);
+                }
+            });
+        };
+
+        ImmutableTree.Empty = new ImmutableTree(null);
+        return ImmutableTree;
+    }();
+
+    exports.ImmutableTree = ImmutableTree;
+});

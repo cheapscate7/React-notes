@@ -1,0 +1,147 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var ImmutableTree_1 = require(_dependencyMap[0], "./util/ImmutableTree");
+
+    var Path_1 = require(_dependencyMap[1], "./util/Path");
+
+    var util_1 = require(_dependencyMap[2], "@firebase/util");
+
+    var Node_1 = require(_dependencyMap[3], "./snap/Node");
+
+    var PriorityIndex_1 = require(_dependencyMap[4], "./snap/indexes/PriorityIndex");
+
+    var util_2 = require(_dependencyMap[2], "@firebase/util");
+
+    var CompoundWrite = function () {
+        function CompoundWrite(writeTree_) {
+            this.writeTree_ = writeTree_;
+        }
+
+        CompoundWrite.prototype.addWrite = function (path, node) {
+            if (path.isEmpty()) {
+                return new CompoundWrite(new ImmutableTree_1.ImmutableTree(node));
+            } else {
+                var rootmost = this.writeTree_.findRootMostValueAndPath(path);
+
+                if (rootmost != null) {
+                    var rootMostPath = rootmost.path;
+                    var value = rootmost.value;
+                    var relativePath = Path_1.Path.relativePath(rootMostPath, path);
+                    value = value.updateChild(relativePath, node);
+                    return new CompoundWrite(this.writeTree_.set(rootMostPath, value));
+                } else {
+                    var subtree = new ImmutableTree_1.ImmutableTree(node);
+                    var newWriteTree = this.writeTree_.setTree(path, subtree);
+                    return new CompoundWrite(newWriteTree);
+                }
+            }
+        };
+
+        CompoundWrite.prototype.addWrites = function (path, updates) {
+            var newWrite = this;
+            util_1.forEach(updates, function (childKey, node) {
+                newWrite = newWrite.addWrite(path.child(childKey), node);
+            });
+            return newWrite;
+        };
+
+        CompoundWrite.prototype.removeWrite = function (path) {
+            if (path.isEmpty()) {
+                return CompoundWrite.Empty;
+            } else {
+                var newWriteTree = this.writeTree_.setTree(path, ImmutableTree_1.ImmutableTree.Empty);
+                return new CompoundWrite(newWriteTree);
+            }
+        };
+
+        CompoundWrite.prototype.hasCompleteWrite = function (path) {
+            return this.getCompleteNode(path) != null;
+        };
+
+        CompoundWrite.prototype.getCompleteNode = function (path) {
+            var rootmost = this.writeTree_.findRootMostValueAndPath(path);
+
+            if (rootmost != null) {
+                return this.writeTree_.get(rootmost.path).getChild(Path_1.Path.relativePath(rootmost.path, path));
+            } else {
+                return null;
+            }
+        };
+
+        CompoundWrite.prototype.getCompleteChildren = function () {
+            var children = [];
+            var node = this.writeTree_.value;
+
+            if (node != null) {
+                if (!node.isLeafNode()) {
+                    node.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (childName, childNode) {
+                        children.push(new Node_1.NamedNode(childName, childNode));
+                    });
+                }
+            } else {
+                this.writeTree_.children.inorderTraversal(function (childName, childTree) {
+                    if (childTree.value != null) {
+                        children.push(new Node_1.NamedNode(childName, childTree.value));
+                    }
+                });
+            }
+
+            return children;
+        };
+
+        CompoundWrite.prototype.childCompoundWrite = function (path) {
+            if (path.isEmpty()) {
+                return this;
+            } else {
+                var shadowingNode = this.getCompleteNode(path);
+
+                if (shadowingNode != null) {
+                    return new CompoundWrite(new ImmutableTree_1.ImmutableTree(shadowingNode));
+                } else {
+                    return new CompoundWrite(this.writeTree_.subtree(path));
+                }
+            }
+        };
+
+        CompoundWrite.prototype.isEmpty = function () {
+            return this.writeTree_.isEmpty();
+        };
+
+        CompoundWrite.prototype.apply = function (node) {
+            return CompoundWrite.applySubtreeWrite_(Path_1.Path.Empty, this.writeTree_, node);
+        };
+
+        CompoundWrite.Empty = new CompoundWrite(new ImmutableTree_1.ImmutableTree(null));
+
+        CompoundWrite.applySubtreeWrite_ = function (relativePath, writeTree, node) {
+            if (writeTree.value != null) {
+                return node.updateChild(relativePath, writeTree.value);
+            } else {
+                var priorityWrite_1 = null;
+                writeTree.children.inorderTraversal(function (childKey, childTree) {
+                    if (childKey === '.priority') {
+                        util_2.assert(childTree.value !== null, 'Priority writes must always be leaf nodes');
+                        priorityWrite_1 = childTree.value;
+                    } else {
+                        node = CompoundWrite.applySubtreeWrite_(relativePath.child(childKey), childTree, node);
+                    }
+                });
+
+                if (!node.getChild(relativePath).isEmpty() && priorityWrite_1 !== null) {
+                    node = node.updateChild(relativePath.child('.priority'), priorityWrite_1);
+                }
+
+                return node;
+            }
+        };
+
+        return CompoundWrite;
+    }();
+
+    exports.CompoundWrite = CompoundWrite;
+});

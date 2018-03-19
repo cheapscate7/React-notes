@@ -1,0 +1,120 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "../util/util");
+
+    var EventQueue = function () {
+        function EventQueue() {
+            this.eventLists_ = [];
+            this.recursionDepth_ = 0;
+        }
+
+        EventQueue.prototype.queueEvents = function (eventDataList) {
+            var currList = null;
+
+            for (var i = 0; i < eventDataList.length; i++) {
+                var eventData = eventDataList[i];
+                var eventPath = eventData.getPath();
+
+                if (currList !== null && !eventPath.equals(currList.getPath())) {
+                    this.eventLists_.push(currList);
+                    currList = null;
+                }
+
+                if (currList === null) {
+                    currList = new EventList(eventPath);
+                }
+
+                currList.add(eventData);
+            }
+
+            if (currList) {
+                this.eventLists_.push(currList);
+            }
+        };
+
+        EventQueue.prototype.raiseEventsAtPath = function (path, eventDataList) {
+            this.queueEvents(eventDataList);
+            this.raiseQueuedEventsMatchingPredicate_(function (eventPath) {
+                return eventPath.equals(path);
+            });
+        };
+
+        EventQueue.prototype.raiseEventsForChangedPath = function (changedPath, eventDataList) {
+            this.queueEvents(eventDataList);
+            this.raiseQueuedEventsMatchingPredicate_(function (eventPath) {
+                return eventPath.contains(changedPath) || changedPath.contains(eventPath);
+            });
+        };
+
+        EventQueue.prototype.raiseQueuedEventsMatchingPredicate_ = function (predicate) {
+            this.recursionDepth_++;
+            var sentAll = true;
+
+            for (var i = 0; i < this.eventLists_.length; i++) {
+                var eventList = this.eventLists_[i];
+
+                if (eventList) {
+                    var eventPath = eventList.getPath();
+
+                    if (predicate(eventPath)) {
+                        this.eventLists_[i].raise();
+                        this.eventLists_[i] = null;
+                    } else {
+                        sentAll = false;
+                    }
+                }
+            }
+
+            if (sentAll) {
+                this.eventLists_ = [];
+            }
+
+            this.recursionDepth_--;
+        };
+
+        return EventQueue;
+    }();
+
+    exports.EventQueue = EventQueue;
+
+    var EventList = function () {
+        function EventList(path_) {
+            this.path_ = path_;
+            this.events_ = [];
+        }
+
+        EventList.prototype.add = function (eventData) {
+            this.events_.push(eventData);
+        };
+
+        EventList.prototype.raise = function () {
+            for (var i = 0; i < this.events_.length; i++) {
+                var eventData = this.events_[i];
+
+                if (eventData !== null) {
+                    this.events_[i] = null;
+                    var eventFn = eventData.getEventRunner();
+
+                    if (util_1.logger) {
+                        util_1.log('event: ' + eventData.toString());
+                    }
+
+                    util_1.exceptionGuard(eventFn);
+                }
+            }
+        };
+
+        EventList.prototype.getPath = function () {
+            return this.path_;
+        };
+
+        return EventList;
+    }();
+
+    exports.EventList = EventList;
+});

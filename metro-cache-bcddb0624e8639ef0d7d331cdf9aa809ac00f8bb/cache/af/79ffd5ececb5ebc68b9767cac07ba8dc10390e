@@ -1,0 +1,104 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var Change_1 = require(_dependencyMap[1], "../Change");
+
+    var ChildrenNode_1 = require(_dependencyMap[2], "../../snap/ChildrenNode");
+
+    var PriorityIndex_1 = require(_dependencyMap[3], "../../snap/indexes/PriorityIndex");
+
+    var IndexedFilter = function () {
+        function IndexedFilter(index_) {
+            this.index_ = index_;
+        }
+
+        IndexedFilter.prototype.updateChild = function (snap, key, newChild, affectedPath, source, optChangeAccumulator) {
+            util_1.assert(snap.isIndexed(this.index_), 'A node must be indexed if only a child is updated');
+            var oldChild = snap.getImmediateChild(key);
+
+            if (oldChild.getChild(affectedPath).equals(newChild.getChild(affectedPath))) {
+                if (oldChild.isEmpty() == newChild.isEmpty()) {
+                    return snap;
+                }
+            }
+
+            if (optChangeAccumulator != null) {
+                if (newChild.isEmpty()) {
+                    if (snap.hasChild(key)) {
+                        optChangeAccumulator.trackChildChange(Change_1.Change.childRemovedChange(key, oldChild));
+                    } else {
+                        util_1.assert(snap.isLeafNode(), 'A child remove without an old child only makes sense on a leaf node');
+                    }
+                } else if (oldChild.isEmpty()) {
+                    optChangeAccumulator.trackChildChange(Change_1.Change.childAddedChange(key, newChild));
+                } else {
+                    optChangeAccumulator.trackChildChange(Change_1.Change.childChangedChange(key, newChild, oldChild));
+                }
+            }
+
+            if (snap.isLeafNode() && newChild.isEmpty()) {
+                return snap;
+            } else {
+                return snap.updateImmediateChild(key, newChild).withIndex(this.index_);
+            }
+        };
+
+        IndexedFilter.prototype.updateFullNode = function (oldSnap, newSnap, optChangeAccumulator) {
+            if (optChangeAccumulator != null) {
+                if (!oldSnap.isLeafNode()) {
+                    oldSnap.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (key, childNode) {
+                        if (!newSnap.hasChild(key)) {
+                            optChangeAccumulator.trackChildChange(Change_1.Change.childRemovedChange(key, childNode));
+                        }
+                    });
+                }
+
+                if (!newSnap.isLeafNode()) {
+                    newSnap.forEachChild(PriorityIndex_1.PRIORITY_INDEX, function (key, childNode) {
+                        if (oldSnap.hasChild(key)) {
+                            var oldChild = oldSnap.getImmediateChild(key);
+
+                            if (!oldChild.equals(childNode)) {
+                                optChangeAccumulator.trackChildChange(Change_1.Change.childChangedChange(key, childNode, oldChild));
+                            }
+                        } else {
+                            optChangeAccumulator.trackChildChange(Change_1.Change.childAddedChange(key, childNode));
+                        }
+                    });
+                }
+            }
+
+            return newSnap.withIndex(this.index_);
+        };
+
+        IndexedFilter.prototype.updatePriority = function (oldSnap, newPriority) {
+            if (oldSnap.isEmpty()) {
+                return ChildrenNode_1.ChildrenNode.EMPTY_NODE;
+            } else {
+                return oldSnap.updatePriority(newPriority);
+            }
+        };
+
+        IndexedFilter.prototype.filtersNodes = function () {
+            return false;
+        };
+
+        IndexedFilter.prototype.getIndexedFilter = function () {
+            return this;
+        };
+
+        IndexedFilter.prototype.getIndex = function () {
+            return this.index_;
+        };
+
+        return IndexedFilter;
+    }();
+
+    exports.IndexedFilter = IndexedFilter;
+});

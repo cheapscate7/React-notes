@@ -1,0 +1,205 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var json = require(_dependencyMap[0], "./json");
+
+    var location_1 = require(_dependencyMap[1], "./location");
+
+    var path = require(_dependencyMap[2], "./path");
+
+    var type = require(_dependencyMap[3], "./type");
+
+    var UrlUtils = require(_dependencyMap[4], "./url");
+
+    function noXform_(metadata, value) {
+        return value;
+    }
+
+    exports.noXform_ = noXform_;
+
+    var Mapping = function () {
+        function Mapping(server, opt_local, opt_writable, opt_xform) {
+            this.server = server;
+            this.local = opt_local || server;
+            this.writable = !!opt_writable;
+            this.xform = opt_xform || noXform_;
+        }
+
+        return Mapping;
+    }();
+
+    exports.Mapping = Mapping;
+    var mappings_ = null;
+
+    function xformPath(fullPath) {
+        var valid = type.isString(fullPath);
+
+        if (!valid || fullPath.length < 2) {
+            return fullPath;
+        } else {
+            fullPath = fullPath;
+            return path.lastComponent(fullPath);
+        }
+    }
+
+    exports.xformPath = xformPath;
+
+    function getMappings() {
+        if (mappings_) {
+            return mappings_;
+        }
+
+        var mappings = [];
+        mappings.push(new Mapping('bucket'));
+        mappings.push(new Mapping('generation'));
+        mappings.push(new Mapping('metageneration'));
+        mappings.push(new Mapping('name', 'fullPath', true));
+
+        function mappingsXformPath(metadata, fullPath) {
+            return xformPath(fullPath);
+        }
+
+        var nameMapping = new Mapping('name');
+        nameMapping.xform = mappingsXformPath;
+        mappings.push(nameMapping);
+
+        function xformSize(metadata, size) {
+            if (type.isDef(size)) {
+                return +size;
+            } else {
+                return size;
+            }
+        }
+
+        var sizeMapping = new Mapping('size');
+        sizeMapping.xform = xformSize;
+        mappings.push(sizeMapping);
+        mappings.push(new Mapping('timeCreated'));
+        mappings.push(new Mapping('updated'));
+        mappings.push(new Mapping('md5Hash', null, true));
+        mappings.push(new Mapping('cacheControl', null, true));
+        mappings.push(new Mapping('contentDisposition', null, true));
+        mappings.push(new Mapping('contentEncoding', null, true));
+        mappings.push(new Mapping('contentLanguage', null, true));
+        mappings.push(new Mapping('contentType', null, true));
+        mappings.push(new Mapping('metadata', 'customMetadata', true));
+
+        function xformTokens(metadata, tokens) {
+            var valid = type.isString(tokens) && tokens.length > 0;
+
+            if (!valid) {
+                return [];
+            }
+
+            var encode = encodeURIComponent;
+            var tokensList = tokens.split(',');
+            var urls = tokensList.map(function (token) {
+                var bucket = metadata['bucket'];
+                var path = metadata['fullPath'];
+                var urlPart = '/b/' + encode(bucket) + '/o/' + encode(path);
+                var base = UrlUtils.makeDownloadUrl(urlPart);
+                var queryString = UrlUtils.makeQueryString({
+                    alt: 'media',
+                    token: token
+                });
+                return base + queryString;
+            });
+            return urls;
+        }
+
+        mappings.push(new Mapping('downloadTokens', 'downloadURLs', false, xformTokens));
+        mappings_ = mappings;
+        return mappings_;
+    }
+
+    exports.getMappings = getMappings;
+
+    function addRef(metadata, authWrapper) {
+        function generateRef() {
+            var bucket = metadata['bucket'];
+            var path = metadata['fullPath'];
+            var loc = new location_1.Location(bucket, path);
+            return authWrapper.makeStorageReference(loc);
+        }
+
+        Object.defineProperty(metadata, 'ref', {
+            get: generateRef
+        });
+    }
+
+    exports.addRef = addRef;
+
+    function fromResource(authWrapper, resource, mappings) {
+        var metadata = {};
+        metadata['type'] = 'file';
+        var len = mappings.length;
+
+        for (var i = 0; i < len; i++) {
+            var mapping = mappings[i];
+            metadata[mapping.local] = mapping.xform(metadata, resource[mapping.server]);
+        }
+
+        addRef(metadata, authWrapper);
+        return metadata;
+    }
+
+    exports.fromResource = fromResource;
+
+    function fromResourceString(authWrapper, resourceString, mappings) {
+        var obj = json.jsonObjectOrNull(resourceString);
+
+        if (obj === null) {
+            return null;
+        }
+
+        var resource = obj;
+        return fromResource(authWrapper, resource, mappings);
+    }
+
+    exports.fromResourceString = fromResourceString;
+
+    function toResourceString(metadata, mappings) {
+        var resource = {};
+        var len = mappings.length;
+
+        for (var i = 0; i < len; i++) {
+            var mapping = mappings[i];
+
+            if (mapping.writable) {
+                resource[mapping.server] = metadata[mapping.local];
+            }
+        }
+
+        return JSON.stringify(resource);
+    }
+
+    exports.toResourceString = toResourceString;
+
+    function metadataValidator(p) {
+        var validType = p && type.isObject(p);
+
+        if (!validType) {
+            throw 'Expected Metadata object.';
+        }
+
+        for (var key in p) {
+            var val = p[key];
+
+            if (key === 'customMetadata') {
+                if (!type.isObject(val)) {
+                    throw 'Expected object for \'customMetadata\' mapping.';
+                }
+            } else {
+                if (type.isNonNullObject(val)) {
+                    throw "Mapping for '" + key + "' cannot be an object.";
+                }
+            }
+        }
+    }
+
+    exports.metadataValidator = metadataValidator;
+});

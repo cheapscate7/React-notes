@@ -1,0 +1,16 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.PROTOCOL_VERSION = '5';
+  exports.VERSION_PARAM = 'v';
+  exports.TRANSPORT_SESSION_PARAM = 's';
+  exports.REFERER_PARAM = 'r';
+  exports.FORGE_REF = 'f';
+  exports.FORGE_DOMAIN = 'firebaseio.com';
+  exports.LAST_SESSION_PARAM = 'ls';
+  exports.WEBSOCKET = 'websocket';
+  exports.LONG_POLLING = 'long_polling';
+});

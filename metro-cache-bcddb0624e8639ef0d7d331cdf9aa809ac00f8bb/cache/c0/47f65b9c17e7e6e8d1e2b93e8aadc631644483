@@ -1,0 +1,13 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  require(_dependencyMap[0], "./src/polyfills/promise");
+
+  require(_dependencyMap[1], "./src/shims/Array");
+
+  require(_dependencyMap[2], "./src/shims/String");
+});

@@ -1,0 +1,57 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    function deepCopy(value) {
+        return deepExtend(undefined, value);
+    }
+
+    exports.deepCopy = deepCopy;
+
+    function deepExtend(target, source) {
+        if (!(source instanceof Object)) {
+            return source;
+        }
+
+        switch (source.constructor) {
+            case Date:
+                var dateValue = source;
+                return new Date(dateValue.getTime());
+
+            case Object:
+                if (target === undefined) {
+                    target = {};
+                }
+
+                break;
+
+            case Array:
+                target = [];
+                break;
+
+            default:
+                return source;
+        }
+
+        for (var prop in source) {
+            if (!source.hasOwnProperty(prop)) {
+                continue;
+            }
+
+            target[prop] = deepExtend(target[prop], source[prop]);
+        }
+
+        return target;
+    }
+
+    exports.deepExtend = deepExtend;
+
+    function patchProperty(obj, prop, value) {
+        obj[prop] = value;
+    }
+
+    exports.patchProperty = patchProperty;
+});

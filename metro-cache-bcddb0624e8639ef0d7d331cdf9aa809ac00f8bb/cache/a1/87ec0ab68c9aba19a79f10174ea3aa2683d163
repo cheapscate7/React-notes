@@ -1,0 +1,69 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var EventEmitter_1 = require(_dependencyMap[1], "./EventEmitter");
+
+    var util_1 = require(_dependencyMap[2], "@firebase/util");
+
+    var VisibilityMonitor = function (_super) {
+        tslib_1.__extends(VisibilityMonitor, _super);
+
+        function VisibilityMonitor() {
+            var _this = _super.call(this, ['visible']) || this;
+
+            var hidden;
+            var visibilityChange;
+
+            if (typeof document !== 'undefined' && typeof document.addEventListener !== 'undefined') {
+                if (typeof document['hidden'] !== 'undefined') {
+                    visibilityChange = 'visibilitychange';
+                    hidden = 'hidden';
+                } else if (typeof document['mozHidden'] !== 'undefined') {
+                    visibilityChange = 'mozvisibilitychange';
+                    hidden = 'mozHidden';
+                } else if (typeof document['msHidden'] !== 'undefined') {
+                    visibilityChange = 'msvisibilitychange';
+                    hidden = 'msHidden';
+                } else if (typeof document['webkitHidden'] !== 'undefined') {
+                    visibilityChange = 'webkitvisibilitychange';
+                    hidden = 'webkitHidden';
+                }
+            }
+
+            _this.visible_ = true;
+
+            if (visibilityChange) {
+                document.addEventListener(visibilityChange, function () {
+                    var visible = !document[hidden];
+
+                    if (visible !== _this.visible_) {
+                        _this.visible_ = visible;
+
+                        _this.trigger('visible', visible);
+                    }
+                }, false);
+            }
+
+            return _this;
+        }
+
+        VisibilityMonitor.getInstance = function () {
+            return new VisibilityMonitor();
+        };
+
+        VisibilityMonitor.prototype.getInitialEvent = function (eventType) {
+            util_1.assert(eventType === 'visible', 'Unknown event type: ' + eventType);
+            return [this.visible_];
+        };
+
+        return VisibilityMonitor;
+    }(EventEmitter_1.EventEmitter);
+
+    exports.VisibilityMonitor = VisibilityMonitor;
+});

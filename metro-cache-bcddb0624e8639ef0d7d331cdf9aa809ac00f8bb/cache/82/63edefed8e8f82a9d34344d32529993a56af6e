@@ -1,0 +1,111 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var Repo_1 = require(_dependencyMap[1], "./Repo");
+
+    var util_2 = require(_dependencyMap[2], "./util/util");
+
+    var parser_1 = require(_dependencyMap[3], "./util/libs/parser");
+
+    var validation_1 = require(_dependencyMap[4], "./util/validation");
+
+    require(_dependencyMap[5], "./Repo_transaction");
+
+    var DATABASE_URL_OPTION = 'databaseURL';
+
+    var _staticInstance;
+
+    var RepoManager = function () {
+        function RepoManager() {
+            this.repos_ = {};
+            this.useRestClient_ = false;
+        }
+
+        RepoManager.getInstance = function () {
+            if (!_staticInstance) {
+                _staticInstance = new RepoManager();
+            }
+
+            return _staticInstance;
+        };
+
+        RepoManager.prototype.interrupt = function () {
+            for (var appName in this.repos_) {
+                for (var dbUrl in this.repos_[appName]) {
+                    this.repos_[appName][dbUrl].interrupt();
+                }
+            }
+        };
+
+        RepoManager.prototype.resume = function () {
+            for (var appName in this.repos_) {
+                for (var dbUrl in this.repos_[appName]) {
+                    this.repos_[appName][dbUrl].resume();
+                }
+            }
+        };
+
+        RepoManager.prototype.databaseFromApp = function (app, url) {
+            var dbUrl = url || app.options[DATABASE_URL_OPTION];
+
+            if (dbUrl === undefined) {
+                util_2.fatal("Can't determine Firebase Database URL.  Be sure to include " + DATABASE_URL_OPTION + ' option when calling firebase.initializeApp().');
+            }
+
+            var parsedUrl = parser_1.parseRepoInfo(dbUrl);
+            var repoInfo = parsedUrl.repoInfo;
+            validation_1.validateUrl('Invalid Firebase Database URL', 1, parsedUrl);
+
+            if (!parsedUrl.path.isEmpty()) {
+                util_2.fatal('Database URL must point to the root of a Firebase Database ' + '(not including a child path).');
+            }
+
+            var repo = this.createRepo(repoInfo, app);
+            return repo.database;
+        };
+
+        RepoManager.prototype.deleteRepo = function (repo) {
+            var appRepos = util_1.safeGet(this.repos_, repo.app.name);
+
+            if (!appRepos || util_1.safeGet(appRepos, repo.repoInfo_.toURLString()) !== repo) {
+                util_2.fatal("Database " + repo.app.name + "(" + repo.repoInfo_ + ") has already been deleted.");
+            }
+
+            repo.interrupt();
+            delete appRepos[repo.repoInfo_.toURLString()];
+        };
+
+        RepoManager.prototype.createRepo = function (repoInfo, app) {
+            var appRepos = util_1.safeGet(this.repos_, app.name);
+
+            if (!appRepos) {
+                appRepos = {};
+                this.repos_[app.name] = appRepos;
+            }
+
+            var repo = util_1.safeGet(appRepos, repoInfo.toURLString());
+
+            if (repo) {
+                util_2.fatal('Database initialized multiple times. Please make sure the format of the database URL matches with each database() call.');
+            }
+
+            repo = new Repo_1.Repo(repoInfo, this.useRestClient_, app);
+            appRepos[repoInfo.toURLString()] = repo;
+            return repo;
+        };
+
+        RepoManager.prototype.forceRestClient = function (forceRestClient) {
+            this.useRestClient_ = forceRestClient;
+        };
+
+        return RepoManager;
+    }();
+
+    exports.RepoManager = RepoManager;
+});

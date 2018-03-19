@@ -1,0 +1,86 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var validation_1 = require(_dependencyMap[1], "../core/util/validation");
+
+    var util_2 = require(_dependencyMap[2], "../core/util/util");
+
+    var util_3 = require(_dependencyMap[0], "@firebase/util");
+
+    var OnDisconnect = function () {
+        function OnDisconnect(repo_, path_) {
+            this.repo_ = repo_;
+            this.path_ = path_;
+        }
+
+        OnDisconnect.prototype.cancel = function (onComplete) {
+            util_1.validateArgCount('OnDisconnect.cancel', 0, 1, arguments.length);
+            util_1.validateCallback('OnDisconnect.cancel', 1, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo_.onDisconnectCancel(this.path_, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        OnDisconnect.prototype.remove = function (onComplete) {
+            util_1.validateArgCount('OnDisconnect.remove', 0, 1, arguments.length);
+            validation_1.validateWritablePath('OnDisconnect.remove', this.path_);
+            util_1.validateCallback('OnDisconnect.remove', 1, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo_.onDisconnectSet(this.path_, null, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        OnDisconnect.prototype.set = function (value, onComplete) {
+            util_1.validateArgCount('OnDisconnect.set', 1, 2, arguments.length);
+            validation_1.validateWritablePath('OnDisconnect.set', this.path_);
+            validation_1.validateFirebaseDataArg('OnDisconnect.set', 1, value, this.path_, false);
+            util_1.validateCallback('OnDisconnect.set', 2, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo_.onDisconnectSet(this.path_, value, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        OnDisconnect.prototype.setWithPriority = function (value, priority, onComplete) {
+            util_1.validateArgCount('OnDisconnect.setWithPriority', 2, 3, arguments.length);
+            validation_1.validateWritablePath('OnDisconnect.setWithPriority', this.path_);
+            validation_1.validateFirebaseDataArg('OnDisconnect.setWithPriority', 1, value, this.path_, false);
+            validation_1.validatePriority('OnDisconnect.setWithPriority', 2, priority, false);
+            util_1.validateCallback('OnDisconnect.setWithPriority', 3, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo_.onDisconnectSetWithPriority(this.path_, value, priority, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        OnDisconnect.prototype.update = function (objectToMerge, onComplete) {
+            util_1.validateArgCount('OnDisconnect.update', 1, 2, arguments.length);
+            validation_1.validateWritablePath('OnDisconnect.update', this.path_);
+
+            if (Array.isArray(objectToMerge)) {
+                var newObjectToMerge = {};
+
+                for (var i = 0; i < objectToMerge.length; ++i) {
+                    newObjectToMerge['' + i] = objectToMerge[i];
+                }
+
+                objectToMerge = newObjectToMerge;
+                util_2.warn('Passing an Array to firebase.database.onDisconnect().update() is deprecated. Use set() if you want to overwrite the ' + 'existing data, or an Object with integer keys if you really do want to only update some of the children.');
+            }
+
+            validation_1.validateFirebaseMergeDataArg('OnDisconnect.update', 1, objectToMerge, this.path_, false);
+            util_1.validateCallback('OnDisconnect.update', 2, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo_.onDisconnectUpdate(this.path_, objectToMerge, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        return OnDisconnect;
+    }();
+
+    exports.OnDisconnect = OnDisconnect;
+});

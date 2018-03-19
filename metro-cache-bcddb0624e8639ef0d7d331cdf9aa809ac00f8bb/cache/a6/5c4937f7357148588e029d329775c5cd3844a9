@@ -1,0 +1,40 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var MemoryStorage = function () {
+        function MemoryStorage() {
+            this.cache_ = {};
+            this.isInMemoryStorage = true;
+        }
+
+        MemoryStorage.prototype.set = function (key, value) {
+            if (value == null) {
+                delete this.cache_[key];
+            } else {
+                this.cache_[key] = value;
+            }
+        };
+
+        MemoryStorage.prototype.get = function (key) {
+            if (util_1.contains(this.cache_, key)) {
+                return this.cache_[key];
+            }
+
+            return null;
+        };
+
+        MemoryStorage.prototype.remove = function (key) {
+            delete this.cache_[key];
+        };
+
+        return MemoryStorage;
+    }();
+
+    exports.MemoryStorage = MemoryStorage;
+});

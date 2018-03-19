@@ -1,0 +1,149 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var util_1 = require(_dependencyMap[1], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[2], "./util/util");
+
+    var util_3 = require(_dependencyMap[1], "@firebase/util");
+
+    var util_4 = require(_dependencyMap[1], "@firebase/util");
+
+    var util_5 = require(_dependencyMap[1], "@firebase/util");
+
+    var ServerActions_1 = require(_dependencyMap[3], "./ServerActions");
+
+    var ReadonlyRestClient = function (_super) {
+        tslib_1.__extends(ReadonlyRestClient, _super);
+
+        function ReadonlyRestClient(repoInfo_, onDataUpdate_, authTokenProvider_) {
+            var _this = _super.call(this) || this;
+
+            _this.repoInfo_ = repoInfo_;
+            _this.onDataUpdate_ = onDataUpdate_;
+            _this.authTokenProvider_ = authTokenProvider_;
+            _this.log_ = util_2.logWrapper('p:rest:');
+            _this.listens_ = {};
+            return _this;
+        }
+
+        ReadonlyRestClient.prototype.reportStats = function (stats) {
+            throw new Error('Method not implemented.');
+        };
+
+        ReadonlyRestClient.getListenId_ = function (query, tag) {
+            if (tag !== undefined) {
+                return 'tag$' + tag;
+            } else {
+                util_1.assert(query.getQueryParams().isDefault(), "should have a tag if it's not a default query.");
+                return query.path.toString();
+            }
+        };
+
+        ReadonlyRestClient.prototype.listen = function (query, currentHashFn, tag, onComplete) {
+            var _this = this;
+
+            var pathString = query.path.toString();
+            this.log_('Listen called for ' + pathString + ' ' + query.queryIdentifier());
+            var listenId = ReadonlyRestClient.getListenId_(query, tag);
+            var thisListen = {};
+            this.listens_[listenId] = thisListen;
+            var queryStringParamaters = query.getQueryParams().toRestQueryStringParameters();
+            this.restRequest_(pathString + '.json', queryStringParamaters, function (error, result) {
+                var data = result;
+
+                if (error === 404) {
+                    data = null;
+                    error = null;
+                }
+
+                if (error === null) {
+                    _this.onDataUpdate_(pathString, data, false, tag);
+                }
+
+                if (util_4.safeGet(_this.listens_, listenId) === thisListen) {
+                    var status_1;
+
+                    if (!error) {
+                        status_1 = 'ok';
+                    } else if (error == 401) {
+                        status_1 = 'permission_denied';
+                    } else {
+                        status_1 = 'rest_error:' + error;
+                    }
+
+                    onComplete(status_1, null);
+                }
+            });
+        };
+
+        ReadonlyRestClient.prototype.unlisten = function (query, tag) {
+            var listenId = ReadonlyRestClient.getListenId_(query, tag);
+            delete this.listens_[listenId];
+        };
+
+        ReadonlyRestClient.prototype.refreshAuthToken = function (token) {};
+
+        ReadonlyRestClient.prototype.restRequest_ = function (pathString, queryStringParameters, callback) {
+            var _this = this;
+
+            if (queryStringParameters === void 0) {
+                queryStringParameters = {};
+            }
+
+            queryStringParameters['format'] = 'export';
+            this.authTokenProvider_.getToken(false).then(function (authTokenData) {
+                var authToken = authTokenData && authTokenData.accessToken;
+
+                if (authToken) {
+                    queryStringParameters['auth'] = authToken;
+                }
+
+                var url = (_this.repoInfo_.secure ? 'https://' : 'http://') + _this.repoInfo_.host + pathString + '?' + util_5.querystring(queryStringParameters);
+
+                _this.log_('Sending REST request for ' + url);
+
+                var xhr = new XMLHttpRequest();
+
+                xhr.onreadystatechange = function () {
+                    if (callback && xhr.readyState === 4) {
+                        _this.log_('REST Response for ' + url + ' received. status:', xhr.status, 'response:', xhr.responseText);
+
+                        var res = null;
+
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                res = util_3.jsonEval(xhr.responseText);
+                            } catch (e) {
+                                util_2.warn('Failed to parse JSON response for ' + url + ': ' + xhr.responseText);
+                            }
+
+                            callback(null, res);
+                        } else {
+                            if (xhr.status !== 401 && xhr.status !== 404) {
+                                util_2.warn('Got unsuccessful REST response for ' + url + ' Status: ' + xhr.status);
+                            }
+
+                            callback(xhr.status);
+                        }
+
+                        callback = null;
+                    }
+                };
+
+                xhr.open('GET', url, true);
+                xhr.send();
+            });
+        };
+
+        return ReadonlyRestClient;
+    }(ServerActions_1.ServerActions);
+
+    exports.ReadonlyRestClient = ReadonlyRestClient;
+});

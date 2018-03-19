@@ -1,0 +1,20 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  var firebase = require(_dependencyMap[0], './app');
+
+  require(_dependencyMap[1], './auth');
+
+  require(_dependencyMap[2], './database');
+
+  require(_dependencyMap[3], './storage');
+
+  var AsyncStorage = require(_dependencyMap[4], "react-native").AsyncStorage;
+
+  firebase.INTERNAL.extendNamespace({
+    INTERNAL: {
+      reactNative: {
+        AsyncStorage: AsyncStorage
+      }
+    }
+  });
+  module.exports = firebase;
+});

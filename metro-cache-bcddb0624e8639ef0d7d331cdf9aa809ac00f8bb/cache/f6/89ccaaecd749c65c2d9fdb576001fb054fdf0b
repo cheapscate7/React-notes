@@ -1,0 +1,22 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var logger_1 = require(_dependencyMap[0], "./src/logger");
+
+    function setLogLevel(level) {
+        logger_1.instances.forEach(function (inst) {
+            inst.logLevel = level;
+        });
+    }
+
+    exports.setLogLevel = setLogLevel;
+
+    var logger_2 = require(_dependencyMap[0], "./src/logger");
+
+    exports.Logger = logger_2.Logger;
+    exports.LogLevel = logger_2.LogLevel;
+});

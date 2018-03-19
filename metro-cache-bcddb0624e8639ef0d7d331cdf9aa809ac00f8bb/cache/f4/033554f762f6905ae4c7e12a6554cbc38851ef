@@ -1,0 +1,82 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var Index_1 = require(_dependencyMap[1], "./Index");
+
+    var util_1 = require(_dependencyMap[2], "../../util/util");
+
+    var Node_1 = require(_dependencyMap[3], "../Node");
+
+    var LeafNode_1 = require(_dependencyMap[4], "../LeafNode");
+
+    var nodeFromJSON;
+    var MAX_NODE;
+
+    function setNodeFromJSON(val) {
+        nodeFromJSON = val;
+    }
+
+    exports.setNodeFromJSON = setNodeFromJSON;
+
+    function setMaxNode(val) {
+        MAX_NODE = val;
+    }
+
+    exports.setMaxNode = setMaxNode;
+
+    var PriorityIndex = function (_super) {
+        tslib_1.__extends(PriorityIndex, _super);
+
+        function PriorityIndex() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+
+        PriorityIndex.prototype.compare = function (a, b) {
+            var aPriority = a.node.getPriority();
+            var bPriority = b.node.getPriority();
+            var indexCmp = aPriority.compareTo(bPriority);
+
+            if (indexCmp === 0) {
+                return util_1.nameCompare(a.name, b.name);
+            } else {
+                return indexCmp;
+            }
+        };
+
+        PriorityIndex.prototype.isDefinedOn = function (node) {
+            return !node.getPriority().isEmpty();
+        };
+
+        PriorityIndex.prototype.indexedValueChanged = function (oldNode, newNode) {
+            return !oldNode.getPriority().equals(newNode.getPriority());
+        };
+
+        PriorityIndex.prototype.minPost = function () {
+            return Node_1.NamedNode.MIN;
+        };
+
+        PriorityIndex.prototype.maxPost = function () {
+            return new Node_1.NamedNode(util_1.MAX_NAME, new LeafNode_1.LeafNode('[PRIORITY-POST]', MAX_NODE));
+        };
+
+        PriorityIndex.prototype.makePost = function (indexValue, name) {
+            var priorityNode = nodeFromJSON(indexValue);
+            return new Node_1.NamedNode(name, new LeafNode_1.LeafNode('[PRIORITY-POST]', priorityNode));
+        };
+
+        PriorityIndex.prototype.toString = function () {
+            return '.priority';
+        };
+
+        return PriorityIndex;
+    }(Index_1.Index);
+
+    exports.PriorityIndex = PriorityIndex;
+    exports.PRIORITY_INDEX = new PriorityIndex();
+});

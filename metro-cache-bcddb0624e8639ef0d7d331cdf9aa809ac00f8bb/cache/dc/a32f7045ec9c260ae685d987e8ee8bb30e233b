@@ -1,0 +1,39 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var StatsCollection_1 = require(_dependencyMap[0], "./StatsCollection");
+
+    var StatsManager = function () {
+        function StatsManager() {}
+
+        StatsManager.getCollection = function (repoInfo) {
+            var hashString = repoInfo.toString();
+
+            if (!this.collections_[hashString]) {
+                this.collections_[hashString] = new StatsCollection_1.StatsCollection();
+            }
+
+            return this.collections_[hashString];
+        };
+
+        StatsManager.getOrCreateReporter = function (repoInfo, creatorFunction) {
+            var hashString = repoInfo.toString();
+
+            if (!this.reporters_[hashString]) {
+                this.reporters_[hashString] = creatorFunction();
+            }
+
+            return this.reporters_[hashString];
+        };
+
+        StatsManager.collections_ = {};
+        StatsManager.reporters_ = {};
+        return StatsManager;
+    }();
+
+    exports.StatsManager = StatsManager;
+});

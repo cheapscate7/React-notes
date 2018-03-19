@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, FlatList, ScrollView, View } from 'react-native';
 import MasonryList from '@appandflow/masonry-list';
 
+import * as firebase from 'firebase';
+
 import Note from './Note.js';
 const data = [
     {title: "hello", content:"whats up bitch"},
@@ -23,11 +25,39 @@ const data = [
     {title: "Wow, you got one too?!", content:"hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha"},
     ];
 
+//const dataFromFirebase = Firebase.retrieveNotes;
 class NoteList extends React.Component {
     constructor(props){
         super(props);
-
+        this.itemsRef = this.getRef();
     }
+    getRef() {
+        return firebaseApp.database().ref();
+    }
+    listenForItems(itemsRef) {
+        itemsRef.on('value', (snap) => {
+    
+          // get children as an array
+          var items = [];
+          snap.forEach((child) => {
+            items.push({
+              title: child.val().title,
+              content: child.val().content,
+              _key: child.key
+            });
+          });
+    
+          this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(items)
+          });
+    
+        });
+      }
+      componentDidMount() {
+        this.listenForItems(this.itemsRef);
+      }
+    
+        
     render() {
         return (
             <View style = {noteListStyles.noteListContainer}>
@@ -54,5 +84,15 @@ const noteListStyles = StyleSheet.create({
         flex: 1,
     }
 });
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB0RCk0pLXrqZBX84h0mjtYazyqmng5l-U",
+    authDomain: "react-notes-5b6a9.firebaseapp.com",
+    databaseURL: "https://react-notes-5b6a9.firebaseio.com",
+    projectId: "react-notes-5b6a9",
+    storageBucket: "react-notes-5b6a9.appspot.com",
+    messagingSenderId: "160847919013"
+  }; const firebaseApp = firebase.initializeApp(firebaseConfig);
+
 
 export default NoteList;

@@ -1,0 +1,44 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var CacheNode = function () {
+    function CacheNode(node_, fullyInitialized_, filtered_) {
+      this.node_ = node_;
+      this.fullyInitialized_ = fullyInitialized_;
+      this.filtered_ = filtered_;
+    }
+
+    CacheNode.prototype.isFullyInitialized = function () {
+      return this.fullyInitialized_;
+    };
+
+    CacheNode.prototype.isFiltered = function () {
+      return this.filtered_;
+    };
+
+    CacheNode.prototype.isCompleteForPath = function (path) {
+      if (path.isEmpty()) {
+        return this.isFullyInitialized() && !this.filtered_;
+      }
+
+      var childKey = path.getFront();
+      return this.isCompleteForChild(childKey);
+    };
+
+    CacheNode.prototype.isCompleteForChild = function (key) {
+      return this.isFullyInitialized() && !this.filtered_ || this.node_.hasChild(key);
+    };
+
+    CacheNode.prototype.getNode = function () {
+      return this.node_;
+    };
+
+    return CacheNode;
+  }();
+
+  exports.CacheNode = CacheNode;
+});

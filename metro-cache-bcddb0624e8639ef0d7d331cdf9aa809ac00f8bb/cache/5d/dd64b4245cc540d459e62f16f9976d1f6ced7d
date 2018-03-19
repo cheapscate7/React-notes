@@ -1,0 +1,245 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var tslib_1 = require(_dependencyMap[0], "tslib");
+
+    var onDisconnect_1 = require(_dependencyMap[1], "./onDisconnect");
+
+    var TransactionResult_1 = require(_dependencyMap[2], "./TransactionResult");
+
+    var util_1 = require(_dependencyMap[3], "../core/util/util");
+
+    var NextPushId_1 = require(_dependencyMap[4], "../core/util/NextPushId");
+
+    var Query_1 = require(_dependencyMap[5], "./Query");
+
+    var Repo_1 = require(_dependencyMap[6], "../core/Repo");
+
+    var Path_1 = require(_dependencyMap[7], "../core/util/Path");
+
+    var QueryParams_1 = require(_dependencyMap[8], "../core/view/QueryParams");
+
+    var validation_1 = require(_dependencyMap[9], "../core/util/validation");
+
+    var util_2 = require(_dependencyMap[10], "@firebase/util");
+
+    var util_3 = require(_dependencyMap[10], "@firebase/util");
+
+    var SyncPoint_1 = require(_dependencyMap[11], "../core/SyncPoint");
+
+    var Reference = function (_super) {
+        tslib_1.__extends(Reference, _super);
+
+        function Reference(repo, path) {
+            var _this = this;
+
+            if (!(repo instanceof Repo_1.Repo)) {
+                throw new Error('new Reference() no longer supported - use app.database().');
+            }
+
+            _this = _super.call(this, repo, path, QueryParams_1.QueryParams.DEFAULT, false) || this;
+            return _this;
+        }
+
+        Reference.prototype.getKey = function () {
+            util_2.validateArgCount('Reference.key', 0, 0, arguments.length);
+            if (this.path.isEmpty()) return null;else return this.path.getBack();
+        };
+
+        Reference.prototype.child = function (pathString) {
+            util_2.validateArgCount('Reference.child', 1, 1, arguments.length);
+
+            if (typeof pathString === 'number') {
+                pathString = String(pathString);
+            } else if (!(pathString instanceof Path_1.Path)) {
+                if (this.path.getFront() === null) validation_1.validateRootPathString('Reference.child', 1, pathString, false);else validation_1.validatePathString('Reference.child', 1, pathString, false);
+            }
+
+            return new Reference(this.repo, this.path.child(pathString));
+        };
+
+        Reference.prototype.getParent = function () {
+            util_2.validateArgCount('Reference.parent', 0, 0, arguments.length);
+            var parentPath = this.path.parent();
+            return parentPath === null ? null : new Reference(this.repo, parentPath);
+        };
+
+        Reference.prototype.getRoot = function () {
+            util_2.validateArgCount('Reference.root', 0, 0, arguments.length);
+            var ref = this;
+
+            while (ref.getParent() !== null) {
+                ref = ref.getParent();
+            }
+
+            return ref;
+        };
+
+        Reference.prototype.databaseProp = function () {
+            return this.repo.database;
+        };
+
+        Reference.prototype.set = function (newVal, onComplete) {
+            util_2.validateArgCount('Reference.set', 1, 2, arguments.length);
+            validation_1.validateWritablePath('Reference.set', this.path);
+            validation_1.validateFirebaseDataArg('Reference.set', 1, newVal, this.path, false);
+            util_2.validateCallback('Reference.set', 2, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo.setWithPriority(this.path, newVal, null, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        Reference.prototype.update = function (objectToMerge, onComplete) {
+            util_2.validateArgCount('Reference.update', 1, 2, arguments.length);
+            validation_1.validateWritablePath('Reference.update', this.path);
+
+            if (Array.isArray(objectToMerge)) {
+                var newObjectToMerge = {};
+
+                for (var i = 0; i < objectToMerge.length; ++i) {
+                    newObjectToMerge['' + i] = objectToMerge[i];
+                }
+
+                objectToMerge = newObjectToMerge;
+                util_1.warn('Passing an Array to Firebase.update() is deprecated. ' + 'Use set() if you want to overwrite the existing data, or ' + 'an Object with integer keys if you really do want to ' + 'only update some of the children.');
+            }
+
+            validation_1.validateFirebaseMergeDataArg('Reference.update', 1, objectToMerge, this.path, false);
+            util_2.validateCallback('Reference.update', 2, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo.update(this.path, objectToMerge, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        Reference.prototype.setWithPriority = function (newVal, newPriority, onComplete) {
+            util_2.validateArgCount('Reference.setWithPriority', 2, 3, arguments.length);
+            validation_1.validateWritablePath('Reference.setWithPriority', this.path);
+            validation_1.validateFirebaseDataArg('Reference.setWithPriority', 1, newVal, this.path, false);
+            validation_1.validatePriority('Reference.setWithPriority', 2, newPriority, false);
+            util_2.validateCallback('Reference.setWithPriority', 3, onComplete, true);
+            if (this.getKey() === '.length' || this.getKey() === '.keys') throw 'Reference.setWithPriority failed: ' + this.getKey() + ' is a read-only object.';
+            var deferred = new util_3.Deferred();
+            this.repo.setWithPriority(this.path, newVal, newPriority, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        Reference.prototype.remove = function (onComplete) {
+            util_2.validateArgCount('Reference.remove', 0, 1, arguments.length);
+            validation_1.validateWritablePath('Reference.remove', this.path);
+            util_2.validateCallback('Reference.remove', 1, onComplete, true);
+            return this.set(null, onComplete);
+        };
+
+        Reference.prototype.transaction = function (transactionUpdate, onComplete, applyLocally) {
+            util_2.validateArgCount('Reference.transaction', 1, 3, arguments.length);
+            validation_1.validateWritablePath('Reference.transaction', this.path);
+            util_2.validateCallback('Reference.transaction', 1, transactionUpdate, false);
+            util_2.validateCallback('Reference.transaction', 2, onComplete, true);
+            validation_1.validateBoolean('Reference.transaction', 3, applyLocally, true);
+            if (this.getKey() === '.length' || this.getKey() === '.keys') throw 'Reference.transaction failed: ' + this.getKey() + ' is a read-only object.';
+            if (applyLocally === undefined) applyLocally = true;
+            var deferred = new util_3.Deferred();
+
+            if (typeof onComplete === 'function') {
+                deferred.promise.catch(function () {});
+            }
+
+            var promiseComplete = function promiseComplete(error, committed, snapshot) {
+                if (error) {
+                    deferred.reject(error);
+                } else {
+                    deferred.resolve(new TransactionResult_1.TransactionResult(committed, snapshot));
+                }
+
+                if (typeof onComplete === 'function') {
+                    onComplete(error, committed, snapshot);
+                }
+            };
+
+            this.repo.startTransaction(this.path, transactionUpdate, promiseComplete, applyLocally);
+            return deferred.promise;
+        };
+
+        Reference.prototype.setPriority = function (priority, onComplete) {
+            util_2.validateArgCount('Reference.setPriority', 1, 2, arguments.length);
+            validation_1.validateWritablePath('Reference.setPriority', this.path);
+            validation_1.validatePriority('Reference.setPriority', 1, priority, false);
+            util_2.validateCallback('Reference.setPriority', 2, onComplete, true);
+            var deferred = new util_3.Deferred();
+            this.repo.setWithPriority(this.path.child('.priority'), priority, null, deferred.wrapCallback(onComplete));
+            return deferred.promise;
+        };
+
+        Reference.prototype.push = function (value, onComplete) {
+            util_2.validateArgCount('Reference.push', 0, 2, arguments.length);
+            validation_1.validateWritablePath('Reference.push', this.path);
+            validation_1.validateFirebaseDataArg('Reference.push', 1, value, this.path, true);
+            util_2.validateCallback('Reference.push', 2, onComplete, true);
+            var now = this.repo.serverTime();
+            var name = NextPushId_1.nextPushId(now);
+            var thennablePushRef = this.child(name);
+            var pushRef = this.child(name);
+            var promise;
+
+            if (value != null) {
+                promise = thennablePushRef.set(value, onComplete).then(function () {
+                    return pushRef;
+                });
+            } else {
+                promise = Promise.resolve(pushRef);
+            }
+
+            thennablePushRef.then = promise.then.bind(promise);
+            thennablePushRef.catch = promise.then.bind(promise, undefined);
+
+            if (typeof onComplete === 'function') {
+                promise.catch(function () {});
+            }
+
+            return thennablePushRef;
+        };
+
+        Reference.prototype.onDisconnect = function () {
+            validation_1.validateWritablePath('Reference.onDisconnect', this.path);
+            return new onDisconnect_1.OnDisconnect(this.repo, this.path);
+        };
+
+        Object.defineProperty(Reference.prototype, "database", {
+            get: function get() {
+                return this.databaseProp();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Reference.prototype, "key", {
+            get: function get() {
+                return this.getKey();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Reference.prototype, "parent", {
+            get: function get() {
+                return this.getParent();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Reference.prototype, "root", {
+            get: function get() {
+                return this.getRoot();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Reference;
+    }(Query_1.Query);
+
+    exports.Reference = Reference;
+    Query_1.Query.__referenceConstructor = Reference;
+    SyncPoint_1.SyncPoint.__referenceConstructor = Reference;
+});

@@ -1,0 +1,110 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    exports.contains = function (obj, key) {
+        return Object.prototype.hasOwnProperty.call(obj, key);
+    };
+
+    exports.safeGet = function (obj, key) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key];
+    };
+
+    exports.forEach = function (obj, fn) {
+        for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                fn(key, obj[key]);
+            }
+        }
+    };
+
+    exports.extend = function (objTo, objFrom) {
+        exports.forEach(objFrom, function (key, value) {
+            objTo[key] = value;
+        });
+        return objTo;
+    };
+
+    exports.clone = function (obj) {
+        return exports.extend({}, obj);
+    };
+
+    exports.isNonNullObject = function (obj) {
+        return typeof obj === 'object' && obj !== null;
+    };
+
+    exports.isEmpty = function (obj) {
+        for (var key in obj) {
+            return false;
+        }
+
+        return true;
+    };
+
+    exports.getCount = function (obj) {
+        var rv = 0;
+
+        for (var key in obj) {
+            rv++;
+        }
+
+        return rv;
+    };
+
+    exports.map = function (obj, f, opt_obj) {
+        var res = {};
+
+        for (var key in obj) {
+            res[key] = f.call(opt_obj, obj[key], key, obj);
+        }
+
+        return res;
+    };
+
+    exports.findKey = function (obj, fn, opt_this) {
+        for (var key in obj) {
+            if (fn.call(opt_this, obj[key], key, obj)) {
+                return key;
+            }
+        }
+
+        return undefined;
+    };
+
+    exports.findValue = function (obj, fn, opt_this) {
+        var key = exports.findKey(obj, fn, opt_this);
+        return key && obj[key];
+    };
+
+    exports.getAnyKey = function (obj) {
+        for (var key in obj) {
+            return key;
+        }
+    };
+
+    exports.getValues = function (obj) {
+        var res = [];
+        var i = 0;
+
+        for (var key in obj) {
+            res[i++] = obj[key];
+        }
+
+        return res;
+    };
+
+    exports.every = function (obj, fn) {
+        for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                if (!fn(key, obj[key])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+});

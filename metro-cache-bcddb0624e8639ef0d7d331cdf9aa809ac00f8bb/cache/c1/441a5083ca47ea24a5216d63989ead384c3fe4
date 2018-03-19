@@ -1,0 +1,61 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var CountedSet = function () {
+        function CountedSet() {
+            this.set = {};
+        }
+
+        CountedSet.prototype.add = function (item, val) {
+            this.set[item] = val !== null ? val : true;
+        };
+
+        CountedSet.prototype.contains = function (key) {
+            return util_1.contains(this.set, key);
+        };
+
+        CountedSet.prototype.get = function (item) {
+            return this.contains(item) ? this.set[item] : undefined;
+        };
+
+        CountedSet.prototype.remove = function (item) {
+            delete this.set[item];
+        };
+
+        CountedSet.prototype.clear = function () {
+            this.set = {};
+        };
+
+        CountedSet.prototype.isEmpty = function () {
+            return util_1.isEmpty(this.set);
+        };
+
+        CountedSet.prototype.count = function () {
+            return util_1.getCount(this.set);
+        };
+
+        CountedSet.prototype.each = function (fn) {
+            util_1.forEach(this.set, function (k, v) {
+                return fn(k, v);
+            });
+        };
+
+        CountedSet.prototype.keys = function () {
+            var keys = [];
+            util_1.forEach(this.set, function (k) {
+                keys.push(k);
+            });
+            return keys;
+        };
+
+        return CountedSet;
+    }();
+
+    exports.CountedSet = CountedSet;
+});

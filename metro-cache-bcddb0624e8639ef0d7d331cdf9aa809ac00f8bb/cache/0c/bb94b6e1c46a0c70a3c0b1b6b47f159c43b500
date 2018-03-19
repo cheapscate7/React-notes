@@ -1,0 +1,78 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var crypt_1 = require(_dependencyMap[0], "./crypt");
+
+    var json_1 = require(_dependencyMap[1], "./json");
+
+    exports.decode = function (token) {
+        var header = {},
+            claims = {},
+            data = {},
+            signature = '';
+
+        try {
+            var parts = token.split('.');
+            header = json_1.jsonEval(crypt_1.base64Decode(parts[0]) || '');
+            claims = json_1.jsonEval(crypt_1.base64Decode(parts[1]) || '');
+            signature = parts[2];
+            data = claims['d'] || {};
+            delete claims['d'];
+        } catch (e) {}
+
+        return {
+            header: header,
+            claims: claims,
+            data: data,
+            signature: signature
+        };
+    };
+
+    exports.isValidTimestamp = function (token) {
+        var claims = exports.decode(token).claims,
+            now = Math.floor(new Date().getTime() / 1000),
+            validSince,
+            validUntil;
+
+        if (typeof claims === 'object') {
+            if (claims.hasOwnProperty('nbf')) {
+                validSince = claims['nbf'];
+            } else if (claims.hasOwnProperty('iat')) {
+                validSince = claims['iat'];
+            }
+
+            if (claims.hasOwnProperty('exp')) {
+                validUntil = claims['exp'];
+            } else {
+                validUntil = validSince + 86400;
+            }
+        }
+
+        return now && validSince && validUntil && now >= validSince && now <= validUntil;
+    };
+
+    exports.issuedAtTime = function (token) {
+        var claims = exports.decode(token).claims;
+
+        if (typeof claims === 'object' && claims.hasOwnProperty('iat')) {
+            return claims['iat'];
+        }
+
+        return null;
+    };
+
+    exports.isValidFormat = function (token) {
+        var decoded = exports.decode(token),
+            claims = decoded.claims;
+        return !!decoded.signature && !!claims && typeof claims === 'object' && claims.hasOwnProperty('iat');
+    };
+
+    exports.isAdmin = function (token) {
+        var claims = exports.decode(token).claims;
+        return typeof claims === 'object' && claims['admin'] === true;
+    };
+});

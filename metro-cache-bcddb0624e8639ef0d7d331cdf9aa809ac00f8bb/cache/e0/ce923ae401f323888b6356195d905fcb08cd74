@@ -101,5 +101,5 @@ __d(function (global, require, module, exports, _dependencyMap) {
     }
   });
 
-  exports.default = Footer;
+  exports.default = (0, _reactNavigation.withNavigation)(Footer);
 });

@@ -1,0 +1,124 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var constants = require(_dependencyMap[0], "./constants");
+
+    var errorsExports = require(_dependencyMap[1], "./error");
+
+    var failrequest_1 = require(_dependencyMap[2], "./failrequest");
+
+    var location_1 = require(_dependencyMap[3], "./location");
+
+    var promiseimpl = require(_dependencyMap[4], "./promise_external");
+
+    var requestmap_1 = require(_dependencyMap[5], "./requestmap");
+
+    var type = require(_dependencyMap[6], "./type");
+
+    var AuthWrapper = function () {
+        function AuthWrapper(app, maker, requestMaker, service, pool) {
+            this.bucket_ = null;
+            this.deleted_ = false;
+            this.app_ = app;
+
+            if (this.app_ !== null) {
+                var options = this.app_.options;
+
+                if (type.isDef(options)) {
+                    this.bucket_ = AuthWrapper.extractBucket_(options);
+                }
+            }
+
+            this.storageRefMaker_ = maker;
+            this.requestMaker_ = requestMaker;
+            this.pool_ = pool;
+            this.service_ = service;
+            this.maxOperationRetryTime_ = constants.defaultMaxOperationRetryTime;
+            this.maxUploadRetryTime_ = constants.defaultMaxUploadRetryTime;
+            this.requestMap_ = new requestmap_1.RequestMap();
+        }
+
+        AuthWrapper.extractBucket_ = function (config) {
+            var bucketString = config[constants.configOption] || null;
+
+            if (bucketString == null) {
+                return null;
+            }
+
+            var loc = location_1.Location.makeFromBucketSpec(bucketString);
+            return loc.bucket;
+        };
+
+        AuthWrapper.prototype.getAuthToken = function () {
+            if (this.app_ !== null && type.isDef(this.app_.INTERNAL) && type.isDef(this.app_.INTERNAL.getToken)) {
+                return this.app_.INTERNAL.getToken().then(function (response) {
+                    if (response !== null) {
+                        return response.accessToken;
+                    } else {
+                        return null;
+                    }
+                }, function (_error) {
+                    return null;
+                });
+            } else {
+                return promiseimpl.resolve(null);
+            }
+        };
+
+        AuthWrapper.prototype.bucket = function () {
+            if (this.deleted_) {
+                throw errorsExports.appDeleted();
+            } else {
+                return this.bucket_;
+            }
+        };
+
+        AuthWrapper.prototype.service = function () {
+            return this.service_;
+        };
+
+        AuthWrapper.prototype.makeStorageReference = function (loc) {
+            return this.storageRefMaker_(this, loc);
+        };
+
+        AuthWrapper.prototype.makeRequest = function (requestInfo, authToken) {
+            if (!this.deleted_) {
+                var request = this.requestMaker_(requestInfo, authToken, this.pool_);
+                this.requestMap_.addRequest(request);
+                return request;
+            } else {
+                return new failrequest_1.FailRequest(errorsExports.appDeleted());
+            }
+        };
+
+        AuthWrapper.prototype.deleteApp = function () {
+            this.deleted_ = true;
+            this.app_ = null;
+            this.requestMap_.clear();
+        };
+
+        AuthWrapper.prototype.maxUploadRetryTime = function () {
+            return this.maxUploadRetryTime_;
+        };
+
+        AuthWrapper.prototype.setMaxUploadRetryTime = function (time) {
+            this.maxUploadRetryTime_ = time;
+        };
+
+        AuthWrapper.prototype.maxOperationRetryTime = function () {
+            return this.maxOperationRetryTime_;
+        };
+
+        AuthWrapper.prototype.setMaxOperationRetryTime = function (time) {
+            this.maxOperationRetryTime_ = time;
+        };
+
+        return AuthWrapper;
+    }();
+
+    exports.AuthWrapper = AuthWrapper;
+});

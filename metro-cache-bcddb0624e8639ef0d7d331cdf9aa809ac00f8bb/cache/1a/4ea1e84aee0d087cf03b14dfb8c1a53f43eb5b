@@ -1,0 +1,5 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+  require(_dependencyMap[0], "@firebase/polyfill");
+
+  module.exports = require(_dependencyMap[1], "@firebase/app").default;
+});

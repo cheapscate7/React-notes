@@ -1,0 +1,120 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var fs = require(_dependencyMap[0], "./fs");
+
+    var string = require(_dependencyMap[1], "./string");
+
+    var string_1 = require(_dependencyMap[1], "./string");
+
+    var type = require(_dependencyMap[2], "./type");
+
+    var FbsBlob = function () {
+        function FbsBlob(data, opt_elideCopy) {
+            var size = 0;
+            var blobType = '';
+
+            if (type.isNativeBlob(data)) {
+                this.data_ = data;
+                size = data.size;
+                blobType = data.type;
+            } else if (data instanceof ArrayBuffer) {
+                if (opt_elideCopy) {
+                    this.data_ = new Uint8Array(data);
+                } else {
+                    this.data_ = new Uint8Array(data.byteLength);
+                    this.data_.set(new Uint8Array(data));
+                }
+
+                size = this.data_.length;
+            } else if (data instanceof Uint8Array) {
+                if (opt_elideCopy) {
+                    this.data_ = data;
+                } else {
+                    this.data_ = new Uint8Array(data.length);
+                    this.data_.set(data);
+                }
+
+                size = data.length;
+            }
+
+            this.size_ = size;
+            this.type_ = blobType;
+        }
+
+        FbsBlob.prototype.size = function () {
+            return this.size_;
+        };
+
+        FbsBlob.prototype.type = function () {
+            return this.type_;
+        };
+
+        FbsBlob.prototype.slice = function (startByte, endByte) {
+            if (type.isNativeBlob(this.data_)) {
+                var realBlob = this.data_;
+                var sliced = fs.sliceBlob(realBlob, startByte, endByte);
+
+                if (sliced === null) {
+                    return null;
+                }
+
+                return new FbsBlob(sliced);
+            } else {
+                var slice = new Uint8Array(this.data_.buffer, startByte, endByte - startByte);
+                return new FbsBlob(slice, true);
+            }
+        };
+
+        FbsBlob.getBlob = function () {
+            var var_args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                var_args[_i] = arguments[_i];
+            }
+
+            if (type.isNativeBlobDefined()) {
+                var blobby = var_args.map(function (val) {
+                    if (val instanceof FbsBlob) {
+                        return val.data_;
+                    } else {
+                        return val;
+                    }
+                });
+                return new FbsBlob(fs.getBlob.apply(null, blobby));
+            } else {
+                var uint8Arrays = var_args.map(function (val) {
+                    if (type.isString(val)) {
+                        return string.dataFromString(string_1.StringFormat.RAW, val).data;
+                    } else {
+                        return val.data_;
+                    }
+                });
+                var finalLength_1 = 0;
+                uint8Arrays.forEach(function (array) {
+                    finalLength_1 += array.byteLength;
+                });
+                var merged_1 = new Uint8Array(finalLength_1);
+                var index_1 = 0;
+                uint8Arrays.forEach(function (array) {
+                    for (var i = 0; i < array.length; i++) {
+                        merged_1[index_1++] = array[i];
+                    }
+                });
+                return new FbsBlob(merged_1, true);
+            }
+        };
+
+        FbsBlob.prototype.uploadData = function () {
+            return this.data_;
+        };
+
+        return FbsBlob;
+    }();
+
+    exports.FbsBlob = FbsBlob;
+});

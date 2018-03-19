@@ -21,6 +21,7 @@
   "dependencies": {
     "@appandflow/masonry-list": "^0.4.0",
     "expo": "^25.0.0",
+    "firebase": "^4.11.0",
     "react": "16.2.0",
     "react-native": "0.52.0",
     "react-native-masonry": "^0.4.6",

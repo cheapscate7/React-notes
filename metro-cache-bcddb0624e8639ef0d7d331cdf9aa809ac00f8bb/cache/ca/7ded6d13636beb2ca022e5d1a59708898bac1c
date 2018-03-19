@@ -1,0 +1,437 @@
+__d(function (global, require, module, exports, _dependencyMap) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var util_1 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_2 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_3 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_4 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_5 = require(_dependencyMap[0], "@firebase/util");
+
+    var util_6 = require(_dependencyMap[0], "@firebase/util");
+
+    var storage_1 = require(_dependencyMap[1], "../storage/storage");
+
+    var util_7 = require(_dependencyMap[0], "@firebase/util");
+
+    var logger_1 = require(_dependencyMap[2], "@firebase/logger");
+
+    var logClient = new logger_1.Logger('@firebase/database');
+
+    exports.LUIDGenerator = function () {
+        var id = 1;
+        return function () {
+            return id++;
+        };
+    }();
+
+    exports.sha1 = function (str) {
+        var utf8Bytes = util_5.stringToByteArray(str);
+        var sha1 = new util_4.Sha1();
+        sha1.update(utf8Bytes);
+        var sha1Bytes = sha1.digest();
+        return util_3.base64.encodeByteArray(sha1Bytes);
+    };
+
+    var buildLogMessage_ = function buildLogMessage_() {
+        var var_args = [];
+
+        for (var _i = 0; _i < arguments.length; _i++) {
+            var_args[_i] = arguments[_i];
+        }
+
+        var message = '';
+
+        for (var i = 0; i < var_args.length; i++) {
+            if (Array.isArray(var_args[i]) || var_args[i] && typeof var_args[i] === 'object' && typeof var_args[i].length === 'number') {
+                message += buildLogMessage_.apply(null, var_args[i]);
+            } else if (typeof var_args[i] === 'object') {
+                message += util_6.stringify(var_args[i]);
+            } else {
+                message += var_args[i];
+            }
+
+            message += ' ';
+        }
+
+        return message;
+    };
+
+    exports.logger = null;
+    var firstLog_ = true;
+
+    exports.enableLogging = function (logger_, persistent) {
+        util_1.assert(!persistent || logger_ === true || logger_ === false, "Can't turn on custom loggers persistently.");
+
+        if (logger_ === true) {
+            exports.logger = logClient.log.bind(logClient);
+            if (persistent) storage_1.SessionStorage.set('logging_enabled', true);
+        } else if (typeof logger_ === 'function') {
+            exports.logger = logger_;
+        } else {
+            exports.logger = null;
+            storage_1.SessionStorage.remove('logging_enabled');
+        }
+    };
+
+    exports.log = function () {
+        var var_args = [];
+
+        for (var _i = 0; _i < arguments.length; _i++) {
+            var_args[_i] = arguments[_i];
+        }
+
+        if (firstLog_ === true) {
+            firstLog_ = false;
+            if (exports.logger === null && storage_1.SessionStorage.get('logging_enabled') === true) exports.enableLogging(true);
+        }
+
+        if (exports.logger) {
+            var message = buildLogMessage_.apply(null, var_args);
+            exports.logger(message);
+        }
+    };
+
+    exports.logWrapper = function (prefix) {
+        return function () {
+            var var_args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                var_args[_i] = arguments[_i];
+            }
+
+            exports.log.apply(void 0, [prefix].concat(var_args));
+        };
+    };
+
+    exports.error = function () {
+        var var_args = [];
+
+        for (var _i = 0; _i < arguments.length; _i++) {
+            var_args[_i] = arguments[_i];
+        }
+
+        var message = 'FIREBASE INTERNAL ERROR: ' + buildLogMessage_.apply(void 0, var_args);
+        logClient.error(message);
+    };
+
+    exports.fatal = function () {
+        var var_args = [];
+
+        for (var _i = 0; _i < arguments.length; _i++) {
+            var_args[_i] = arguments[_i];
+        }
+
+        var message = "FIREBASE FATAL ERROR: " + buildLogMessage_.apply(void 0, var_args);
+        logClient.error(message);
+        throw new Error(message);
+    };
+
+    exports.warn = function () {
+        var var_args = [];
+
+        for (var _i = 0; _i < arguments.length; _i++) {
+            var_args[_i] = arguments[_i];
+        }
+
+        var message = 'FIREBASE WARNING: ' + buildLogMessage_.apply(void 0, var_args);
+        logClient.warn(message);
+    };
+
+    exports.warnIfPageIsSecure = function () {
+        if (typeof window !== 'undefined' && window.location && window.location.protocol && window.location.protocol.indexOf('https:') !== -1) {
+            exports.warn('Insecure Firebase access from a secure page. ' + 'Please use https in calls to new Firebase().');
+        }
+    };
+
+    exports.warnAboutUnsupportedMethod = function (methodName) {
+        exports.warn(methodName + ' is unsupported and will likely change soon.  ' + 'Please do not use.');
+    };
+
+    exports.isInvalidJSONNumber = function (data) {
+        return typeof data === 'number' && (data != data || data == Number.POSITIVE_INFINITY || data == Number.NEGATIVE_INFINITY);
+    };
+
+    exports.executeWhenDOMReady = function (fn) {
+        if (util_7.isNodeSdk() || document.readyState === 'complete') {
+            fn();
+        } else {
+            var called_1 = false;
+
+            var wrappedFn_1 = function wrappedFn_1() {
+                if (!document.body) {
+                    setTimeout(wrappedFn_1, Math.floor(10));
+                    return;
+                }
+
+                if (!called_1) {
+                    called_1 = true;
+                    fn();
+                }
+            };
+
+            if (document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', wrappedFn_1, false);
+                window.addEventListener('load', wrappedFn_1, false);
+            } else if (document.attachEvent) {
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState === 'complete') wrappedFn_1();
+                });
+                window.attachEvent('onload', wrappedFn_1);
+            }
+        }
+    };
+
+    exports.MIN_NAME = '[MIN_NAME]';
+    exports.MAX_NAME = '[MAX_NAME]';
+
+    exports.nameCompare = function (a, b) {
+        if (a === b) {
+            return 0;
+        } else if (a === exports.MIN_NAME || b === exports.MAX_NAME) {
+            return -1;
+        } else if (b === exports.MIN_NAME || a === exports.MAX_NAME) {
+            return 1;
+        } else {
+            var aAsInt = exports.tryParseInt(a),
+                bAsInt = exports.tryParseInt(b);
+
+            if (aAsInt !== null) {
+                if (bAsInt !== null) {
+                    return aAsInt - bAsInt == 0 ? a.length - b.length : aAsInt - bAsInt;
+                } else {
+                    return -1;
+                }
+            } else if (bAsInt !== null) {
+                return 1;
+            } else {
+                return a < b ? -1 : 1;
+            }
+        }
+    };
+
+    exports.stringCompare = function (a, b) {
+        if (a === b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        } else {
+            return 1;
+        }
+    };
+
+    exports.requireKey = function (key, obj) {
+        if (obj && key in obj) {
+            return obj[key];
+        } else {
+            throw new Error('Missing required key (' + key + ') in object: ' + util_6.stringify(obj));
+        }
+    };
+
+    exports.ObjectToUniqueKey = function (obj) {
+        if (typeof obj !== 'object' || obj === null) return util_6.stringify(obj);
+        var keys = [];
+
+        for (var k in obj) {
+            keys.push(k);
+        }
+
+        keys.sort();
+        var key = '{';
+
+        for (var i = 0; i < keys.length; i++) {
+            if (i !== 0) key += ',';
+            key += util_6.stringify(keys[i]);
+            key += ':';
+            key += exports.ObjectToUniqueKey(obj[keys[i]]);
+        }
+
+        key += '}';
+        return key;
+    };
+
+    exports.splitStringBySize = function (str, segsize) {
+        var len = str.length;
+
+        if (len <= segsize) {
+            return [str];
+        }
+
+        var dataSegs = [];
+
+        for (var c = 0; c < len; c += segsize) {
+            if (c + segsize > len) {
+                dataSegs.push(str.substring(c, len));
+            } else {
+                dataSegs.push(str.substring(c, c + segsize));
+            }
+        }
+
+        return dataSegs;
+    };
+
+    exports.each = function (obj, fn) {
+        if (Array.isArray(obj)) {
+            for (var i = 0; i < obj.length; ++i) {
+                fn(i, obj[i]);
+            }
+        } else {
+            util_2.forEach(obj, function (key, val) {
+                return fn(val, key);
+            });
+        }
+    };
+
+    exports.bindCallback = function (callback, context) {
+        return context ? callback.bind(context) : callback;
+    };
+
+    exports.doubleToIEEE754String = function (v) {
+        util_1.assert(!exports.isInvalidJSONNumber(v), 'Invalid JSON number');
+        var ebits = 11,
+            fbits = 52;
+        var bias = (1 << ebits - 1) - 1,
+            s,
+            e,
+            f,
+            ln,
+            i,
+            bits,
+            str;
+
+        if (v === 0) {
+            e = 0;
+            f = 0;
+            s = 1 / v === -Infinity ? 1 : 0;
+        } else {
+            s = v < 0;
+            v = Math.abs(v);
+
+            if (v >= Math.pow(2, 1 - bias)) {
+                ln = Math.min(Math.floor(Math.log(v) / Math.LN2), bias);
+                e = ln + bias;
+                f = Math.round(v * Math.pow(2, fbits - ln) - Math.pow(2, fbits));
+            } else {
+                e = 0;
+                f = Math.round(v / Math.pow(2, 1 - bias - fbits));
+            }
+        }
+
+        bits = [];
+
+        for (i = fbits; i; i -= 1) {
+            bits.push(f % 2 ? 1 : 0);
+            f = Math.floor(f / 2);
+        }
+
+        for (i = ebits; i; i -= 1) {
+            bits.push(e % 2 ? 1 : 0);
+            e = Math.floor(e / 2);
+        }
+
+        bits.push(s ? 1 : 0);
+        bits.reverse();
+        str = bits.join('');
+        var hexByteString = '';
+
+        for (i = 0; i < 64; i += 8) {
+            var hexByte = parseInt(str.substr(i, 8), 2).toString(16);
+            if (hexByte.length === 1) hexByte = '0' + hexByte;
+            hexByteString = hexByteString + hexByte;
+        }
+
+        return hexByteString.toLowerCase();
+    };
+
+    exports.isChromeExtensionContentScript = function () {
+        return !!(typeof window === 'object' && window['chrome'] && window['chrome']['extension'] && !/^chrome/.test(window.location.href));
+    };
+
+    exports.isWindowsStoreApp = function () {
+        return typeof Windows === 'object' && typeof Windows.UI === 'object';
+    };
+
+    exports.errorForServerCode = function (code, query) {
+        var reason = 'Unknown Error';
+
+        if (code === 'too_big') {
+            reason = 'The data requested exceeds the maximum size ' + 'that can be accessed with a single request.';
+        } else if (code == 'permission_denied') {
+            reason = "Client doesn't have permission to access the desired data.";
+        } else if (code == 'unavailable') {
+            reason = 'The service is unavailable';
+        }
+
+        var error = new Error(code + ' at ' + query.path.toString() + ': ' + reason);
+        error.code = code.toUpperCase();
+        return error;
+    };
+
+    exports.INTEGER_REGEXP_ = new RegExp('^-?\\d{1,10}$');
+
+    exports.tryParseInt = function (str) {
+        if (exports.INTEGER_REGEXP_.test(str)) {
+            var intVal = Number(str);
+
+            if (intVal >= -2147483648 && intVal <= 2147483647) {
+                return intVal;
+            }
+        }
+
+        return null;
+    };
+
+    exports.exceptionGuard = function (fn) {
+        try {
+            fn();
+        } catch (e) {
+            setTimeout(function () {
+                var stack = e.stack || '';
+                exports.warn('Exception was thrown by user callback.', stack);
+                throw e;
+            }, Math.floor(0));
+        }
+    };
+
+    exports.callUserCallback = function (callback) {
+        var var_args = [];
+
+        for (var _i = 1; _i < arguments.length; _i++) {
+            var_args[_i - 1] = arguments[_i];
+        }
+
+        if (typeof callback === 'function') {
+            exports.exceptionGuard(function () {
+                callback.apply(void 0, var_args);
+            });
+        }
+    };
+
+    exports.beingCrawled = function () {
+        var userAgent = typeof window === 'object' && window['navigator'] && window['navigator']['userAgent'] || '';
+        return userAgent.search(/googlebot|google webmaster tools|bingbot|yahoo! slurp|baiduspider|yandexbot|duckduckbot/i) >= 0;
+    };
+
+    exports.exportPropGetter = function (object, name, fnGet) {
+        Object.defineProperty(object, name, {
+            get: fnGet
+        });
+    };
+
+    exports.setTimeoutNonBlocking = function (fn, time) {
+        var timeout = setTimeout(fn, time);
+
+        if (typeof timeout === 'object' && timeout['unref']) {
+            timeout['unref']();
+        }
+
+        return timeout;
+    };
+});
